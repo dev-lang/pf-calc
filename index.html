@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Plazo Fijo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 300;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        input:focus, select:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .results {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 5px;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            background: transparent;
+            color: #666;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .info-iva {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            color: #856404;
+            font-size: 13px;
+        }
+
+        .comision-personalizada {
+            border: 2px dashed rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .costos-desglose {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .cotizaciones-box {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .cotizaciones-box h3 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .cotizacion-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .cotizacion-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .precio-dolar {
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .operacion-section {
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .resultado-operacion {
+            margin-bottom: 15px;
+        }
+
+        .sub-item {
+            font-size: 0.9em;
+            opacity: 0.8;
+            padding-left: 20px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .result-label {
+            font-weight: 500;
+        }
+
+        .result-value {
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+
+        .highlight {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .info {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('plazo-fijo')">💰 Plazo Fijo</button>
+            <button class="tab-btn" onclick="switchTab('cauciones')">📊 Cauciones Bursátiles</button>
+            <button class="tab-btn" onclick="switchTab('acciones')">📈 Compra de Acciones</button>
+            <button class="tab-btn" onclick="switchTab('dolares')">💵 Compra/Venta USD</button>
+        </div>
+
+        <!-- DOLARES SECTION -->
+        <div id="dolares" class="tab-content">
+            <h1>💵 Calculadora de Compra/Venta USD</h1>
+            
+            <div class="info">
+                <strong>💡 Info:</strong> Calcula cuántos pesos necesitas para comprar dólares o cuántos dólares obtienes al vender pesos según las cotizaciones actuales.
+            </div>
+
+            <div class="cotizaciones-box">
+                <h3>📊 Cotizaciones Dólar Oficial</h3>
+                <div class="cotizacion-item">
+                    <span>🟢 Compra (Banco te compra USD):</span>
+                    <span class="precio-dolar">$1.320</span>
+                </div>
+                <div class="cotizacion-item">
+                    <span>🔴 Venta (Banco te vende USD):</span>
+                    <span class="precio-dolar">$1.360</span>
+                </div>
+            </div>
+
+            <form id="dolaresForm">
+                <div class="form-group">
+                    <label for="operacionTipo">🔄 Tipo de operación</label>
+                    <select id="operacionTipo" name="operacionTipo" required onchange="toggleOperacionFields()">
+                        <option value="comprar">Comprar Dólares (entrego pesos, recibo USD)</option>
+                        <option value="vender">Vender Dólares (entrego USD, recibo pesos)</option>
+                    </select>
+                </div>
+
+                <div id="comprarDolares" class="operacion-section">
+                    <div class="form-group">
+                        <label for="pesosAInvertir">💰 Pesos disponibles (ARS)</label>
+                        <input type="number" id="pesosAInvertir" name="pesosAInvertir" min="1" step="0.01" placeholder="Ej: 136000">
+                    </div>
+                </div>
+
+                <div id="venderDolares" class="operacion-section" style="display: none;">
+                    <div class="form-group">
+                        <label for="dolaresAVender">💵 Dólares a vender (USD)</label>
+                        <input type="number" id="dolaresAVender" name="dolaresAVender" min="0.01" step="0.01" placeholder="Ej: 100">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="tipoDolar">🏦 Tipo de dólar</label>
+                    <select id="tipoDolar" name="tipoDolar" required>
+                        <option value="oficial">Dólar Oficial</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn">🚀 Calcular Operación</button>
+            </form>
+
+            <div id="resultsDolares" class="results">
+                <div id="resultadoCompra" class="resultado-operacion">
+                    <div class="result-item">
+                        <span class="result-label">Pesos entregados:</span>
+                        <span class="result-value" id="pesosEntregados">$0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Cotización aplicada:</span>
+                        <span class="result-value" id="cotizacionAplicada">$0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Dólares recibidos:</span>
+                        <span class="result-value" id="dolaresRecibidos">US$ 0</span>
+                    </div>
+                </div>
+
+                <div id="resultadoVenta" class="resultado-operacion" style="display: none;">
+                    <div class="result-item">
+                        <span class="result-label">Dólares entregados:</span>
+                        <span class="result-value" id="dolaresEntregados">US$ 0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Cotización aplicada:</span>
+                        <span class="result-value" id="cotizacionAplicadaVenta">$0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Pesos recibidos:</span>
+                        <span class="result-value" id="pesosRecibidos">$0</span>
+                    </div>
+                </div>
+                
+                <div class="highlight">
+                    <div class="result-item">
+                        <span class="result-label">📊 Tipo de operación:</span>
+                        <span class="result-value" id="tipoOperacionResult">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">💱 Spread bancario:</span>
+                        <span class="result-value" id="spreadBancario">$40 (2.94%)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACCIONES SECTION -->
+        <div id="acciones" class="tab-content">
+            <h1>📈 Calculadora de Compra de Acciones</h1>
+            
+            <div class="info">
+                <strong>💡 Info:</strong> Calcula el costo total de comprar acciones incluyendo todos los aranceles, derechos de mercado e IVA correspondientes.
+            </div>
+
+            <form id="accionesForm">
+                <div class="form-group">
+                    <label for="cantidadAccionesCompra">📊 Cantidad de acciones a comprar</label>
+                    <input type="number" id="cantidadAccionesCompra" name="cantidadAccionesCompra" min="1" step="1" required placeholder="Ej: 50">
+                </div>
+
+                <div class="form-group">
+                    <label for="precioAccion">💵 Precio por acción (ARS)</label>
+                    <input type="number" id="precioAccion" name="precioAccion" min="0.01" step="0.01" required placeholder="Ej: 1250.50">
+                </div>
+
+                <div class="form-group">
+                    <label for="tipoComisionAccion">💳 Tipo de comisión</label>
+                    <select id="tipoComisionAccion" name="tipoComisionAccion" required onchange="toggleComisionFieldsAcciones()">
+                        <option value="fija">Comisión Fija (%)</option>
+                        <option value="personalizada" selected>Personalizada (Arancel + Derecho + IVA)</option>
+                    </select>
+                </div>
+
+                <div id="comisionFijaAccion" class="form-group" style="display: none;">
+                    <label for="comisionAccion">📊 Comisión del broker (%)</label>
+                    <input type="number" id="comisionAccion" name="comisionAccion" min="0" max="10" step="0.01" value="1" placeholder="Ej: 1.0">
+                </div>
+
+                <div id="comisionPersonalizadaAccion" class="comision-personalizada">
+                    <div class="form-group">
+                        <label for="arancelAccion">🏛️ Arancel (%)</label>
+                        <input type="number" id="arancelAccion" name="arancelAccion" min="0" max="5" step="0.001" value="0.5" placeholder="Ej: 0.5">
+                    </div>
+                    <div class="form-group">
+                        <label for="derechoMercadoAccion">🏢 Derecho de Mercado (%)</label>
+                        <input type="number" id="derechoMercadoAccion" name="derechoMercadoAccion" min="0" max="5" step="0.001" value="0.08" placeholder="Ej: 0.08">
+                    </div>
+                    <div class="info-iva">
+                        <strong>ℹ️ IVA:</strong> Se calcula automáticamente como 21% sobre (Arancel + Derecho de Mercado)
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">🚀 Calcular Compra</button>
+            </form>
+
+            <div id="resultsAcciones" class="results">
+                <div class="result-item">
+                    <span class="result-label">Cantidad de acciones:</span>
+                    <span class="result-value" id="cantidadAccionesResult">0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Precio por acción:</span>
+                    <span class="result-value" id="precioAccionResult">$0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Valor bruto de las acciones:</span>
+                    <span class="result-value" id="valorBrutoAcciones">$0</span>
+                </div>
+                
+                <div id="desgloseCostosAcciones" class="costos-desglose">
+                    <div class="result-item">
+                        <span class="result-label">💰 Total costos operativos:</span>
+                        <span class="result-value" id="totalCostosAcciones">$0</span>
+                    </div>
+                    <div id="detallePersonalizadoAcciones">
+                        <div class="result-item sub-item">
+                            <span class="result-label">• Arancel:</span>
+                            <span class="result-value" id="costoArancelAccion">$0</span>
+                        </div>
+                        <div class="result-item sub-item">
+                            <span class="result-label">• Derecho Mercado:</span>
+                            <span class="result-value" id="costoDerechoMercadoAccion">$0</span>
+                        </div>
+                        <div class="result-item sub-item">
+                            <span class="result-label">• IVA (21%):</span>
+                            <span class="result-value" id="costoIVAAccion">$0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="highlight">
+                    <div class="result-item">
+                        <span class="result-label">📊 Costo total de la operación:</span>
+                        <span class="result-value" id="costoTotalOperacion">$0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">📈 % de costos sobre valor de acciones:</span>
+                        <span class="result-value" id="porcentajeCostos">0%</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">💰 Costo promedio por acción (con gastos):</span>
+                        <span class="result-value" id="costoPromedioAccion">$0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PLAZO FIJO SECTION -->
+        <div id="plazo-fijo" class="tab-content active">
+            <h1>💰 Calculadora de Plazo Fijo</h1>
+            
+            <div class="info">
+                <strong>💡 Tip:</strong> Esta calculadora te ayuda a determinar el rendimiento de tu plazo fijo considerando diferentes tipos de capitalización de intereses.
+            </div>
+
+            <form id="calculatorForm">
+                <div class="form-group">
+                    <label for="capital">💵 Capital inicial (ARS)</label>
+                    <input type="number" id="capital" name="capital" min="1" step="0.01" required placeholder="Ej: 100000">
+                </div>
+
+                <div class="form-group">
+                    <label for="tasa">📈 Tasa de interés anual (%)</label>
+                    <input type="number" id="tasa" name="tasa" min="0.01" step="0.01" required placeholder="Ej: 35.5">
+                </div>
+
+                <div class="form-group">
+                    <label for="plazo">📅 Plazo (días)</label>
+                    <input type="number" id="plazo" name="plazo" min="1" required placeholder="Ej: 30, 90, 180, 365">
+                </div>
+
+                <div class="form-group">
+                    <label for="capitalizacion">🔄 Tipo de capitalización</label>
+                    <select id="capitalizacion" name="capitalizacion" required>
+                        <option value="simple">Interés Simple</option>
+                        <option value="compuesta">Interés Compuesto (diario)</option>
+                        <option value="mensual">Interés Compuesto (mensual)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn">🚀 Calcular Rendimiento</button>
+            </form>
+
+            <div id="results" class="results">
+                <div class="result-item">
+                    <span class="result-label">Capital inicial:</span>
+                    <span class="result-value" id="capitalInicial">$0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Intereses ganados:</span>
+                    <span class="result-value" id="intereses">$0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Capital final:</span>
+                    <span class="result-value" id="capitalFinal">$0</span>
+                </div>
+                
+                <div class="highlight">
+                    <div class="result-item">
+                        <span class="result-label">📊 Rendimiento total:</span>
+                        <span class="result-value" id="rendimientoTotal">0%</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">📈 Rendimiento mensual promedio:</span>
+                        <span class="result-value" id="rendimientoMensual">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CAUCIONES SECTION -->
+        <div id="cauciones" class="tab-content">
+            <h1>📊 Calculadora de Cauciones Bursátiles</h1>
+            
+            <div class="info">
+                <strong>💡 Info:</strong> Las cauciones bursátiles son operaciones de préstamo a muy corto plazo. Ideal para invertir dinero disponible por períodos cortos.
+            </div>
+
+            <form id="caucionesForm">
+                <div class="form-group">
+                    <label for="capitalCaucion">💵 Capital a invertir (ARS)</label>
+                    <input type="number" id="capitalCaucion" name="capitalCaucion" min="1" step="0.01" required placeholder="Ej: 50000">
+                </div>
+
+                <div class="form-group">
+                    <label for="tasaCaucion">📈 TNA - Tasa Nominal Anual (%)</label>
+                    <input type="number" id="tasaCaucion" name="tasaCaucion" min="0.01" step="0.01" required placeholder="Ej: 45.2">
+                </div>
+
+                <div class="form-group">
+                    <label for="plazoCaucion">📅 Tipo de liquidación</label>
+                    <select id="plazoCaucion" name="plazoCaucion" required>
+                        <option value="1">T+1 (1 día hábil)</option>
+                        <option value="2">T+2 (2 días hábiles)</option>
+                        <option value="3">T+3 (3 días hábiles)</option>
+                        <option value="7">1 semana</option>
+                        <option value="15">15 días</option>
+                        <option value="30">30 días</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tipoComision">💳 Tipo de comisión</label>
+                    <select id="tipoComision" name="tipoComision" required onchange="toggleComisionFields()">
+                        <option value="fija">Comisión Fija (%)</option>
+                        <option value="personalizada">Personalizada (Arancel + Derecho + IVA)</option>
+                    </select>
+                </div>
+
+                <div id="comisionFija" class="form-group">
+                    <label for="comision">📊 Comisión del broker (%)</label>
+                    <input type="number" id="comision" name="comision" min="0" max="10" step="0.01" value="0" placeholder="Ej: 0.5">
+                </div>
+
+                <div id="comisionPersonalizada" class="comision-personalizada" style="display: none;">
+                    <div class="form-group">
+                        <label for="arancel">🏛️ Arancel (%)</label>
+                        <input type="number" id="arancel" name="arancel" min="0" max="5" step="0.001" value="2.705" placeholder="Ej: 2.705">
+                    </div>
+                    <div class="form-group">
+                        <label for="derechoMercado">🏢 Derecho de Mercado (%)</label>
+                        <input type="number" id="derechoMercado" name="derechoMercado" min="0" max="5" step="0.001" value="0.501" placeholder="Ej: 0.501">
+                    </div>
+                    <div class="info-iva">
+                        <strong>ℹ️ IVA:</strong> Se calcula automáticamente como 21% sobre (Arancel + Derecho de Mercado)
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">🚀 Calcular Caución</button>
+            </form>
+
+            <div id="resultsCaucion" class="results">
+                <div class="result-item">
+                    <span class="result-label">Capital invertido:</span>
+                    <span class="result-value" id="capitalInicialCaucion">$0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Intereses brutos:</span>
+                    <span class="result-value" id="interesesBrutos">$0</span>
+                </div>
+                
+                <div id="desgloseCostos" class="costos-desglose">
+                    <div class="result-item">
+                        <span class="result-label">💰 Total costos:</span>
+                        <span class="result-value" id="totalCostos">$0</span>
+                    </div>
+                    <div id="detallePersonalizado" style="display: none;">
+                        <div class="result-item sub-item">
+                            <span class="result-label">• Arancel:</span>
+                            <span class="result-value" id="costoArancel">$0</span>
+                        </div>
+                        <div class="result-item sub-item">
+                            <span class="result-label">• Derecho Mercado:</span>
+                            <span class="result-value" id="costoDerechoMercado">$0</span>
+                        </div>
+                        <div class="result-item sub-item">
+                            <span class="result-label">• IVA (21%):</span>
+                            <span class="result-value" id="costoIVA">$0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Intereses netos:</span>
+                    <span class="result-value" id="interesesNetos">$0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Capital final:</span>
+                    <span class="result-value" id="capitalFinalCaucion">$0</span>
+                </div>
+                
+                <div class="highlight">
+                    <div class="result-item">
+                        <span class="result-label">📊 Rendimiento neto:</span>
+                        <span class="result-value" id="rendimientoNetoCaucion">0%</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">📈 TNA efectiva:</span>
+                        <span class="result-value" id="tnaEfectiva">0%</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">💰 Ganancia diaria promedio:</span>
+                        <span class="result-value" id="gananciaDiaria">$0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('calculatorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const capital = parseFloat(document.getElementById('capital').value);
+            const tasaAnual = parseFloat(document.getElementById('tasa').value) / 100;
+            const plazo = parseInt(document.getElementById('plazo').value);
+            const capitalizacion = document.getElementById('capitalizacion').value;
+            
+            let capitalFinal;
+            let intereses;
+            
+            if (capitalizacion === 'simple') {
+                // Interés simple: I = C * r * t
+                intereses = capital * tasaAnual * (plazo / 365);
+                capitalFinal = capital + intereses;
+            } else if (capitalizacion === 'compuesta') {
+                // Interés compuesto diario: A = P(1 + r/n)^(n*t)
+                const tasaDiaria = tasaAnual / 365;
+                capitalFinal = capital * Math.pow(1 + tasaDiaria, plazo);
+                intereses = capitalFinal - capital;
+            } else if (capitalizacion === 'mensual') {
+                // Interés compuesto mensual: A = P(1 + r/12)^(12*t)
+                const tasaMensual = tasaAnual / 12;
+                const meses = plazo / 30.44; // Promedio de días por mes
+                capitalFinal = capital * Math.pow(1 + tasaMensual, meses);
+                intereses = capitalFinal - capital;
+            }
+            
+            const rendimientoTotal = ((capitalFinal - capital) / capital) * 100;
+            const meses = plazo / 30.44;
+            const rendimientoMensual = meses > 0 ? rendimientoTotal / meses : 0;
+            
+            // Mostrar resultados
+            document.getElementById('capitalInicial').textContent = formatCurrency(capital);
+            document.getElementById('intereses').textContent = formatCurrency(intereses);
+            document.getElementById('capitalFinal').textContent = formatCurrency(capitalFinal);
+            document.getElementById('rendimientoTotal').textContent = rendimientoTotal.toFixed(2) + '%';
+            document.getElementById('rendimientoMensual').textContent = rendimientoMensual.toFixed(2) + '%';
+            
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Calculadora de Cauciones
+        document.getElementById('caucionesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const capital = parseFloat(document.getElementById('capitalCaucion').value);
+            const tnaAnual = parseFloat(document.getElementById('tasaCaucion').value) / 100;
+            const dias = parseInt(document.getElementById('plazoCaucion').value);
+            const tipoComision = document.getElementById('tipoComision').value;
+            
+            // Calcular interés bruto (interés simple)
+            const interesesBrutos = capital * tnaAnual * (dias / 365);
+            
+            let totalCostos = 0;
+            let costoArancel = 0;
+            let costoDerechoMercado = 0;
+            let costoIVA = 0;
+            
+            if (tipoComision === 'fija') {
+                const comisionPorcentaje = parseFloat(document.getElementById('comision').value) / 100;
+                totalCostos = interesesBrutos * comisionPorcentaje;
+                
+                // Ocultar desglose personalizado
+                document.getElementById('detallePersonalizado').style.display = 'none';
+            } else {
+                // Comisión personalizada
+                const arancelPorcentaje = parseFloat(document.getElementById('arancel').value) / 100;
+                const derechoMercadoPorcentaje = parseFloat(document.getElementById('derechoMercado').value) / 100;
+                
+                // Calcular cada componente sobre los intereses brutos
+                costoArancel = interesesBrutos * arancelPorcentaje;
+                costoDerechoMercado = interesesBrutos * derechoMercadoPorcentaje;
+                
+                // IVA del 21% sobre arancel + derecho de mercado
+                costoIVA = (costoArancel + costoDerechoMercado) * 0.21;
+                
+                totalCostos = costoArancel + costoDerechoMercado + costoIVA;
+                
+                // Mostrar desglose personalizado
+                document.getElementById('detallePersonalizado').style.display = 'block';
+                document.getElementById('costoArancel').textContent = formatCurrency(costoArancel);
+                document.getElementById('costoDerechoMercado').textContent = formatCurrency(costoDerechoMercado);
+                document.getElementById('costoIVA').textContent = formatCurrency(costoIVA);
+            }
+            
+            // Intereses netos después de todos los costos
+            const interesesNetos = interesesBrutos - totalCostos;
+            
+            // Capital final
+            const capitalFinal = capital + interesesNetos;
+            
+            // Rendimiento neto
+            const rendimientoNeto = (interesesNetos / capital) * 100;
+            
+            // TNA efectiva (después de costos)
+            const tnaEfectiva = (interesesNetos / capital) * (365 / dias) * 100;
+            
+            // Ganancia diaria promedio
+            const gananciaDiaria = dias > 0 ? interesesNetos / dias : 0;
+            
+            // Mostrar resultados
+            document.getElementById('capitalInicialCaucion').textContent = formatCurrency(capital);
+            document.getElementById('interesesBrutos').textContent = formatCurrency(interesesBrutos);
+            document.getElementById('totalCostos').textContent = formatCurrency(totalCostos);
+            document.getElementById('interesesNetos').textContent = formatCurrency(interesesNetos);
+            document.getElementById('capitalFinalCaucion').textContent = formatCurrency(capitalFinal);
+            document.getElementById('rendimientoNetoCaucion').textContent = rendimientoNeto.toFixed(3) + '%';
+            document.getElementById('tnaEfectiva').textContent = tnaEfectiva.toFixed(2) + '%';
+            document.getElementById('gananciaDiaria').textContent = formatCurrency(gananciaDiaria);
+            
+            document.getElementById('resultsCaucion').style.display = 'block';
+            document.getElementById('resultsCaucion').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Calculadora de Acciones
+        document.getElementById('accionesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const cantidadAcciones = parseInt(document.getElementById('cantidadAccionesCompra').value);
+            const precioAccion = parseFloat(document.getElementById('precioAccion').value);
+            const tipoComision = document.getElementById('tipoComisionAccion').value;
+            
+            // Valor bruto de las acciones (cantidad × precio)
+            const valorBrutoAcciones = cantidadAcciones * precioAccion;
+            
+            let totalCostos = 0;
+            let costoArancel = 0;
+            let costoDerechoMercado = 0;
+            let costoIVA = 0;
+            
+            if (tipoComision === 'fija') {
+                const comisionPorcentaje = parseFloat(document.getElementById('comisionAccion').value) / 100;
+                totalCostos = valorBrutoAcciones * comisionPorcentaje;
+                
+                // Ocultar desglose personalizado
+                document.getElementById('detallePersonalizadoAcciones').style.display = 'none';
+            } else {
+                // Comisión personalizada
+                const arancelPorcentaje = parseFloat(document.getElementById('arancelAccion').value) / 100;
+                const derechoMercadoPorcentaje = parseFloat(document.getElementById('derechoMercadoAccion').value) / 100;
+                
+                // Calcular cada componente sobre el valor bruto de las acciones
+                costoArancel = valorBrutoAcciones * arancelPorcentaje;
+                costoDerechoMercado = valorBrutoAcciones * derechoMercadoPorcentaje;
+                
+                // IVA del 21% sobre arancel + derecho de mercado
+                costoIVA = (costoArancel + costoDerechoMercado) * 0.21;
+                
+                totalCostos = costoArancel + costoDerechoMercado + costoIVA;
+                
+                // Mostrar desglose personalizado
+                document.getElementById('detallePersonalizadoAcciones').style.display = 'block';
+                document.getElementById('costoArancelAccion').textContent = formatCurrency(costoArancel);
+                document.getElementById('costoDerechoMercadoAccion').textContent = formatCurrency(costoDerechoMercado);
+                document.getElementById('costoIVAAccion').textContent = formatCurrency(costoIVA);
+            }
+            
+            // Costo total de la operación (valor de acciones + costos)
+            const costoTotalOperacion = valorBrutoAcciones + totalCostos;
+            
+            // Porcentaje de costos sobre el valor de las acciones
+            const porcentajeCostos = (totalCostos / valorBrutoAcciones) * 100;
+            
+            // Costo promedio por acción incluyendo todos los gastos
+            const costoPromedioAccion = costoTotalOperacion / cantidadAcciones;
+            
+            // Mostrar resultados
+            document.getElementById('cantidadAccionesResult').textContent = cantidadAcciones.toLocaleString('es-AR');
+            document.getElementById('precioAccionResult').textContent = formatCurrency(precioAccion);
+            document.getElementById('valorBrutoAcciones').textContent = formatCurrency(valorBrutoAcciones);
+            document.getElementById('totalCostosAcciones').textContent = formatCurrency(totalCostos);
+            document.getElementById('costoTotalOperacion').textContent = formatCurrency(costoTotalOperacion);
+            document.getElementById('porcentajeCostos').textContent = porcentajeCostos.toFixed(3) + '%';
+            document.getElementById('costoPromedioAccion').textContent = formatCurrency(costoPromedioAccion);
+            
+            document.getElementById('resultsAcciones').style.display = 'block';
+            document.getElementById('resultsAcciones').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Función para alternar campos de comisión
+        function toggleComisionFields() {
+            const tipoComision = document.getElementById('tipoComision').value;
+            const comisionFija = document.getElementById('comisionFija');
+            const comisionPersonalizada = document.getElementById('comisionPersonalizada');
+            
+            if (tipoComision === 'fija') {
+                comisionFija.style.display = 'block';
+                comisionPersonalizada.style.display = 'none';
+            } else {
+                comisionFija.style.display = 'none';
+                comisionPersonalizada.style.display = 'block';
+            }
+        }
+
+        // Calculadora de Dólares
+        document.getElementById('dolaresForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const operacionTipo = document.getElementById('operacionTipo').value;
+            const tipoDolar = document.getElementById('tipoDolar').value;
+            
+            // Cotizaciones del dólar oficial
+            const cotizaciones = {
+                oficial: {
+                    compra: 1320, // Banco compra USD (tú vendes USD)
+                    venta: 1360   // Banco vende USD (tú compras USD)
+                }
+            };
+            
+            const cotizacion = cotizaciones[tipoDolar];
+            
+            if (operacionTipo === 'comprar') {
+                // Comprar dólares: entrego pesos, recibo USD
+                const pesosDisponibles = parseFloat(document.getElementById('pesosAInvertir').value);
+                const cotizacionVenta = cotizacion.venta; // Uso cotización de venta
+                const dolaresRecibidos = pesosDisponibles / cotizacionVenta;
+                
+                // Mostrar resultados de compra
+                document.getElementById('resultadoCompra').style.display = 'block';
+                document.getElementById('resultadoVenta').style.display = 'none';
+                
+                document.getElementById('pesosEntregados').textContent = formatCurrency(pesosDisponibles);
+                document.getElementById('cotizacionAplicada').textContent = formatCurrency(cotizacionVenta);
+                document.getElementById('dolaresRecibidos').textContent = 'US$ ' + dolaresRecibidos.toFixed(2);
+                document.getElementById('tipoOperacionResult').textContent = 'Compra de Dólares';
+                
+            } else {
+                // Vender dólares: entrego USD, recibo pesos
+                const dolaresAVender = parseFloat(document.getElementById('dolaresAVender').value);
+                const cotizacionCompra = cotizacion.compra; // Uso cotización de compra
+                const pesosRecibidos = dolaresAVender * cotizacionCompra;
+                
+                // Mostrar resultados de venta
+                document.getElementById('resultadoCompra').style.display = 'none';
+                document.getElementById('resultadoVenta').style.display = 'block';
+                
+                document.getElementById('dolaresEntregados').textContent = 'US$ ' + dolaresAVender.toFixed(2);
+                document.getElementById('cotizacionAplicadaVenta').textContent = formatCurrency(cotizacionCompra);
+                document.getElementById('pesosRecibidos').textContent = formatCurrency(pesosRecibidos);
+                document.getElementById('tipoOperacionResult').textContent = 'Venta de Dólares';
+            }
+            
+            // Calcular spread bancario
+            const spread = cotizacion.venta - cotizacion.compra;
+            const spreadPorcentaje = (spread / cotizacion.compra) * 100;
+            document.getElementById('spreadBancario').textContent = `${spread} (${spreadPorcentaje.toFixed(2)}%)`;
+            
+            document.getElementById('resultsDolares').style.display = 'block';
+            document.getElementById('resultsDolares').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Función para alternar campos de comisión en acciones
+        function toggleComisionFieldsAcciones() {
+            const tipoComision = document.getElementById('tipoComisionAccion').value;
+            const comisionFija = document.getElementById('comisionFijaAccion');
+            const comisionPersonalizada = document.getElementById('comisionPersonalizadaAccion');
+            
+            if (tipoComision === 'fija') {
+                comisionFija.style.display = 'block';
+                comisionPersonalizada.style.display = 'none';
+            } else {
+                comisionFija.style.display = 'none';
+                comisionPersonalizada.style.display = 'block';
+            }
+        }
+
+        // Función para alternar campos según tipo de operación
+        function toggleOperacionFields() {
+            const operacionTipo = document.getElementById('operacionTipo').value;
+            const comprarSection = document.getElementById('comprarDolares');
+            const venderSection = document.getElementById('venderDolares');
+            
+            if (operacionTipo === 'comprar') {
+                comprarSection.style.display = 'block';
+                venderSection.style.display = 'none';
+                // Limpiar campo de venta
+                document.getElementById('dolaresAVender').value = '';
+            } else {
+                comprarSection.style.display = 'none';
+                venderSection.style.display = 'block';
+                // Limpiar campo de compra
+                document.getElementById('pesosAInvertir').value = '';
+            }
+        }
+
+        // Función para cambiar tabs
+        function switchTab(tabName) {
+            // Ocultar todos los contenidos
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remover clase active de todos los botones
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Mostrar contenido seleccionado
+            document.getElementById(tabName).classList.add('active');
+            
+            // Activar botón correspondiente
+            event.target.classList.add('active');
+            
+            // Ocultar resultados cuando se cambia de tab
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('resultsCaucion').style.display = 'none';
+            document.getElementById('resultsAcciones').style.display = 'none';
+            document.getElementById('resultsDolares').style.display = 'none';
+        }
+        
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-AR', {
+                style: 'currency',
+                currency: 'ARS',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        // Agregar efectos de hover a los inputs
+        document.querySelectorAll('input, select').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+                this.parentElement.style.transition = 'transform 0.2s ease';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
