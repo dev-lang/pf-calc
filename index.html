@@ -334,6 +334,7 @@
             <button class="tab-btn" onclick="switchTab('cauciones')">📊 Cauciones Bursátiles</button>
             <button class="tab-btn" onclick="switchTab('acciones')">📈 Compra de Acciones</button>
             <button class="tab-btn" onclick="switchTab('dolares')">💵 Compra/Venta USD</button>
+            <button class="tab-btn" onclick="switchTab('tna')">🎯 Tasa Nominal</button>
         </div>
 
         <!-- DOLARES SECTION -->
@@ -722,6 +723,77 @@
                 </div>
             </div>
         </div>
+
+        <!-- TASA NOMINAL (TNA) SECTION -->
+        <div id="tna" class="tab-content">
+            <h1>🎯 Calculadora de Tasa Nominal</h1>
+
+            <div class="info">
+                <strong>💡 Info:</strong> Calculá la TNA (Tasa Nominal Anual) de una inversión a partir de cómo evolucionó tu saldo, sin necesidad de conocer la tasa de antemano.
+            </div>
+
+            <form id="tnaForm">
+                <div class="form-group">
+                    <label for="metodoTNA">🔀 ¿Con qué datos contás?</label>
+                    <select id="metodoTNA" name="metodoTNA" required onchange="toggleMetodoTNA()">
+                        <option value="saldos">A) Saldo inicial y saldo final</option>
+                        <option value="rendimiento">B) Saldo inicial y rendimiento obtenido ($)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="saldoInicialTNA">💵 Saldo inicial (ARS)</label>
+                    <input type="number" id="saldoInicialTNA" name="saldoInicialTNA" min="0.01" step="0.01" required placeholder="Ej: 100000">
+                </div>
+
+                <div id="campoSaldoFinalTNA" class="form-group">
+                    <label for="saldoFinalTNA">💰 Saldo final (ARS)</label>
+                    <input type="number" id="saldoFinalTNA" name="saldoFinalTNA" min="0.01" step="0.01" placeholder="Ej: 108500">
+                </div>
+
+                <div id="campoRendimientoTNA" class="form-group" style="display: none;">
+                    <label for="rendimientoTNA">📈 Rendimiento obtenido / intereses ganados (ARS)</label>
+                    <input type="number" id="rendimientoTNA" name="rendimientoTNA" min="0" step="0.01" placeholder="Ej: 8500">
+                </div>
+
+                <div class="form-group">
+                    <label for="diasTNA">📅 Plazo transcurrido (días)</label>
+                    <input type="number" id="diasTNA" name="diasTNA" min="1" required placeholder="Ej: 30, 90, 180">
+                </div>
+
+                <button type="submit" class="btn">🚀 Calcular TNA</button>
+            </form>
+
+            <div id="resultsTNA" class="results">
+                <div class="result-item">
+                    <span class="result-label">Saldo inicial:</span>
+                    <span class="result-value" id="saldoInicialResultTNA">$0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Saldo final:</span>
+                    <span class="result-value" id="saldoFinalResultTNA">$0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Intereses ganados:</span>
+                    <span class="result-value" id="interesesResultTNA">$0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Rendimiento del período:</span>
+                    <span class="result-value" id="rendimientoPeriodoTNA">0%</span>
+                </div>
+
+                <div class="highlight">
+                    <div class="result-item">
+                        <span class="result-label">📊 TNA (Tasa Nominal Anual):</span>
+                        <span class="result-value" id="tnaResult">0%</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">📈 TEA (Tasa Efectiva Anual, con reinversión):</span>
+                        <span class="result-value" id="teaResult">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1074,6 +1146,66 @@
             }
         }
 
+        // Función para alternar campos según el método elegido en TNA
+        function toggleMetodoTNA() {
+            const metodo = document.getElementById('metodoTNA').value;
+            const campoSaldoFinal = document.getElementById('campoSaldoFinalTNA');
+            const campoRendimiento = document.getElementById('campoRendimientoTNA');
+
+            if (metodo === 'saldos') {
+                campoSaldoFinal.style.display = 'block';
+                campoRendimiento.style.display = 'none';
+                document.getElementById('saldoFinalTNA').required = true;
+                document.getElementById('rendimientoTNA').required = false;
+            } else {
+                campoSaldoFinal.style.display = 'none';
+                campoRendimiento.style.display = 'block';
+                document.getElementById('saldoFinalTNA').required = false;
+                document.getElementById('rendimientoTNA').required = true;
+            }
+        }
+
+        // Calculadora de Tasa Nominal (TNA)
+        document.getElementById('tnaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const metodo = document.getElementById('metodoTNA').value;
+            const saldoInicial = parseFloat(document.getElementById('saldoInicialTNA').value);
+            const dias = parseInt(document.getElementById('diasTNA').value);
+
+            let saldoFinal;
+            let intereses;
+
+            if (metodo === 'saldos') {
+                saldoFinal = parseFloat(document.getElementById('saldoFinalTNA').value);
+                intereses = saldoFinal - saldoInicial;
+            } else {
+                intereses = parseFloat(document.getElementById('rendimientoTNA').value);
+                saldoFinal = saldoInicial + intereses;
+            }
+
+            // Rendimiento del período (interés simple sobre el período)
+            const rendimientoPeriodo = (intereses / saldoInicial) * 100;
+
+            // TNA: se anualiza linealmente (interés simple) según los días transcurridos
+            const tna = rendimientoPeriodo * (365 / dias);
+
+            // TEA: tasa efectiva anual, asumiendo reinversión del mismo rendimiento periódico
+            const periodosPorAnio = 365 / dias;
+            const tea = (Math.pow(1 + (rendimientoPeriodo / 100), periodosPorAnio) - 1) * 100;
+
+            // Mostrar resultados
+            document.getElementById('saldoInicialResultTNA').textContent = formatCurrency(saldoInicial);
+            document.getElementById('saldoFinalResultTNA').textContent = formatCurrency(saldoFinal);
+            document.getElementById('interesesResultTNA').textContent = formatCurrency(intereses);
+            document.getElementById('rendimientoPeriodoTNA').textContent = rendimientoPeriodo.toFixed(3) + '%';
+            document.getElementById('tnaResult').textContent = tna.toFixed(2) + '%';
+            document.getElementById('teaResult').textContent = tea.toFixed(2) + '%';
+
+            document.getElementById('resultsTNA').style.display = 'block';
+            document.getElementById('resultsTNA').scrollIntoView({ behavior: 'smooth' });
+        });
+
         // Función para cambiar tabs
         function switchTab(tabName) {
             // Ocultar todos los contenidos
@@ -1097,6 +1229,7 @@
             document.getElementById('resultsCaucion').style.display = 'none';
             document.getElementById('resultsAcciones').style.display = 'none';
             document.getElementById('resultsDolares').style.display = 'none';
+            document.getElementById('resultsTNA').style.display = 'none';
         }
         
         function formatCurrency(amount) {
