@@ -642,6 +642,7 @@
                     <select id="tipoComision" name="tipoComision" required onchange="toggleComisionFields()">
                         <option value="fija">Comisión Fija (%)</option>
                         <option value="personalizada">Personalizada (Arancel + Derecho + IVA)</option>
+                        <option value="personalizada2">Personalizada 2 (Comisión + Derecho, IVA discriminado)</option>
                     </select>
                 </div>
 
@@ -661,6 +662,20 @@
                     </div>
                     <div class="info-iva">
                         <strong>ℹ️ IVA:</strong> Se calcula automáticamente como 21% sobre (Arancel + Derecho de Mercado)
+                    </div>
+                </div>
+
+                <div id="comisionP2" class="comision-personalizada" style="display: none;">
+                    <div class="form-group">
+                        <label for="comisionP2Pct">💳 Comisión de compra (%, sobre el capital)</label>
+                        <input type="number" id="comisionP2Pct" name="comisionP2Pct" min="0" max="5" step="0.00001" value="0.00493" placeholder="Ej: 0.00493">
+                    </div>
+                    <div class="form-group">
+                        <label for="derechoP2Pct">🏢 Derechos de Mercado (%, sobre el capital)</label>
+                        <input type="number" id="derechoP2Pct" name="derechoP2Pct" min="0" max="5" step="0.00001" value="0.0005" placeholder="Ej: 0.0005">
+                    </div>
+                    <div class="info-iva">
+                        <strong>ℹ️ IVA discriminado:</strong> A diferencia de la opción "Personalizada", acá el 21% de IVA se calcula por separado sobre la Comisión y sobre el Derecho de Mercado (no sobre la suma), y ambos porcentajes se aplican sobre el capital invertido, no sobre los intereses.
                     </div>
                 </div>
 
@@ -694,6 +709,24 @@
                         <div class="result-item sub-item">
                             <span class="result-label">• IVA (21%):</span>
                             <span class="result-value" id="costoIVA">$0</span>
+                        </div>
+                    </div>
+                    <div id="detalleP2" style="display: none;">
+                        <div class="result-item sub-item">
+                            <span class="result-label">• Comisión de compra:</span>
+                            <span class="result-value" id="costoComisionP2">$0</span>
+                        </div>
+                        <div class="result-item sub-item">
+                            <span class="result-label">• IVA Comisión (21%):</span>
+                            <span class="result-value" id="costoIvaComisionP2">$0</span>
+                        </div>
+                        <div class="result-item sub-item">
+                            <span class="result-label">• Derechos de Mercado:</span>
+                            <span class="result-value" id="costoDerechoP2">$0</span>
+                        </div>
+                        <div class="result-item sub-item">
+                            <span class="result-label">• IVA Derechos de Mercado (21%):</span>
+                            <span class="result-value" id="costoIvaDerechoP2">$0</span>
                         </div>
                     </div>
                 </div>
@@ -929,9 +962,10 @@
                 const comisionPorcentaje = parseFloat(document.getElementById('comision').value) / 100;
                 totalCostos = interesesBrutos * comisionPorcentaje;
                 
-                // Ocultar desglose personalizado
+                // Ocultar desgloses de las otras opciones
                 document.getElementById('detallePersonalizado').style.display = 'none';
-            } else {
+                document.getElementById('detalleP2').style.display = 'none';
+            } else if (tipoComision === 'personalizada') {
                 // Comisión personalizada
                 const arancelPorcentaje = parseFloat(document.getElementById('arancel').value) / 100;
                 const derechoMercadoPorcentaje = parseFloat(document.getElementById('derechoMercado').value) / 100;
@@ -947,9 +981,30 @@
                 
                 // Mostrar desglose personalizado
                 document.getElementById('detallePersonalizado').style.display = 'block';
+                document.getElementById('detalleP2').style.display = 'none';
                 document.getElementById('costoArancel').textContent = formatCurrency(costoArancel);
                 document.getElementById('costoDerechoMercado').textContent = formatCurrency(costoDerechoMercado);
                 document.getElementById('costoIVA').textContent = formatCurrency(costoIVA);
+            } else if (tipoComision === 'personalizada2') {
+                // Personalizada 2: comisión y derecho de mercado se calculan sobre el CAPITAL (no sobre los intereses),
+                // y el IVA (21%) se calcula por separado para cada uno de los dos conceptos.
+                const comisionP2Porcentaje = parseFloat(document.getElementById('comisionP2Pct').value) / 100;
+                const derechoP2Porcentaje = parseFloat(document.getElementById('derechoP2Pct').value) / 100;
+                
+                const costoComisionP2 = capital * comisionP2Porcentaje;
+                const costoIvaComisionP2 = costoComisionP2 * 0.21;
+                const costoDerechoP2 = capital * derechoP2Porcentaje;
+                const costoIvaDerechoP2 = costoDerechoP2 * 0.21;
+                
+                totalCostos = costoComisionP2 + costoIvaComisionP2 + costoDerechoP2 + costoIvaDerechoP2;
+                
+                // Mostrar desglose Personalizada 2
+                document.getElementById('detallePersonalizado').style.display = 'none';
+                document.getElementById('detalleP2').style.display = 'block';
+                document.getElementById('costoComisionP2').textContent = formatCurrency(costoComisionP2);
+                document.getElementById('costoIvaComisionP2').textContent = formatCurrency(costoIvaComisionP2);
+                document.getElementById('costoDerechoP2').textContent = formatCurrency(costoDerechoP2);
+                document.getElementById('costoIvaDerechoP2').textContent = formatCurrency(costoIvaDerechoP2);
             }
             
             // Intereses netos después de todos los costos
@@ -1051,13 +1106,18 @@
             const tipoComision = document.getElementById('tipoComision').value;
             const comisionFija = document.getElementById('comisionFija');
             const comisionPersonalizada = document.getElementById('comisionPersonalizada');
-            
+            const comisionP2 = document.getElementById('comisionP2');
+
+            comisionFija.style.display = 'none';
+            comisionPersonalizada.style.display = 'none';
+            comisionP2.style.display = 'none';
+
             if (tipoComision === 'fija') {
                 comisionFija.style.display = 'block';
-                comisionPersonalizada.style.display = 'none';
-            } else {
-                comisionFija.style.display = 'none';
+            } else if (tipoComision === 'personalizada') {
                 comisionPersonalizada.style.display = 'block';
+            } else if (tipoComision === 'personalizada2') {
+                comisionP2.style.display = 'block';
             }
         }
 
