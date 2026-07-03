@@ -1007,6 +1007,14 @@
                 const derecho=parseFloat(document.getElementById('derechoFijoP3').value);
                 const iva=(arancel+derecho)*0.21;
                 totalCostos=arancel+derecho+iva;
+                const d=document.getElementById('detalleP3');
+                if(d) d.style.display='block';
+                const ca=document.getElementById('costoArancelP3');
+                if(ca) ca.textContent=formatCurrency(arancel);
+                const cd=document.getElementById('costoDerechoP3');
+                if(cd) cd.textContent=formatCurrency(derecho);
+                const ci=document.getElementById('costoIvaP3');
+                if(ci) ci.textContent=formatCurrency(iva);
             } else if (tipoComision === 'personalizada3') {
                 document.getElementById('comisionP3').style.display='block';
             } else if (tipoComision === 'personalizada2') {
@@ -1146,6 +1154,14 @@
                 const derecho=parseFloat(document.getElementById('derechoFijoP3').value);
                 const iva=(arancel+derecho)*0.21;
                 totalCostos=arancel+derecho+iva;
+                const d=document.getElementById('detalleP3');
+                if(d) d.style.display='block';
+                const ca=document.getElementById('costoArancelP3');
+                if(ca) ca.textContent=formatCurrency(arancel);
+                const cd=document.getElementById('costoDerechoP3');
+                if(cd) cd.textContent=formatCurrency(derecho);
+                const ci=document.getElementById('costoIvaP3');
+                if(ci) ci.textContent=formatCurrency(iva);
             } else if (tipoComision === 'personalizada2') {
                 comisionP2.style.display = 'block';
             }
