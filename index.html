@@ -723,7 +723,12 @@
                             <span class="result-value" id="costoIVA">$0</span>
                         </div>
                     </div>
-                    <div id="detalleP2" style="display: none;">
+                    <div id="detalleP3" style="display:none;">
+                        <div class="result-item sub-item"><span class="result-label">• Arancel:</span><span class="result-value" id="costoArancelP3">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">• Derecho fijo:</span><span class="result-value" id="costoDerechoP3">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">• IVA (21% sobre Arancel + Derecho):</span><span class="result-value" id="costoIvaP3">$0</span></div>
+                    </div>
+<div id="detalleP2" style="display: none;">
                         <div class="result-item sub-item">
                             <span class="result-label">• Comisión de compra:</span>
                             <span class="result-value" id="costoComisionP2">$0</span>
@@ -1321,8 +1326,8 @@
             return new Intl.NumberFormat('es-AR', {
                 style: 'currency',
                 currency: 'ARS',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
             }).format(amount);
         }
         
