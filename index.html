@@ -399,8 +399,10 @@
                     <div class="info-iva">
                         <strong>ℹ️ Fórmula:</strong><br>
                         • Comisión = (tasaComisión / 30 × plazo) × monto<br>
-                        • Derechos = (tasaDerechos / 90 × plazo × monto) × 1.21<br>
-                        • Ambos se descuentan del capital inicial
+                        • Derechos = (tasaDerechos / 90 × plazo × monto)<br>
+                        • IVA Comisión = Comisión × 21%<br>
+                        • IVA Derechos = Derechos × 21%<br>
+                        • Todos se descuentan del capital inicial
                     </div>
                 </div>
 
@@ -444,7 +446,8 @@
                     <div id="detalleP4" style="display:none;">
                         <div class="result-item sub-item"><span class="result-label">• Comisión:</span><span class="result-value" id="costoComisionP4">$0</span></div>
                         <div class="result-item sub-item"><span class="result-label">• Derechos:</span><span class="result-value" id="costoDerechosP4">$0</span></div>
-                        <div class="result-item sub-item"><span class="result-label">• IVA (21% sobre Comisión + Derechos):</span><span class="result-value" id="costoIvaP4">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">• IVA (21% sobre Comisión):</span><span class="result-value" id="costoIvaComisionP4">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">• IVA (21% sobre Derechos):</span><span class="result-value" id="costoIvaDerechosP4">$0</span></div>
                     </div>
 <div id="detalleP2" style="display: none;">
                         <div class="result-item sub-item">
@@ -908,16 +911,17 @@
                 document.getElementById('costoDerechoP3').textContent = formatCurrency(derecho);
                 document.getElementById('costoIvaP3').textContent = formatCurrency(iva);
             } else if (tipoComision === 'personalizada4') {
-                // Personalizada 4: Comisión + Derechos variables por plazo
+                // Personalizada 4: Comisión + Derechos variables por plazo, con IVA discriminado por separado
                 const tasaComision = parseFloat(document.getElementById('comisionP4Tasa').value);
                 const tasaDerechos = parseFloat(document.getElementById('derechoP4Tasa').value);
                 
                 const costoComisionP4 = (tasaComision / 30 * dias) * capital;
-                const costoIvaP4 = costoComisionP4 * 0.21;
                 const derechosBase = (tasaDerechos / 90 * dias * capital);
-                const costoDerechosP4 = derechosBase * 1.21; // Ya incluye IVA
+                const costoIvaComisionP4 = costoComisionP4 * 0.21;
+                const costoIvaDerechosP4 = derechosBase * 0.21;
+                const costoDerechosP4 = derechosBase;
                 
-                totalCostos = costoComisionP4 + costoIvaP4 + costoDerechosP4;
+                totalCostos = costoComisionP4 + costoDerechosP4 + costoIvaComisionP4 + costoIvaDerechosP4;
                 
                 document.getElementById('detallePersonalizado').style.display = 'none';
                 document.getElementById('detalleP2').style.display = 'none';
@@ -925,7 +929,8 @@
                 document.getElementById('detalleP4').style.display = 'block';
                 document.getElementById('costoComisionP4').textContent = formatCurrency(costoComisionP4);
                 document.getElementById('costoDerechosP4').textContent = formatCurrency(costoDerechosP4);
-                document.getElementById('costoIvaP4').textContent = formatCurrency(costoIvaP4);
+                document.getElementById('costoIvaComisionP4').textContent = formatCurrency(costoIvaComisionP4);
+                document.getElementById('costoIvaDerechosP4').textContent = formatCurrency(costoIvaDerechosP4);
             }
             
             // Intereses netos después de todos los costos
@@ -1394,11 +1399,12 @@
                 const tasaDerechos = parseFloat(document.getElementById(`derechoP4TasaComp${id}`).value);
                 
                 const costoComisionP4 = (tasaComision / 30 * dias) * capital;
-                const costoIvaP4 = costoComisionP4 * 0.21;
                 const derechosBase = (tasaDerechos / 90 * dias * capital);
-                const costoDerechosP4 = derechosBase * 1.21; // Ya incluye IVA
+                const costoIvaComisionP4 = costoComisionP4 * 0.21;
+                const costoIvaDerechosP4 = derechosBase * 0.21;
+                const costoDerechosP4 = derechosBase;
                 
-                totalCostos = costoComisionP4 + costoIvaP4 + costoDerechosP4;
+                totalCostos = costoComisionP4 + costoDerechosP4 + costoIvaComisionP4 + costoIvaDerechosP4;
             }
 
             return interesBruto - totalCostos;
