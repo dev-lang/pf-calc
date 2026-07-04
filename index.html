@@ -238,8 +238,23 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="fuenteTasa">📊 Fuente de tasa</label>
+                    <select id="fuenteTasa" name="fuenteTasa" onchange="toggleFuenteTasaPlazoFijo()">
+                        <option value="personalizada">Personalizada</option>
+                        <option value="banco">Banco (tasa a 30 días)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label for="tasa">📈 Tasa de interés anual (%)</label>
                     <input type="number" id="tasa" name="tasa" min="0.01" step="0.01" required placeholder="Ej: 35.5">
+                </div>
+
+                <div class="form-group" id="grupoBancoTasa" style="display: none;">
+                    <label for="bancoTasaPlazoFijo">🏦 Banco</label>
+                    <select id="bancoTasaPlazoFijo" name="bancoTasaPlazoFijo" onchange="actualizarTasaDesdeBanco()">
+                        <option value="">Cargando bancos...</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -660,6 +675,111 @@
 
         // Cargar cotización apenas se abre la página
         // (Se ejecutará en el DOMContentLoaded del final del script)
+
+        let tasasBancosPlazoFijo = [];
+
+        function obtenerTasa30DiasBanco(banco) {
+            if (Array.isArray(banco.tasas) && banco.tasas.length > 0) {
+                const tasa30 = banco.tasas.find(t => {
+                    const plazoMin = Number(t.plazoMinDias);
+                    const plazoMax = Number(t.plazoMaxDias);
+                    return Number.isFinite(plazoMin) && Number.isFinite(plazoMax) && plazoMin <= 30 && plazoMax >= 30;
+                });
+
+                if (tasa30 && Number.isFinite(Number(tasa30.tna))) {
+                    return Number(tasa30.tna) * 100;
+                }
+            }
+
+            const tasaFallback = Number(banco.tnaClientes ?? banco.tnaNoClientes);
+            return Number.isFinite(tasaFallback) ? tasaFallback * 100 : null;
+        }
+
+        async function cargarTasasPlazoFijo() {
+            const selectBanco = document.getElementById('bancoTasaPlazoFijo');
+            const fuenteTasa = document.getElementById('fuenteTasa');
+            if (!selectBanco || !fuenteTasa) return;
+
+            selectBanco.innerHTML = '<option value="">Cargando bancos...</option>';
+
+            try {
+                const response = await fetch('https://api.argentinadatos.com/v1/finanzas/tasas/plazoFijo');
+                if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
+
+                const data = await response.json();
+                const bancos = Array.isArray(data)
+                    ? data
+                    : Array.isArray(data?.value)
+                        ? data.value
+                        : Array.isArray(data?.data)
+                            ? data.data
+                            : [];
+
+                tasasBancosPlazoFijo = bancos
+                    .map(banco => {
+                        const tasa = obtenerTasa30DiasBanco(banco);
+                        if (!Number.isFinite(tasa) || tasa <= 0) return null;
+                        return {
+                            nombre: banco.entidad || 'Banco',
+                            tasa
+                        };
+                    })
+                    .filter(Boolean)
+                    .sort((a, b) => b.tasa - a.tasa);
+
+                if (tasasBancosPlazoFijo.length === 0) {
+                    selectBanco.innerHTML = '<option value="">No se pudieron cargar las tasas</option>';
+                    return;
+                }
+
+                selectBanco.innerHTML = '<option value="">Seleccioná un banco</option>' + tasasBancosPlazoFijo
+                    .map(({ nombre, tasa }) => `<option value="${nombre}" data-tasa="${tasa}">${nombre} (${tasa.toFixed(2)}%)</option>`)
+                    .join('');
+
+                if (fuenteTasa.value === 'banco') {
+                    actualizarTasaDesdeBanco();
+                }
+            } catch (error) {
+                console.error('Error al obtener tasas de bancos:', error);
+                selectBanco.innerHTML = '<option value="">No se pudieron cargar las tasas</option>';
+            }
+        }
+
+        function toggleFuenteTasaPlazoFijo() {
+            const fuente = document.getElementById('fuenteTasa').value;
+            const grupoBanco = document.getElementById('grupoBancoTasa');
+            const tasaInput = document.getElementById('tasa');
+
+            if (!grupoBanco || !tasaInput) return;
+
+            if (fuente === 'banco') {
+                grupoBanco.style.display = 'block';
+                tasaInput.disabled = true;
+                actualizarTasaDesdeBanco();
+            } else {
+                grupoBanco.style.display = 'none';
+                tasaInput.disabled = false;
+                tasaInput.placeholder = 'Ej: 35.5';
+            }
+        }
+
+        function actualizarTasaDesdeBanco() {
+            const fuente = document.getElementById('fuenteTasa').value;
+            const selectBanco = document.getElementById('bancoTasaPlazoFijo');
+            const tasaInput = document.getElementById('tasa');
+
+            if (!selectBanco || !tasaInput || fuente !== 'banco') return;
+
+            const option = selectBanco.options[selectBanco.selectedIndex];
+            const tasa = option && option.dataset.tasa ? Number(option.dataset.tasa) : null;
+
+            if (Number.isFinite(tasa)) {
+                tasaInput.value = tasa.toFixed(2);
+            }
+        }
+
+        cargarTasasPlazoFijo();
+        toggleFuenteTasaPlazoFijo();
 
         document.getElementById('calculatorForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -1368,23 +1488,35 @@
             });
             
             // Mostrar contenido seleccionado
-            document.getElementById(tabName).classList.add('active');
+            const contenido = document.getElementById(tabName);
+            if (contenido) {
+                contenido.classList.add('active');
+            }
             
             // Activar botón correspondiente
             if (event && event.target) {
                 event.target.classList.add('active');
             } else {
                 // Si se llama desde el hash, activar el botón correspondiente
-                document.querySelector(`button[onclick="switchTab('${tabName}')"]`)?.classList.add('active');
+                const boton = document.querySelector(`button[onclick="switchTab('${tabName}')"]`);
+                if (boton) {
+                    boton.classList.add('active');
+                }
             }
             
             // Ocultar resultados cuando se cambia de tab
-            document.getElementById('results').style.display = 'none';
-            document.getElementById('resultsCaucion').style.display = 'none';
-            document.getElementById('resultsAcciones').style.display = 'none';
-            document.getElementById('resultsDolares').style.display = 'none';
-            document.getElementById('resultsTNA').style.display = 'none';
-            document.getElementById('resultsComparador').style.display = 'none';
+            const resultados = document.getElementById('results');
+            if (resultados) resultados.style.display = 'none';
+            const resultadosCaucion = document.getElementById('resultsCaucion');
+            if (resultadosCaucion) resultadosCaucion.style.display = 'none';
+            const resultadosAcciones = document.getElementById('resultsAcciones');
+            if (resultadosAcciones) resultadosAcciones.style.display = 'none';
+            const resultadosDolares = document.getElementById('resultsDolares');
+            if (resultadosDolares) resultadosDolares.style.display = 'none';
+            const resultadosTNA = document.getElementById('resultsTNA');
+            if (resultadosTNA) resultadosTNA.style.display = 'none';
+            const resultadosComparador = document.getElementById('resultsComparador');
+            if (resultadosComparador) resultadosComparador.style.display = 'none';
 
             if (tabName === 'comparador') {
                 inicializarComparadorSiHaceFalta();
