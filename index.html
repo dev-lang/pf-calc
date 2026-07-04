@@ -27,7 +27,7 @@
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             padding: 40px;
-            max-width: 600px;
+            max-width: 720px;
             width: 100%;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
@@ -131,17 +131,18 @@
         }
 
         .tabs {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 6px;
             margin-bottom: 30px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 15px;
-            padding: 5px;
+            padding: 6px;
             backdrop-filter: blur(10px);
         }
 
         .tab-btn {
-            flex: 1;
-            padding: 15px 20px;
+            padding: 12px 8px;
             border: none;
             background: transparent;
             color: #666;
@@ -149,7 +150,8 @@
             border-radius: 10px;
             transition: all 0.3s ease;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 14px;
+            line-height: 1.2;
         }
 
         .tab-btn.active {
@@ -324,6 +326,111 @@
             h1 {
                 font-size: 1.8em;
             }
+
+            .tabs {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .tab-btn {
+                font-size: 12px;
+                padding: 10px 4px;
+            }
+        }
+
+        /* ===== COMPARADOR ===== */
+        .fila-opcion {
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(102, 126, 234, 0.05);
+            position: relative;
+        }
+
+        .fila-opcion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .fila-opcion-header strong {
+            color: #555;
+        }
+
+        .btn-quitar-fila {
+            background: rgba(220, 53, 69, 0.85);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .btn-quitar-fila:hover {
+            background: rgba(220, 53, 69, 1);
+        }
+
+        .btn-agregar-fila {
+            background: rgba(102, 126, 234, 0.12);
+            border: 2px dashed rgba(102, 126, 234, 0.4);
+            color: #667eea;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 20px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-agregar-fila:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        .fila-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .fila-grid .form-group {
+            margin-bottom: 12px;
+        }
+
+        .tabla-comparacion {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .tabla-comparacion th,
+        .tabla-comparacion td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+            font-size: 14px;
+        }
+
+        .tabla-comparacion th {
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .fila-ganadora {
+            background: rgba(255, 255, 255, 0.25);
+            font-weight: 700;
+        }
+
+        .badge-ganador {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 12px;
+            margin-left: 6px;
         }
     </style>
 </head>
@@ -335,6 +442,7 @@
             <button class="tab-btn" onclick="switchTab('acciones')">📈 Compra de Acciones</button>
             <button class="tab-btn" onclick="switchTab('dolares')">💵 Compra/Venta USD</button>
             <button class="tab-btn" onclick="switchTab('tna')">🎯 Tasa Nominal</button>
+            <button class="tab-btn" onclick="switchTab('comparador')">🆚 Comparador</button>
         </div>
 
         <!-- DOLARES SECTION -->
@@ -844,6 +952,49 @@
                 </div>
             </div>
         </div>
+
+        <!-- COMPARADOR SECTION -->
+        <div id="comparador" class="tab-content">
+            <h1>🆚 Comparador de Inversiones</h1>
+
+            <div class="info">
+                <strong>💡 Info:</strong> Cargá el mismo capital y plazo, agregá tantas opciones como quieras (Plazo Fijo, Caución, o una tasa personalizada) y compará cuál te conviene más, ya con los costos descontados.
+            </div>
+
+            <form id="comparadorForm">
+                <div class="form-group">
+                    <label for="capitalComparador">💵 Capital a invertir (ARS)</label>
+                    <input type="number" id="capitalComparador" name="capitalComparador" min="1" step="0.01" required placeholder="Ej: 100000">
+                </div>
+
+                <div class="form-group">
+                    <label for="diasComparador">📅 Plazo (días), igual para todas las opciones</label>
+                    <input type="number" id="diasComparador" name="diasComparador" min="1" required placeholder="Ej: 30">
+                </div>
+
+                <div id="filasComparador"></div>
+
+                <button type="button" class="btn-agregar-fila" onclick="agregarFilaComparador()">➕ Agregar opción a comparar</button>
+
+                <button type="submit" class="btn">🚀 Comparar</button>
+            </form>
+
+            <div id="resultsComparador" class="results">
+                <div class="highlight" style="margin-top: 0;">
+                    <table class="tabla-comparacion" id="tablaComparacion">
+                        <thead>
+                            <tr>
+                                <th>Opción</th>
+                                <th>Interés neto</th>
+                                <th>Rendimiento</th>
+                                <th>TNA efectiva</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpoTablaComparacion"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1312,6 +1463,261 @@
             document.getElementById('resultsTNA').scrollIntoView({ behavior: 'smooth' });
         });
 
+        // ==========================================
+        // COMPARADOR DE INVERSIONES
+        // ==========================================
+        let filaComparadorContador = 0;
+
+        function agregarFilaComparador(tipoInicial = 'caucion') {
+            filaComparadorContador++;
+            const id = filaComparadorContador;
+            const nombresPorTipo = { plazoFijo: 'Plazo Fijo', caucion: 'Caución', personalizada: 'Otra opción' };
+            const tnaPorTipo = { plazoFijo: 35, caucion: 32, personalizada: 30 };
+
+            const fila = document.createElement('div');
+            fila.className = 'fila-opcion';
+            fila.id = `filaComparador${id}`;
+            fila.innerHTML = `
+                <div class="fila-opcion-header">
+                    <strong>Opción #${id}</strong>
+                    <button type="button" class="btn-quitar-fila" onclick="quitarFilaComparador(${id})">✕ Quitar</button>
+                </div>
+                <div class="form-group">
+                    <label>🏷️ Nombre de la opción</label>
+                    <input type="text" id="nombreComp${id}" value="${nombresPorTipo[tipoInicial]}" required>
+                </div>
+                <div class="form-group">
+                    <label>🔀 Tipo de instrumento</label>
+                    <select id="tipoInstrumentoComp${id}" onchange="renderCamposEspecificosComp(${id})">
+                        <option value="plazoFijo" ${tipoInicial === 'plazoFijo' ? 'selected' : ''}>💰 Plazo Fijo</option>
+                        <option value="caucion" ${tipoInicial === 'caucion' ? 'selected' : ''}>📊 Caución Bursátil</option>
+                        <option value="personalizada" ${tipoInicial === 'personalizada' ? 'selected' : ''}>🎯 Otra (TNA + comisión simple)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📈 TNA - Tasa Nominal Anual (%)</label>
+                    <input type="number" id="tnaComp${id}" min="0" step="0.01" value="${tnaPorTipo[tipoInicial]}" required>
+                </div>
+                <div id="camposEspecificosComp${id}"></div>
+            `;
+            document.getElementById('filasComparador').appendChild(fila);
+            renderCamposEspecificosComp(id);
+        }
+
+        function quitarFilaComparador(id) {
+            const fila = document.getElementById(`filaComparador${id}`);
+            if (fila) fila.remove();
+        }
+
+        // Renderiza los campos propios de cada tipo de instrumento (misma lógica que sus pestañas)
+        function renderCamposEspecificosComp(id) {
+            const tipo = document.getElementById(`tipoInstrumentoComp${id}`).value;
+            const contenedor = document.getElementById(`camposEspecificosComp${id}`);
+
+            if (tipo === 'plazoFijo') {
+                contenedor.innerHTML = `
+                    <div class="form-group">
+                        <label>🔄 Tipo de capitalización</label>
+                        <select id="capitalizacionComp${id}">
+                            <option value="simple">Interés Simple</option>
+                            <option value="compuesta">Interés Compuesto (diario)</option>
+                            <option value="mensual">Interés Compuesto (mensual)</option>
+                        </select>
+                    </div>
+                `;
+            } else if (tipo === 'caucion') {
+                contenedor.innerHTML = `
+                    <div class="form-group">
+                        <label>💳 Tipo de comisión</label>
+                        <select id="tipoComisionComp${id}" onchange="renderComisionCaucionComp(${id})">
+                            <option value="fija">Comisión Fija (%)</option>
+                            <option value="personalizada">Personalizada (Arancel + Derecho + IVA)</option>
+                            <option value="personalizada2">Personalizada 2 (Comisión + Derecho, IVA discriminado)</option>
+                            <option value="personalizada3">Personalizada 3 (IOL: Arancel sobre interés + Derecho fijo + IVA)</option>
+                        </select>
+                    </div>
+                    <div id="camposComisionCaucionComp${id}"></div>
+                `;
+                renderComisionCaucionComp(id);
+            } else {
+                contenedor.innerHTML = `
+                    <div class="form-group">
+                        <label>💳 Comisión sobre el interés (%)</label>
+                        <input type="number" id="comisionSimpleComp${id}" min="0" step="0.01" value="0">
+                    </div>
+                `;
+            }
+        }
+
+        // Renderiza los sub-campos de comisión de Caución, iguales a los de la pestaña Cauciones
+        function renderComisionCaucionComp(id) {
+            const tipoComision = document.getElementById(`tipoComisionComp${id}`).value;
+            const contenedor = document.getElementById(`camposComisionCaucionComp${id}`);
+
+            if (tipoComision === 'fija') {
+                contenedor.innerHTML = `
+                    <div class="form-group">
+                        <label>📊 Comisión del broker (%)</label>
+                        <input type="number" id="comisionFijaComp${id}" min="0" max="10" step="0.01" value="0">
+                    </div>
+                `;
+            } else if (tipoComision === 'personalizada') {
+                contenedor.innerHTML = `
+                    <div class="comision-personalizada">
+                        <div class="form-group">
+                            <label>🏛️ Arancel (%)</label>
+                            <input type="number" id="arancelComp${id}" min="0" max="5" step="0.001" value="2.705">
+                        </div>
+                        <div class="form-group">
+                            <label>🏢 Derecho de Mercado (%)</label>
+                            <input type="number" id="derechoMercadoComp${id}" min="0" max="5" step="0.001" value="0.501">
+                        </div>
+                        <div class="info-iva"><strong>ℹ️ IVA:</strong> 21% sobre (Arancel + Derecho de Mercado)</div>
+                    </div>
+                `;
+            } else if (tipoComision === 'personalizada2') {
+                contenedor.innerHTML = `
+                    <div class="comision-personalizada">
+                        <div class="form-group">
+                            <label>💳 Comisión de compra (%, sobre el capital)</label>
+                            <input type="number" id="comisionP2PctComp${id}" min="0" max="5" step="0.00001" value="0.00493">
+                        </div>
+                        <div class="form-group">
+                            <label>🏢 Derechos de Mercado (%, sobre el capital)</label>
+                            <input type="number" id="derechoP2PctComp${id}" min="0" max="5" step="0.00001" value="0.0005">
+                        </div>
+                        <div class="info-iva"><strong>ℹ️ IVA discriminado:</strong> 21% por separado sobre Comisión y sobre Derecho de Mercado, ambos calculados sobre el capital.</div>
+                    </div>
+                `;
+            } else if (tipoComision === 'personalizada3') {
+                contenedor.innerHTML = `
+                    <div class="comision-personalizada">
+                        <div class="form-group">
+                            <label>🏛️ Arancel (% sobre intereses)</label>
+                            <input type="number" id="arancelP3Comp${id}" step="0.01" value="9.73">
+                        </div>
+                        <div class="form-group">
+                            <label>🏢 Derecho fijo ($)</label>
+                            <input type="number" id="derechoFijoP3Comp${id}" step="0.01" value="75">
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Precargar el comparador con Plazo Fijo vs Caución al entrar por primera vez
+        let comparadorInicializado = false;
+        function inicializarComparadorSiHaceFalta() {
+            if (comparadorInicializado) return;
+            comparadorInicializado = true;
+            agregarFilaComparador('plazoFijo');
+            agregarFilaComparador('caucion');
+        }
+
+        // Calcula el interés neto de una fila de Caución con la misma fórmula exacta de la pestaña Cauciones
+        function calcularNetoCaucionComp(id, capital, interesBruto) {
+            const tipoComision = document.getElementById(`tipoComisionComp${id}`).value;
+            let totalCostos = 0;
+
+            if (tipoComision === 'fija') {
+                const comisionPorcentaje = parseFloat(document.getElementById(`comisionFijaComp${id}`).value) / 100;
+                totalCostos = interesBruto * comisionPorcentaje;
+            } else if (tipoComision === 'personalizada') {
+                const arancelPorcentaje = parseFloat(document.getElementById(`arancelComp${id}`).value) / 100;
+                const derechoMercadoPorcentaje = parseFloat(document.getElementById(`derechoMercadoComp${id}`).value) / 100;
+                const costoArancel = interesBruto * arancelPorcentaje;
+                const costoDerechoMercado = interesBruto * derechoMercadoPorcentaje;
+                const costoIVA = (costoArancel + costoDerechoMercado) * 0.21;
+                totalCostos = costoArancel + costoDerechoMercado + costoIVA;
+            } else if (tipoComision === 'personalizada2') {
+                const comisionP2Porcentaje = parseFloat(document.getElementById(`comisionP2PctComp${id}`).value) / 100;
+                const derechoP2Porcentaje = parseFloat(document.getElementById(`derechoP2PctComp${id}`).value) / 100;
+                const costoComisionP2 = capital * comisionP2Porcentaje;
+                const costoIvaComisionP2 = costoComisionP2 * 0.21;
+                const costoDerechoP2 = capital * derechoP2Porcentaje;
+                const costoIvaDerechoP2 = costoDerechoP2 * 0.21;
+                totalCostos = costoComisionP2 + costoIvaComisionP2 + costoDerechoP2 + costoIvaDerechoP2;
+            } else if (tipoComision === 'personalizada3') {
+                const arancel = interesBruto * (parseFloat(document.getElementById(`arancelP3Comp${id}`).value) / 100);
+                const derecho = parseFloat(document.getElementById(`derechoFijoP3Comp${id}`).value);
+                const iva = (arancel + derecho) * 0.21;
+                totalCostos = arancel + derecho + iva;
+            }
+
+            return interesBruto - totalCostos;
+        }
+
+        document.getElementById('comparadorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const capital = parseFloat(document.getElementById('capitalComparador').value);
+            const dias = parseInt(document.getElementById('diasComparador').value);
+
+            const filas = document.querySelectorAll('#filasComparador .fila-opcion');
+            if (filas.length === 0) {
+                alert('Agregá al menos una opción para comparar.');
+                return;
+            }
+
+            const resultados = [];
+
+            filas.forEach(fila => {
+                const id = fila.id.replace('filaComparador', '');
+                const nombre = document.getElementById(`nombreComp${id}`).value || `Opción ${id}`;
+                const tipoInstrumento = document.getElementById(`tipoInstrumentoComp${id}`).value;
+                const tna = parseFloat(document.getElementById(`tnaComp${id}`).value) / 100;
+
+                let interesNeto;
+
+                if (tipoInstrumento === 'plazoFijo') {
+                    const capitalizacion = document.getElementById(`capitalizacionComp${id}`).value;
+                    if (capitalizacion === 'simple') {
+                        interesNeto = capital * tna * (dias / 365);
+                    } else if (capitalizacion === 'compuesta') {
+                        const tasaDiaria = tna / 365;
+                        interesNeto = capital * Math.pow(1 + tasaDiaria, dias) - capital;
+                    } else {
+                        const tasaMensual = tna / 12;
+                        const meses = dias / 30.44;
+                        interesNeto = capital * Math.pow(1 + tasaMensual, meses) - capital;
+                    }
+                } else if (tipoInstrumento === 'caucion') {
+                    const interesBruto = capital * tna * (dias / 365);
+                    interesNeto = calcularNetoCaucionComp(id, capital, interesBruto);
+                } else {
+                    const interesBruto = capital * tna * (dias / 365);
+                    const comisionPct = parseFloat(document.getElementById(`comisionSimpleComp${id}`).value) / 100;
+                    interesNeto = interesBruto * (1 - comisionPct);
+                }
+
+                const rendimiento = (interesNeto / capital) * 100;
+                const tnaEfectiva = (interesNeto / capital) * (365 / dias) * 100;
+
+                resultados.push({ nombre, interesNeto, rendimiento, tnaEfectiva });
+            });
+
+            // Ordenar de mayor a menor interés neto
+            resultados.sort((a, b) => b.interesNeto - a.interesNeto);
+
+            const cuerpo = document.getElementById('cuerpoTablaComparacion');
+            cuerpo.innerHTML = '';
+
+            resultados.forEach((r, index) => {
+                const tr = document.createElement('tr');
+                if (index === 0) tr.classList.add('fila-ganadora');
+                tr.innerHTML = `
+                    <td>${r.nombre}${index === 0 ? '<span class="badge-ganador">🏆 Mejor opción</span>' : ''}</td>
+                    <td>${formatCurrency(r.interesNeto)}</td>
+                    <td>${r.rendimiento.toFixed(3)}%</td>
+                    <td>${r.tnaEfectiva.toFixed(2)}%</td>
+                `;
+                cuerpo.appendChild(tr);
+            });
+
+            document.getElementById('resultsComparador').style.display = 'block';
+            document.getElementById('resultsComparador').scrollIntoView({ behavior: 'smooth' });
+        });
+
         // Función para cambiar tabs
         function switchTab(tabName) {
             // Ocultar todos los contenidos
@@ -1336,6 +1742,11 @@
             document.getElementById('resultsAcciones').style.display = 'none';
             document.getElementById('resultsDolares').style.display = 'none';
             document.getElementById('resultsTNA').style.display = 'none';
+            document.getElementById('resultsComparador').style.display = 'none';
+
+            if (tabName === 'comparador') {
+                inicializarComparadorSiHaceFalta();
+            }
         }
         
         function formatCurrency(amount) {
