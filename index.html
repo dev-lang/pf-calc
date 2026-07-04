@@ -323,7 +323,8 @@
                         <option value="fija">Comisión Fija (%)</option>
                         <option value="personalizada">Personalizada (Arancel + Derecho + IVA)</option>
                         <option value="personalizada2">Personalizada 2 (Comisión + Derecho, IVA discriminado)</option>
-<option value="personalizada3">Personalizada 3 (IOL: Arancel sobre interés + Derecho fijo + IVA)</option>
+                        <option value="personalizada3">Personalizada 3 (IOL: Arancel sobre interés + Derecho fijo + IVA)</option>
+                        <option value="personalizada4">Personalizada 4 (Comisión + Derechos variables por plazo)</option>
                     </select>
                 </div>
 
@@ -371,6 +372,23 @@
                     </div>
                 </div>
 
+                <div id="comisionP4" class="comision-personalizada" style="display:none;">
+                    <div class="form-group">
+                        <label for="comisionP4Tasa">💳 Tasa de comisión diaria (% / 30 días)</label>
+                        <input type="number" id="comisionP4Tasa" value="0.0015" step="0.00001" placeholder="Ej: 0.0015">
+                    </div>
+                    <div class="form-group">
+                        <label for="derechoP4Tasa">🏢 Tasa de derechos diaria (% / 90 días)</label>
+                        <input type="number" id="derechoP4Tasa" value="0.00045" step="0.00001" placeholder="Ej: 0.00045">
+                    </div>
+                    <div class="info-iva">
+                        <strong>ℹ️ Fórmula:</strong><br>
+                        • Comisión = (tasaComisión / 30 × plazo) × monto<br>
+                        • Derechos = (tasaDerechos / 90 × plazo × monto) × 1.21<br>
+                        • Ambos se descuentan del capital inicial
+                    </div>
+                </div>
+
                 <button type="submit" class="btn">🚀 Calcular Caución</button>
             </form>
 
@@ -407,6 +425,11 @@
                         <div class="result-item sub-item"><span class="result-label">• Arancel:</span><span class="result-value" id="costoArancelP3">$0</span></div>
                         <div class="result-item sub-item"><span class="result-label">• Derecho fijo:</span><span class="result-value" id="costoDerechoP3">$0</span></div>
                         <div class="result-item sub-item"><span class="result-label">• IVA (21% sobre Arancel + Derecho):</span><span class="result-value" id="costoIvaP3">$0</span></div>
+                    </div>
+                    <div id="detalleP4" style="display:none;">
+                        <div class="result-item sub-item"><span class="result-label">• Comisión:</span><span class="result-value" id="costoComisionP4">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">• Derechos:</span><span class="result-value" id="costoDerechosP4">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">• IVA (21% sobre Comisión + Derechos):</span><span class="result-value" id="costoIvaP4">$0</span></div>
                     </div>
 <div id="detalleP2" style="display: none;">
                         <div class="result-item sub-item">
@@ -705,6 +728,8 @@
                 // Ocultar desgloses de las otras opciones
                 document.getElementById('detallePersonalizado').style.display = 'none';
                 document.getElementById('detalleP2').style.display = 'none';
+                document.getElementById('detalleP3').style.display = 'none';
+                document.getElementById('detalleP4').style.display = 'none';
             } else if (tipoComision === 'personalizada') {
                 // Comisión personalizada
                 const arancelPorcentaje = parseFloat(document.getElementById('arancel').value) / 100;
@@ -722,24 +747,11 @@
                 // Mostrar desglose personalizado
                 document.getElementById('detallePersonalizado').style.display = 'block';
                 document.getElementById('detalleP2').style.display = 'none';
+                document.getElementById('detalleP3').style.display = 'none';
+                document.getElementById('detalleP4').style.display = 'none';
                 document.getElementById('costoArancel').textContent = formatCurrency(costoArancel);
                 document.getElementById('costoDerechoMercado').textContent = formatCurrency(costoDerechoMercado);
                 document.getElementById('costoIVA').textContent = formatCurrency(costoIVA);
-            } else if (tipoComision === 'personalizada3') {
-                const arancel=interesesBrutos*(parseFloat(document.getElementById('arancelP3').value)/100);
-                const derecho=parseFloat(document.getElementById('derechoFijoP3').value);
-                const iva=(arancel+derecho)*0.21;
-                totalCostos=arancel+derecho+iva;
-                const d=document.getElementById('detalleP3');
-                if(d) d.style.display='block';
-                const ca=document.getElementById('costoArancelP3');
-                if(ca) ca.textContent=formatCurrency(arancel);
-                const cd=document.getElementById('costoDerechoP3');
-                if(cd) cd.textContent=formatCurrency(derecho);
-                const ci=document.getElementById('costoIvaP3');
-                if(ci) ci.textContent=formatCurrency(iva);
-            } else if (tipoComision === 'personalizada3') {
-                document.getElementById('comisionP3').style.display='block';
             } else if (tipoComision === 'personalizada2') {
                 // Personalizada 2: comisión y derecho de mercado se calculan sobre el CAPITAL (no sobre los intereses),
                 // y el IVA (21%) se calcula por separado para cada uno de los dos conceptos.
@@ -756,10 +768,44 @@
                 // Mostrar desglose Personalizada 2
                 document.getElementById('detallePersonalizado').style.display = 'none';
                 document.getElementById('detalleP2').style.display = 'block';
+                document.getElementById('detalleP3').style.display = 'none';
+                document.getElementById('detalleP4').style.display = 'none';
                 document.getElementById('costoComisionP2').textContent = formatCurrency(costoComisionP2);
                 document.getElementById('costoIvaComisionP2').textContent = formatCurrency(costoIvaComisionP2);
                 document.getElementById('costoDerechoP2').textContent = formatCurrency(costoDerechoP2);
                 document.getElementById('costoIvaDerechoP2').textContent = formatCurrency(costoIvaDerechoP2);
+            } else if (tipoComision === 'personalizada3') {
+                const arancel = interesesBrutos * (parseFloat(document.getElementById('arancelP3').value) / 100);
+                const derecho = parseFloat(document.getElementById('derechoFijoP3').value);
+                const iva = (arancel + derecho) * 0.21;
+                totalCostos = arancel + derecho + iva;
+                
+                document.getElementById('detallePersonalizado').style.display = 'none';
+                document.getElementById('detalleP2').style.display = 'none';
+                document.getElementById('detalleP3').style.display = 'block';
+                document.getElementById('detalleP4').style.display = 'none';
+                document.getElementById('costoArancelP3').textContent = formatCurrency(arancel);
+                document.getElementById('costoDerechoP3').textContent = formatCurrency(derecho);
+                document.getElementById('costoIvaP3').textContent = formatCurrency(iva);
+            } else if (tipoComision === 'personalizada4') {
+                // Personalizada 4: Comisión + Derechos variables por plazo
+                const tasaComision = parseFloat(document.getElementById('comisionP4Tasa').value) / 100;
+                const tasaDerechos = parseFloat(document.getElementById('derechoP4Tasa').value) / 100;
+                
+                const costoComisionP4 = (tasaComision / 30 * dias) * capital;
+                const costoIvaP4 = costoComisionP4 * 0.21;
+                const derechosBase = (tasaDerechos / 90 * dias * capital);
+                const costoDerechosP4 = derechosBase * 1.21; // Ya incluye IVA
+                
+                totalCostos = costoComisionP4 + costoIvaP4 + costoDerechosP4;
+                
+                document.getElementById('detallePersonalizado').style.display = 'none';
+                document.getElementById('detalleP2').style.display = 'none';
+                document.getElementById('detalleP3').style.display = 'none';
+                document.getElementById('detalleP4').style.display = 'block';
+                document.getElementById('costoComisionP4').textContent = formatCurrency(costoComisionP4);
+                document.getElementById('costoDerechosP4').textContent = formatCurrency(costoDerechosP4);
+                document.getElementById('costoIvaP4').textContent = formatCurrency(costoIvaP4);
             }
             
             // Intereses netos después de todos los costos
@@ -862,31 +908,25 @@
             const comisionFija = document.getElementById('comisionFija');
             const comisionPersonalizada = document.getElementById('comisionPersonalizada');
             const comisionP2 = document.getElementById('comisionP2');
+            const comisionP3 = document.getElementById('comisionP3');
+            const comisionP4 = document.getElementById('comisionP4');
 
             comisionFija.style.display = 'none';
             comisionPersonalizada.style.display = 'none';
             comisionP2.style.display = 'none';
-            const p3=document.getElementById('comisionP3'); if(p3)p3.style.display='none';
+            comisionP3.style.display = 'none';
+            comisionP4.style.display = 'none';
 
             if (tipoComision === 'fija') {
                 comisionFija.style.display = 'block';
             } else if (tipoComision === 'personalizada') {
                 comisionPersonalizada.style.display = 'block';
-            } else if (tipoComision === 'personalizada3') {
-                const arancel=interesesBrutos*(parseFloat(document.getElementById('arancelP3').value)/100);
-                const derecho=parseFloat(document.getElementById('derechoFijoP3').value);
-                const iva=(arancel+derecho)*0.21;
-                totalCostos=arancel+derecho+iva;
-                const d=document.getElementById('detalleP3');
-                if(d) d.style.display='block';
-                const ca=document.getElementById('costoArancelP3');
-                if(ca) ca.textContent=formatCurrency(arancel);
-                const cd=document.getElementById('costoDerechoP3');
-                if(cd) cd.textContent=formatCurrency(derecho);
-                const ci=document.getElementById('costoIvaP3');
-                if(ci) ci.textContent=formatCurrency(iva);
             } else if (tipoComision === 'personalizada2') {
                 comisionP2.style.display = 'block';
+            } else if (tipoComision === 'personalizada3') {
+                comisionP3.style.display = 'block';
+            } else if (tipoComision === 'personalizada4') {
+                comisionP4.style.display = 'block';
             }
         }
 
@@ -1106,6 +1146,7 @@
                             <option value="personalizada">Personalizada (Arancel + Derecho + IVA)</option>
                             <option value="personalizada2">Personalizada 2 (Comisión + Derecho, IVA discriminado)</option>
                             <option value="personalizada3">Personalizada 3 (IOL: Arancel sobre interés + Derecho fijo + IVA)</option>
+                            <option value="personalizada4">Personalizada 4 (Comisión + Derechos variables por plazo)</option>
                         </select>
                     </div>
                     <div id="camposComisionCaucionComp${id}"></div>
@@ -1174,6 +1215,19 @@
                         </div>
                     </div>
                 `;
+            } else if (tipoComision === 'personalizada4') {
+                contenedor.innerHTML = `
+                    <div class="comision-personalizada">
+                        <div class="form-group">
+                            <label>💳 Tasa de comisión diaria (% / 30 días)</label>
+                            <input type="number" id="comisionP4TasaComp${id}" value="0.0015" step="0.00001">
+                        </div>
+                        <div class="form-group">
+                            <label>🏢 Tasa de derechos diaria (% / 90 días)</label>
+                            <input type="number" id="derechoP4TasaComp${id}" value="0.00045" step="0.00001">
+                        </div>
+                    </div>
+                `;
             }
         }
 
@@ -1214,6 +1268,17 @@
                 const derecho = parseFloat(document.getElementById(`derechoFijoP3Comp${id}`).value);
                 const iva = (arancel + derecho) * 0.21;
                 totalCostos = arancel + derecho + iva;
+            } else if (tipoComision === 'personalizada4') {
+                const dias = parseInt(document.querySelector('#diasComparador').value);
+                const tasaComision = parseFloat(document.getElementById(`comisionP4TasaComp${id}`).value) / 100;
+                const tasaDerechos = parseFloat(document.getElementById(`derechoP4TasaComp${id}`).value) / 100;
+                
+                const costoComisionP4 = (tasaComision / 30 * dias) * capital;
+                const costoIvaP4 = costoComisionP4 * 0.21;
+                const derechosBase = (tasaDerechos / 90 * dias * capital);
+                const costoDerechosP4 = derechosBase * 1.21; // Ya incluye IVA
+                
+                totalCostos = costoComisionP4 + costoIvaP4 + costoDerechosP4;
             }
 
             return interesBruto - totalCostos;
