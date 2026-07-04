@@ -789,8 +789,8 @@
                 document.getElementById('costoIvaP3').textContent = formatCurrency(iva);
             } else if (tipoComision === 'personalizada4') {
                 // Personalizada 4: Comisión + Derechos variables por plazo
-                const tasaComision = parseFloat(document.getElementById('comisionP4Tasa').value) / 100;
-                const tasaDerechos = parseFloat(document.getElementById('derechoP4Tasa').value) / 100;
+                const tasaComision = parseFloat(document.getElementById('comisionP4Tasa').value);
+                const tasaDerechos = parseFloat(document.getElementById('derechoP4Tasa').value);
                 
                 const costoComisionP4 = (tasaComision / 30 * dias) * capital;
                 const costoIvaP4 = costoComisionP4 * 0.21;
@@ -1270,8 +1270,8 @@
                 totalCostos = arancel + derecho + iva;
             } else if (tipoComision === 'personalizada4') {
                 const dias = parseInt(document.querySelector('#diasComparador').value);
-                const tasaComision = parseFloat(document.getElementById(`comisionP4TasaComp${id}`).value) / 100;
-                const tasaDerechos = parseFloat(document.getElementById(`derechoP4TasaComp${id}`).value) / 100;
+                const tasaComision = parseFloat(document.getElementById(`comisionP4TasaComp${id}`).value);
+                const tasaDerechos = parseFloat(document.getElementById(`derechoP4TasaComp${id}`).value);
                 
                 const costoComisionP4 = (tasaComision / 30 * dias) * capital;
                 const costoIvaP4 = costoComisionP4 * 0.21;
