@@ -39,6 +39,24 @@
                 <button type="button" class="btn-refresh" id="btnRefreshCotizacion" onclick="cargarCotizacion()">🔄 Actualizar cotización</button>
             </div>
 
+            <div class="cotizaciones-box bandas-box" id="bandasBox">
+                <h3>📏 Bandas Cambiarias (BCRA)</h3>
+                <div class="cotizacion-item">
+                    <span>🔻 Piso:</span>
+                    <span class="precio-dolar" id="bandaPisoDisplay">Calculando...</span>
+                </div>
+                <div class="cotizacion-item">
+                    <span>🔺 Techo:</span>
+                    <span class="precio-dolar" id="bandaTechoDisplay">Calculando...</span>
+                </div>
+                <div class="cotizacion-item">
+                    <span>📍 Mayorista vs. banda:</span>
+                    <span class="precio-dolar" id="bandaPosicionDisplay">Calculando...</span>
+                </div>
+                <div class="cotizacion-meta" id="bandaMeta">Calculando bandas según fórmula oficial del BCRA...</div>
+                <button type="button" class="btn-refresh" id="btnRefreshBanda" onclick="cargarBandaCambiaria()">🔄 Recalcular banda</button>
+            </div>
+
             <form id="dolaresForm">
                 <div class="form-group">
                     <label for="operacionTipo">🔄 Tipo de operación</label>
@@ -229,6 +247,19 @@
             
             <div class="info">
                 <strong>💡 Tip:</strong> Esta calculadora te ayuda a determinar el rendimiento de tu plazo fijo considerando diferentes tipos de capitalización de intereses.
+            </div>
+
+            <div class="cotizaciones-box mejor-tasa-box" id="mejorTasaBox">
+                <h3>🏆 Mejor Tasa Actual</h3>
+                <div class="cotizacion-item">
+                    <span>🥇 Banco líder:</span>
+                    <span class="precio-dolar" id="mejorTasaBanco">Cargando...</span>
+                </div>
+                <div class="cotizacion-item">
+                    <span>📈 TNA a 30 días:</span>
+                    <span class="precio-dolar" id="mejorTasaValor">Cargando...</span>
+                </div>
+                <div class="cotizacion-meta" id="mejorTasaMeta">Consultando tasas de todos los bancos...</div>
             </div>
 
             <form id="calculatorForm">
@@ -679,6 +710,143 @@
         // Cargar cotización apenas se abre la página
         // (Se ejecutará en el DOMContentLoaded del final del script)
 
+        // ==========================================
+        // BANDAS CAMBIARIAS (esquema BCRA vigente desde 11/04/2025)
+        // ==========================================
+        // Fase 1 (11/abr/2025 - 31/dic/2025): piso -1% mensual, techo +1% mensual (interpolado día a día)
+        // Fase 2 (desde 1/ene/2026): piso y techo se ajustan mensualmente según IPC con rezago T-2
+        // Cálculo estimado a partir de parámetros públicos del BCRA + IPC de ArgentinaDatos/INDEC.
+        // Puede diferir levemente del valor que el BCRA publica oficialmente.
+
+        async function obtenerInflacionMensualMap() {
+            try {
+                const response = await fetch('https://api.argentinadatos.com/v1/finanzas/indices/inflacion');
+                if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
+                const data = await response.json();
+                const lista = Array.isArray(data)
+                    ? data
+                    : Array.isArray(data?.value)
+                        ? data.value
+                        : Array.isArray(data?.data)
+                            ? data.data
+                            : [];
+
+                const mapa = {};
+                lista.forEach(item => {
+                    const fecha = item.fecha || item.date;
+                    const valor = Number(item.valor ?? item.value);
+                    if (fecha && Number.isFinite(valor)) {
+                        mapa[String(fecha).slice(0, 7)] = valor; // clave "YYYY-MM"
+                    }
+                });
+                return mapa;
+            } catch (error) {
+                console.error('Error al obtener inflación mensual:', error);
+                return null;
+            }
+        }
+
+        function calcularBandaEnFecha(inflacionMap, fechaObjetivo) {
+            const ANCHOR_DATE = new Date('2025-04-11T00:00:00');
+            const FIN_FASE1 = new Date('2025-12-31T23:59:59');
+            const INICIO_FASE2 = new Date('2026-01-01T00:00:00');
+
+            let piso = 1000;
+            let techo = 1400;
+
+            // Fase 1: interpolación diaria del ±1% mensual
+            const finInterpolacion = fechaObjetivo < FIN_FASE1 ? fechaObjetivo : FIN_FASE1;
+            const diasFase1 = Math.max(0, (finInterpolacion - ANCHOR_DATE) / 86400000);
+            const mesesFase1 = diasFase1 / 30.4368;
+            piso = piso * Math.pow(0.99, mesesFase1);
+            techo = techo * Math.pow(1.01, mesesFase1);
+
+            // Fase 2: ajuste mensual por IPC con rezago T-2, mes a mes desde enero 2026
+            if (fechaObjetivo >= INICIO_FASE2 && inflacionMap) {
+                const cursor = new Date('2026-01-01T00:00:00');
+                while (cursor <= fechaObjetivo) {
+                    const mesRef = new Date(cursor);
+                    mesRef.setMonth(mesRef.getMonth() - 2);
+                    const key = `${mesRef.getFullYear()}-${String(mesRef.getMonth() + 1).padStart(2, '0')}`;
+                    const ipc = inflacionMap[key];
+                    if (Number.isFinite(ipc)) {
+                        piso = piso * (1 - ipc / 100);
+                        techo = techo * (1 + ipc / 100);
+                    }
+                    cursor.setMonth(cursor.getMonth() + 1);
+                }
+            }
+
+            return { piso, techo };
+        }
+
+        async function cargarBandaCambiaria() {
+            const pisoDisplay = document.getElementById('bandaPisoDisplay');
+            const techoDisplay = document.getElementById('bandaTechoDisplay');
+            const posicionDisplay = document.getElementById('bandaPosicionDisplay');
+            const meta = document.getElementById('bandaMeta');
+            const box = document.getElementById('bandasBox');
+            const btnRefresh = document.getElementById('btnRefreshBanda');
+            if (!pisoDisplay || !techoDisplay || !posicionDisplay || !meta) return;
+
+            if (btnRefresh) btnRefresh.disabled = true;
+            pisoDisplay.textContent = 'Calculando...';
+            techoDisplay.textContent = 'Calculando...';
+            posicionDisplay.textContent = 'Calculando...';
+            box.classList.remove('cotizacion-error');
+
+            try {
+                const [inflacionMap, mayoristaResponse] = await Promise.all([
+                    obtenerInflacionMensualMap(),
+                    fetch('https://dolarapi.com/v1/dolares/mayorista')
+                ]);
+
+                const { piso, techo } = calcularBandaEnFecha(inflacionMap, new Date());
+                pisoDisplay.textContent = formatCurrency(piso);
+                techoDisplay.textContent = formatCurrency(techo);
+
+                if (mayoristaResponse.ok) {
+                    const mayoristaData = await mayoristaResponse.json();
+                    const valorMayorista = Number(mayoristaData.venta ?? mayoristaData.compra);
+
+                    if (Number.isFinite(valorMayorista)) {
+                        const rango = techo - piso;
+                        const posicionPct = rango > 0 ? ((valorMayorista - piso) / rango) * 100 : null;
+
+                        if (Number.isFinite(posicionPct)) {
+                            const posicionClamp = Math.min(100, Math.max(0, posicionPct));
+                            let cercania = 'dentro de la banda';
+                            if (posicionPct < 0) cercania = 'por debajo del piso';
+                            else if (posicionPct > 100) cercania = 'por encima del techo';
+                            else if (posicionClamp < 20) cercania = 'cerca del piso';
+                            else if (posicionClamp > 80) cercania = 'cerca del techo';
+
+                            posicionDisplay.textContent = `${formatCurrency(valorMayorista)} (${posicionClamp.toFixed(0)}%, ${cercania})`;
+                        } else {
+                            posicionDisplay.textContent = formatCurrency(valorMayorista);
+                        }
+                    } else {
+                        posicionDisplay.textContent = '—';
+                    }
+                } else {
+                    posicionDisplay.textContent = '—';
+                }
+
+                meta.textContent = inflacionMap
+                    ? '📐 Estimado según fórmula oficial del BCRA (Fase 2: ±IPC con rezago T-2). Puede diferir levemente del valor que publica el BCRA.'
+                    : '⚠️ No se pudo obtener el IPC más reciente; el cálculo puede estar desactualizado.';
+            } catch (error) {
+                console.error('Error al calcular banda cambiaria:', error);
+                box.classList.add('cotizacion-error');
+                pisoDisplay.textContent = '—';
+                techoDisplay.textContent = '—';
+                posicionDisplay.textContent = '—';
+                meta.textContent = '⚠️ No se pudo calcular la banda cambiaria. Reintentá con el botón de abajo.';
+            } finally {
+                if (btnRefresh) btnRefresh.disabled = false;
+            }
+        }
+
         let tasasBancosPlazoFijo = [];
 
         function obtenerTasa30DiasBanco(banco) {
@@ -730,6 +898,8 @@
                     .filter(Boolean)
                     .sort((a, b) => b.tasa - a.tasa);
 
+                actualizarMejorTasaBox();
+
                 if (tasasBancosPlazoFijo.length === 0) {
                     selectBanco.innerHTML = '<option value="">No se pudieron cargar las tasas</option>';
                     return;
@@ -745,7 +915,32 @@
             } catch (error) {
                 console.error('Error al obtener tasas de bancos:', error);
                 selectBanco.innerHTML = '<option value="">No se pudieron cargar las tasas</option>';
+                tasasBancosPlazoFijo = [];
+                actualizarMejorTasaBox();
             }
+        }
+
+        function actualizarMejorTasaBox() {
+            const bancoDisplay = document.getElementById('mejorTasaBanco');
+            const valorDisplay = document.getElementById('mejorTasaValor');
+            const meta = document.getElementById('mejorTasaMeta');
+            const box = document.getElementById('mejorTasaBox');
+            if (!bancoDisplay || !valorDisplay || !meta) return;
+
+            if (tasasBancosPlazoFijo.length === 0) {
+                bancoDisplay.textContent = '—';
+                valorDisplay.textContent = '—';
+                meta.textContent = '⚠️ No se pudieron cargar las tasas de los bancos.';
+                if (box) box.classList.add('cotizacion-error');
+                return;
+            }
+
+            // La lista ya viene ordenada de mayor a menor tasa
+            const mejor = tasasBancosPlazoFijo[0];
+            bancoDisplay.textContent = mejor.nombre;
+            valorDisplay.textContent = `${mejor.tasa.toFixed(2)}%`;
+            meta.textContent = `🥇 Entre ${tasasBancosPlazoFijo.length} bancos relevados · Fuente: ArgentinaDatos (BCRA)`;
+            if (box) box.classList.remove('cotizacion-error');
         }
 
         function toggleFuenteTasaPlazoFijo() {
@@ -1554,6 +1749,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             handleHashChange();
             cargarCotizacion();
+            cargarBandaCambiaria();
         });
         
         function formatCurrency(amount) {
