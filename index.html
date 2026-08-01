@@ -61,7 +61,8 @@
                 <div class="form-group">
                     <label for="operacionTipo">🔄 Tipo de operación</label>
                     <select id="operacionTipo" name="operacionTipo" required onchange="toggleOperacionFields()">
-                        <option value="comprar">Comprar Dólares (entrego pesos, recibo USD)</option>
+                        <option value="comprar">Comprar Dólares (tengo pesos, ¿cuántos USD me dan?)</option>
+                        <option value="comprar-objetivo">Comprar Dólares (quiero X USD, ¿cuántos pesos necesito?)</option>
                         <option value="vender">Vender Dólares (entrego USD, recibo pesos)</option>
                     </select>
                 </div>
@@ -70,6 +71,13 @@
                     <div class="form-group">
                         <label for="pesosAInvertir">💰 Pesos disponibles (ARS)</label>
                         <input type="number" id="pesosAInvertir" name="pesosAInvertir" min="1" step="0.01" placeholder="Ej: 136000">
+                    </div>
+                </div>
+
+                <div id="comprarObjetivoDolares" class="operacion-section" style="display: none;">
+                    <div class="form-group">
+                        <label for="dolaresObjetivo">🎯 Dólares que quiero comprar (USD)</label>
+                        <input type="number" id="dolaresObjetivo" name="dolaresObjetivo" min="0.01" step="0.01" placeholder="Ej: 100">
                     </div>
                 </div>
 
@@ -112,6 +120,21 @@
                     </div>
                 </div>
 
+                <div id="resultadoCompraObjetivo" class="resultado-operacion" style="display: none;">
+                    <div class="result-item">
+                        <span class="result-label">Dólares a comprar:</span>
+                        <span class="result-value" id="dolaresObjetivoResult">US$ 0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Cotización aplicada:</span>
+                        <span class="result-value" id="cotizacionAplicadaObjetivo">$0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Pesos necesarios:</span>
+                        <span class="result-value" id="pesosNecesarios">$0</span>
+                    </div>
+                </div>
+
                 <div id="resultadoVenta" class="resultado-operacion" style="display: none;">
                     <div class="result-item">
                         <span class="result-label">Dólares entregados:</span>
@@ -149,14 +172,16 @@
             </div>
 
             <form id="accionesForm">
-                <div class="form-group">
-                    <label for="cantidadAccionesCompra">📊 Cantidad de acciones a comprar</label>
-                    <input type="number" id="cantidadAccionesCompra" name="cantidadAccionesCompra" min="1" step="1" required placeholder="Ej: 50">
-                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cantidadAccionesCompra">📊 Cantidad de acciones a comprar</label>
+                        <input type="number" id="cantidadAccionesCompra" name="cantidadAccionesCompra" min="1" step="1" required placeholder="Ej: 50">
+                    </div>
 
-                <div class="form-group">
-                    <label for="precioAccion">💵 Precio por acción (ARS)</label>
-                    <input type="number" id="precioAccion" name="precioAccion" min="0.01" step="0.01" required placeholder="Ej: 1250.50">
+                    <div class="form-group">
+                        <label for="precioAccion">💵 Precio por acción (ARS)</label>
+                        <input type="number" id="precioAccion" name="precioAccion" min="0.01" step="0.01" required placeholder="Ej: 1250.50">
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -263,9 +288,16 @@
             </div>
 
             <form id="calculatorForm">
-                <div class="form-group">
-                    <label for="capital">💵 Capital inicial (ARS)</label>
-                    <input type="number" id="capital" name="capital" min="1" step="0.01" required placeholder="Ej: 100000">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="capital">💵 Capital inicial (ARS)</label>
+                        <input type="number" id="capital" name="capital" min="1" step="0.01" required placeholder="Ej: 100000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="plazo">📅 Plazo (días)</label>
+                        <input type="number" id="plazo" name="plazo" min="1" required placeholder="Ej: 30, 90, 180, 365">
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -286,11 +318,6 @@
                     <select id="bancoTasaPlazoFijo" name="bancoTasaPlazoFijo" onchange="actualizarTasaDesdeBanco()">
                         <option value="">Cargando bancos...</option>
                     </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="plazo">📅 Plazo (días)</label>
-                    <input type="number" id="plazo" name="plazo" min="1" required placeholder="Ej: 30, 90, 180, 365">
                 </div>
 
                 <div class="form-group">
@@ -341,14 +368,16 @@
             </div>
 
             <form id="caucionesForm">
-                <div class="form-group">
-                    <label for="capitalCaucion">💵 Capital a invertir (ARS)</label>
-                    <input type="number" id="capitalCaucion" name="capitalCaucion" min="1" step="0.01" required placeholder="Ej: 50000">
-                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="capitalCaucion">💵 Capital a invertir (ARS)</label>
+                        <input type="number" id="capitalCaucion" name="capitalCaucion" min="1" step="0.01" required placeholder="Ej: 50000">
+                    </div>
 
-                <div class="form-group">
-                    <label for="tasaCaucion">📈 TNA - Tasa Nominal Anual (%)</label>
-                    <input type="number" id="tasaCaucion" name="tasaCaucion" min="0.01" step="0.01" required placeholder="Ej: 45.2">
+                    <div class="form-group">
+                        <label for="tasaCaucion">📈 TNA - Tasa Nominal Anual (%)</label>
+                        <input type="number" id="tasaCaucion" name="tasaCaucion" min="0.01" step="0.01" required placeholder="Ej: 45.2">
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -543,9 +572,16 @@
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="saldoInicialTNA">💵 Saldo inicial (ARS)</label>
-                    <input type="number" id="saldoInicialTNA" name="saldoInicialTNA" min="0.01" step="0.01" required placeholder="Ej: 100000">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="saldoInicialTNA">💵 Saldo inicial (ARS)</label>
+                        <input type="number" id="saldoInicialTNA" name="saldoInicialTNA" min="0.01" step="0.01" required placeholder="Ej: 100000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="diasTNA">📅 Plazo transcurrido (días)</label>
+                        <input type="number" id="diasTNA" name="diasTNA" min="1" required placeholder="Ej: 30, 90, 180">
+                    </div>
                 </div>
 
                 <div id="campoSaldoFinalTNA" class="form-group">
@@ -556,11 +592,6 @@
                 <div id="campoRendimientoTNA" class="form-group" style="display: none;">
                     <label for="rendimientoTNA">📈 Rendimiento obtenido / intereses ganados (ARS)</label>
                     <input type="number" id="rendimientoTNA" name="rendimientoTNA" min="0" step="0.01" placeholder="Ej: 8500">
-                </div>
-
-                <div class="form-group">
-                    <label for="diasTNA">📅 Plazo transcurrido (días)</label>
-                    <input type="number" id="diasTNA" name="diasTNA" min="1" required placeholder="Ej: 30, 90, 180">
                 </div>
 
                 <button type="submit" class="btn">🚀 Calcular TNA</button>
@@ -606,14 +637,16 @@
             </div>
 
             <form id="comparadorForm">
-                <div class="form-group">
-                    <label for="capitalComparador">💵 Capital a invertir (ARS)</label>
-                    <input type="number" id="capitalComparador" name="capitalComparador" min="1" step="0.01" required placeholder="Ej: 100000">
-                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="capitalComparador">💵 Capital a invertir (ARS)</label>
+                        <input type="number" id="capitalComparador" name="capitalComparador" min="1" step="0.01" required placeholder="Ej: 100000">
+                    </div>
 
-                <div class="form-group">
-                    <label for="diasComparador">📅 Plazo (días), igual para todas las opciones</label>
-                    <input type="number" id="diasComparador" name="diasComparador" min="1" required placeholder="Ej: 30">
+                    <div class="form-group">
+                        <label for="diasComparador">📅 Plazo (días), igual para todas las opciones</label>
+                        <input type="number" id="diasComparador" name="diasComparador" min="1" required placeholder="Ej: 30">
+                    </div>
                 </div>
 
                 <div id="filasComparador"></div>
@@ -1269,13 +1302,30 @@
                 
                 // Mostrar resultados de compra
                 document.getElementById('resultadoCompra').style.display = 'block';
+                document.getElementById('resultadoCompraObjetivo').style.display = 'none';
                 document.getElementById('resultadoVenta').style.display = 'none';
                 
                 document.getElementById('pesosEntregados').textContent = formatCurrency(pesosDisponibles);
                 document.getElementById('cotizacionAplicada').textContent = formatCurrency(cotizacionVenta);
                 document.getElementById('dolaresRecibidos').textContent = 'US$ ' + dolaresRecibidos.toFixed(2);
                 document.getElementById('tipoOperacionResult').textContent = 'Compra de Dólares';
-                
+
+            } else if (operacionTipo === 'comprar-objetivo') {
+                // Comprar una cantidad específica de USD: ¿cuántos pesos necesito?
+                const dolaresObjetivo = parseFloat(document.getElementById('dolaresObjetivo').value);
+                const cotizacionVenta = cotizacionActual.venta; // Uso cotización de venta
+                const pesosNecesarios = dolaresObjetivo * cotizacionVenta;
+
+                // Mostrar resultados de compra por objetivo
+                document.getElementById('resultadoCompra').style.display = 'none';
+                document.getElementById('resultadoCompraObjetivo').style.display = 'block';
+                document.getElementById('resultadoVenta').style.display = 'none';
+
+                document.getElementById('dolaresObjetivoResult').textContent = 'US$ ' + dolaresObjetivo.toFixed(2);
+                document.getElementById('cotizacionAplicadaObjetivo').textContent = formatCurrency(cotizacionVenta);
+                document.getElementById('pesosNecesarios').textContent = formatCurrency(pesosNecesarios);
+                document.getElementById('tipoOperacionResult').textContent = 'Compra de Dólares (monto objetivo)';
+
             } else {
                 // Vender dólares: entrego USD, recibo pesos
                 const dolaresAVender = parseFloat(document.getElementById('dolaresAVender').value);
@@ -1284,6 +1334,7 @@
                 
                 // Mostrar resultados de venta
                 document.getElementById('resultadoCompra').style.display = 'none';
+                document.getElementById('resultadoCompraObjetivo').style.display = 'none';
                 document.getElementById('resultadoVenta').style.display = 'block';
                 
                 document.getElementById('dolaresEntregados').textContent = 'US$ ' + dolaresAVender.toFixed(2);
@@ -1320,18 +1371,23 @@
         function toggleOperacionFields() {
             const operacionTipo = document.getElementById('operacionTipo').value;
             const comprarSection = document.getElementById('comprarDolares');
+            const comprarObjetivoSection = document.getElementById('comprarObjetivoDolares');
             const venderSection = document.getElementById('venderDolares');
-            
+
+            comprarSection.style.display = 'none';
+            comprarObjetivoSection.style.display = 'none';
+            venderSection.style.display = 'none';
+
+            document.getElementById('pesosAInvertir').value = '';
+            document.getElementById('dolaresObjetivo').value = '';
+            document.getElementById('dolaresAVender').value = '';
+
             if (operacionTipo === 'comprar') {
                 comprarSection.style.display = 'block';
-                venderSection.style.display = 'none';
-                // Limpiar campo de venta
-                document.getElementById('dolaresAVender').value = '';
+            } else if (operacionTipo === 'comprar-objetivo') {
+                comprarObjetivoSection.style.display = 'block';
             } else {
-                comprarSection.style.display = 'none';
                 venderSection.style.display = 'block';
-                // Limpiar campo de compra
-                document.getElementById('pesosAInvertir').value = '';
             }
         }
 
