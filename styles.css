@@ -98,6 +98,40 @@ body {
     margin-bottom: 28px;
 }
 
+.riesgo-pais-card {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    margin: 0 2px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.riesgo-pais-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.riesgo-pais-valor {
+    font-size: 1.3em;
+    font-weight: 700;
+    color: #fff;
+}
+
+.riesgo-pais-meta {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.riesgo-pais-card.riesgo-pais-error .riesgo-pais-valor {
+    color: #ffd6d6;
+}
+
 .main-content {
     flex: 1;
     min-width: 0;
@@ -494,6 +528,10 @@ input:focus, select:focus {
     }
 
     .sidebar-brand {
+        display: none;
+    }
+
+    .riesgo-pais-card {
         display: none;
     }
 
