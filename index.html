@@ -7,16 +7,20 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('plazo-fijo')">💰 Plazo Fijo</button>
-            <button class="tab-btn" onclick="switchTab('cauciones')">📊 Cauciones Bursátiles</button>
-            <button class="tab-btn" onclick="switchTab('acciones')">📈 Compra de Acciones</button>
-            <button class="tab-btn" onclick="switchTab('dolares')">💵 Compra/Venta USD</button>
-            <button class="tab-btn" onclick="switchTab('tna')">🎯 Tasa Nominal</button>
-            <button class="tab-btn" onclick="switchTab('comparador')">🆚 Comparador</button>
-        </div>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="sidebar-brand">🏦 <span>PF Calc</span></div>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('plazo-fijo')">💰 <span>Plazo Fijo</span></button>
+                <button class="tab-btn" onclick="switchTab('cauciones')">📊 <span>Cauciones Bursátiles</span></button>
+                <button class="tab-btn" onclick="switchTab('acciones')">📈 <span>Compra de Acciones</span></button>
+                <button class="tab-btn" onclick="switchTab('dolares')">💵 <span>Compra/Venta USD</span></button>
+                <button class="tab-btn" onclick="switchTab('tna')">🎯 <span>Tasa Nominal</span></button>
+                <button class="tab-btn" onclick="switchTab('comparador')">🆚 <span>Comparador</span></button>
+            </div>
+        </aside>
 
+        <main class="main-content">
         <div class="tabs-content-wrapper">
         <!-- DOLARES SECTION -->
         <div id="dolares" class="tab-content">
@@ -26,36 +30,38 @@
                 <strong>💡 Info:</strong> Calcula cuántos pesos necesitas para comprar dólares o cuántos dólares obtienes al vender pesos según las cotizaciones actuales (se obtienen en vivo desde DolarAPI).
             </div>
 
-            <div class="cotizaciones-box" id="cotizacionesBox">
-                <h3>📊 Cotizaciones Dólar Oficial</h3>
-                <div class="cotizacion-item">
-                    <span>🟢 Compra (Banco te compra USD):</span>
-                    <span class="precio-dolar" id="cotCompraDisplay">Cargando...</span>
+            <div class="boxes-row">
+                <div class="cotizaciones-box" id="cotizacionesBox">
+                    <h3>📊 Cotizaciones Dólar Oficial</h3>
+                    <div class="cotizacion-item">
+                        <span>🟢 Compra (Banco te compra USD):</span>
+                        <span class="precio-dolar" id="cotCompraDisplay">Cargando...</span>
+                    </div>
+                    <div class="cotizacion-item">
+                        <span>🔴 Venta (Banco te vende USD):</span>
+                        <span class="precio-dolar" id="cotVentaDisplay">Cargando...</span>
+                    </div>
+                    <div class="cotizacion-meta" id="cotMeta">Consultando cotización en vivo...</div>
+                    <button type="button" class="btn-refresh" id="btnRefreshCotizacion" onclick="cargarCotizacion()">🔄 Actualizar cotización</button>
                 </div>
-                <div class="cotizacion-item">
-                    <span>🔴 Venta (Banco te vende USD):</span>
-                    <span class="precio-dolar" id="cotVentaDisplay">Cargando...</span>
-                </div>
-                <div class="cotizacion-meta" id="cotMeta">Consultando cotización en vivo...</div>
-                <button type="button" class="btn-refresh" id="btnRefreshCotizacion" onclick="cargarCotizacion()">🔄 Actualizar cotización</button>
-            </div>
 
-            <div class="cotizaciones-box bandas-box" id="bandasBox">
-                <h3>📏 Bandas Cambiarias (BCRA)</h3>
-                <div class="cotizacion-item">
-                    <span>🔻 Piso:</span>
-                    <span class="precio-dolar" id="bandaPisoDisplay">Calculando...</span>
+                <div class="cotizaciones-box bandas-box" id="bandasBox">
+                    <h3>📏 Bandas Cambiarias (BCRA)</h3>
+                    <div class="cotizacion-item">
+                        <span>🔻 Piso:</span>
+                        <span class="precio-dolar" id="bandaPisoDisplay">Calculando...</span>
+                    </div>
+                    <div class="cotizacion-item">
+                        <span>🔺 Techo:</span>
+                        <span class="precio-dolar" id="bandaTechoDisplay">Calculando...</span>
+                    </div>
+                    <div class="cotizacion-item">
+                        <span>📍 Mayorista vs. banda:</span>
+                        <span class="precio-dolar" id="bandaPosicionDisplay">Calculando...</span>
+                    </div>
+                    <div class="cotizacion-meta" id="bandaMeta">Calculando bandas según fórmula oficial del BCRA...</div>
+                    <button type="button" class="btn-refresh" id="btnRefreshBanda" onclick="cargarBandaCambiaria()">🔄 Recalcular banda</button>
                 </div>
-                <div class="cotizacion-item">
-                    <span>🔺 Techo:</span>
-                    <span class="precio-dolar" id="bandaTechoDisplay">Calculando...</span>
-                </div>
-                <div class="cotizacion-item">
-                    <span>📍 Mayorista vs. banda:</span>
-                    <span class="precio-dolar" id="bandaPosicionDisplay">Calculando...</span>
-                </div>
-                <div class="cotizacion-meta" id="bandaMeta">Calculando bandas según fórmula oficial del BCRA...</div>
-                <button type="button" class="btn-refresh" id="btnRefreshBanda" onclick="cargarBandaCambiaria()">🔄 Recalcular banda</button>
             </div>
 
             <form id="dolaresForm">
@@ -674,6 +680,7 @@
             </div>
         </div>
         </div>
+        </main>
     </div>
 
     <script>
@@ -1053,7 +1060,7 @@
             document.getElementById('rendimientoTotal').textContent = rendimientoTotal.toFixed(2) + '%';
             document.getElementById('rendimientoMensual').textContent = rendimientoMensual.toFixed(2) + '%';
             
-            document.getElementById('results').style.display = 'block';
+            document.getElementById('results').style.display = 'grid';
             document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
         });
 
@@ -1188,7 +1195,7 @@
             document.getElementById('tnaEfectiva').textContent = tnaEfectiva.toFixed(2) + '%';
             document.getElementById('gananciaDiaria').textContent = formatCurrency(gananciaDiaria);
             
-            document.getElementById('resultsCaucion').style.display = 'block';
+            document.getElementById('resultsCaucion').style.display = 'grid';
             document.getElementById('resultsCaucion').scrollIntoView({ behavior: 'smooth' });
         });
 
@@ -1253,7 +1260,7 @@
             document.getElementById('porcentajeCostos').textContent = porcentajeCostos.toFixed(3) + '%';
             document.getElementById('costoPromedioAccion').textContent = formatCurrency(costoPromedioAccion);
             
-            document.getElementById('resultsAcciones').style.display = 'block';
+            document.getElementById('resultsAcciones').style.display = 'grid';
             document.getElementById('resultsAcciones').scrollIntoView({ behavior: 'smooth' });
         });
 
@@ -1303,7 +1310,7 @@
                 const dolaresRecibidos = pesosDisponibles / cotizacionVenta;
                 
                 // Mostrar resultados de compra
-                document.getElementById('resultadoCompra').style.display = 'block';
+                document.getElementById('resultadoCompra').style.display = 'grid';
                 document.getElementById('resultadoCompraObjetivo').style.display = 'none';
                 document.getElementById('resultadoVenta').style.display = 'none';
                 
@@ -1320,7 +1327,7 @@
 
                 // Mostrar resultados de compra por objetivo
                 document.getElementById('resultadoCompra').style.display = 'none';
-                document.getElementById('resultadoCompraObjetivo').style.display = 'block';
+                document.getElementById('resultadoCompraObjetivo').style.display = 'grid';
                 document.getElementById('resultadoVenta').style.display = 'none';
 
                 document.getElementById('dolaresObjetivoResult').textContent = 'US$ ' + dolaresObjetivo.toFixed(2);
@@ -1337,7 +1344,7 @@
                 // Mostrar resultados de venta
                 document.getElementById('resultadoCompra').style.display = 'none';
                 document.getElementById('resultadoCompraObjetivo').style.display = 'none';
-                document.getElementById('resultadoVenta').style.display = 'block';
+                document.getElementById('resultadoVenta').style.display = 'grid';
                 
                 document.getElementById('dolaresEntregados').textContent = 'US$ ' + dolaresAVender.toFixed(2);
                 document.getElementById('cotizacionAplicadaVenta').textContent = formatCurrency(cotizacionCompra);
@@ -1350,7 +1357,7 @@
             const spreadPorcentaje = (spread / cotizacionActual.compra) * 100;
             document.getElementById('spreadBancario').textContent = `${formatCurrency(spread)} (${spreadPorcentaje.toFixed(2)}%)`;
             
-            document.getElementById('resultsDolares').style.display = 'block';
+            document.getElementById('resultsDolares').style.display = 'grid';
             document.getElementById('resultsDolares').scrollIntoView({ behavior: 'smooth' });
         });
 
@@ -1449,7 +1456,7 @@
             document.getElementById('tnaResult').textContent = tna.toFixed(2) + '%';
             document.getElementById('teaResult').textContent = tea.toFixed(2) + '%';
 
-            document.getElementById('resultsTNA').style.display = 'block';
+            document.getElementById('resultsTNA').style.display = 'grid';
             document.getElementById('resultsTNA').scrollIntoView({ behavior: 'smooth' });
         });
 
@@ -1730,7 +1737,7 @@
                 cuerpo.appendChild(tr);
             });
 
-            document.getElementById('resultsComparador').style.display = 'block';
+            document.getElementById('resultsComparador').style.display = 'grid';
             document.getElementById('resultsComparador').scrollIntoView({ behavior: 'smooth' });
         });
 
