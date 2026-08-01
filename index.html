@@ -17,6 +17,7 @@
                 <button class="tab-btn" onclick="switchTab('dolares')">💵 <span>Compra/Venta USD</span></button>
                 <button class="tab-btn" onclick="switchTab('tna')">🎯 <span>Tasa Nominal</span></button>
                 <button class="tab-btn" onclick="switchTab('comparador')">🆚 <span>Comparador</span></button>
+                <button class="tab-btn" onclick="switchTab('ipc')">📈 <span>Inflación (IPC)</span></button>
             </div>
         </aside>
 
@@ -679,6 +680,62 @@
                 </div>
             </div>
         </div>
+
+        <!-- IPC / INFLACION SECTION -->
+        <div id="ipc" class="tab-content">
+            <h1>📈 Inflación (IPC Nivel General)</h1>
+
+            <div class="info">
+                <strong>💡 Info:</strong> Evolución del Índice de Precios al Consumidor (Nivel General, Nacional), con variación mensual e interanual calculadas a partir de la serie oficial del INDEC (base diciembre 2016 = 100), publicada en la API de Series de Tiempo de datos.gob.ar.
+            </div>
+
+            <div class="cotizaciones-box ipc-box" id="ipcResumenBox">
+                <h3>📊 Último dato publicado</h3>
+                <div class="cotizacion-item">
+                    <span>🗓️ Mes:</span>
+                    <span class="precio-dolar" id="ipcUltimoMes">Cargando...</span>
+                </div>
+                <div class="cotizacion-item">
+                    <span>📈 Variación mensual:</span>
+                    <span class="precio-dolar" id="ipcUltimaMensual">Cargando...</span>
+                </div>
+                <div class="cotizacion-item">
+                    <span>📅 Variación interanual:</span>
+                    <span class="precio-dolar" id="ipcUltimaInteranual">Cargando...</span>
+                </div>
+                <div class="cotizacion-meta" id="ipcMeta">Consultando serie oficial (INDEC / datos.gob.ar)...</div>
+                <button type="button" class="btn-refresh" id="btnRefreshIPC" onclick="cargarIPC()">🔄 Actualizar</button>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ipcDesde">📅 Desde</label>
+                    <select id="ipcDesde" onchange="renderTablaIPC()">
+                        <option value="">Cargando...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ipcHasta">📅 Hasta</label>
+                    <select id="ipcHasta" onchange="renderTablaIPC()">
+                        <option value="">Cargando...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="highlight" style="margin-top: 0;">
+                <table class="tabla-comparacion" id="tablaIPC">
+                    <thead>
+                        <tr>
+                            <th>Mes</th>
+                            <th>Índice</th>
+                            <th>Var. Mensual</th>
+                            <th>Var. Interanual</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaIPC"></tbody>
+                </table>
+            </div>
+        </div>
         </div>
         </main>
     </div>
@@ -1015,6 +1072,138 @@
 
             if (Number.isFinite(tasa)) {
                 tasaInput.value = tasa.toFixed(2);
+            }
+        }
+
+        // ==========================================
+        // IPC NIVEL GENERAL (INDEC vía API de Series de Tiempo - datos.gob.ar)
+        // ==========================================
+        const IPC_SERIES_ID = '148.3_INIVELNAL_DICI_M_26'; // IPC Nivel General, Nacional, base dic-2016=100
+        let serieIPC = []; // [{ mes, indice, variacionMensual, variacionInteranual }]
+
+        async function obtenerIPCNivelGeneral() {
+            const url = `https://apis.datos.gob.ar/series/api/series/?ids=${IPC_SERIES_ID}&start_date=2016-12&format=json&limit=1000`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
+            const json = await response.json();
+            if (!Array.isArray(json.data)) throw new Error('Formato de respuesta inesperado');
+
+            return json.data
+                .map(([fecha, indice]) => ({ mes: String(fecha).slice(0, 7), indice: Number(indice) }))
+                .filter(p => Number.isFinite(p.indice))
+                .sort((a, b) => a.mes.localeCompare(b.mes));
+        }
+
+        function calcularVariacionesIPC(serie) {
+            // serie: [{mes, indice}] ordenada cronológicamente ascendente
+            return serie.map((punto, i) => {
+                const mesAnterior = serie[i - 1];
+                const mismoMesAnioAnterior = serie[i - 12];
+
+                const variacionMensual = mesAnterior
+                    ? (punto.indice / mesAnterior.indice - 1) * 100
+                    : null; // dic-2016 es la base: no hay mes anterior
+
+                const variacionInteranual = mismoMesAnioAnterior
+                    ? (punto.indice / mismoMesAnioAnterior.indice - 1) * 100
+                    : null; // recién calculable desde 12 meses después del inicio de la serie
+
+                return { ...punto, variacionMensual, variacionInteranual };
+            });
+        }
+
+        function formatearMesIPC(mesStr) {
+            const [anio, mes] = mesStr.split('-').map(Number);
+            const nombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            return `${nombres[mes - 1]} ${anio}`;
+        }
+
+        function formatearPorcentajeIPC(valor) {
+            if (!Number.isFinite(valor)) return '—';
+            const signo = valor > 0 ? '+' : '';
+            return `${signo}${valor.toFixed(1)}%`;
+        }
+
+        function poblarSelectsIPC() {
+            const selectDesde = document.getElementById('ipcDesde');
+            const selectHasta = document.getElementById('ipcHasta');
+            if (!selectDesde || !selectHasta || serieIPC.length === 0) return;
+
+            const opciones = serieIPC
+                .map(p => `<option value="${p.mes}">${formatearMesIPC(p.mes)}</option>`)
+                .join('');
+
+            selectDesde.innerHTML = opciones;
+            selectHasta.innerHTML = opciones;
+
+            selectDesde.value = serieIPC[0].mes;
+            selectHasta.value = serieIPC[serieIPC.length - 1].mes;
+        }
+
+        function renderTablaIPC() {
+            const cuerpo = document.getElementById('cuerpoTablaIPC');
+            const selectDesde = document.getElementById('ipcDesde');
+            const selectHasta = document.getElementById('ipcHasta');
+            if (!cuerpo || !selectDesde || !selectHasta) return;
+
+            const desde = selectDesde.value;
+            const hasta = selectHasta.value;
+            if (!desde || !hasta) return;
+
+            const filas = serieIPC
+                .filter(p => p.mes >= desde && p.mes <= hasta)
+                .slice()
+                .reverse(); // más reciente primero, como un historial
+
+            cuerpo.innerHTML = filas.map(p => `
+                <tr>
+                    <td>${formatearMesIPC(p.mes)}</td>
+                    <td>${p.indice.toLocaleString('es-AR', { maximumFractionDigits: 2 })}</td>
+                    <td>${formatearPorcentajeIPC(p.variacionMensual)}</td>
+                    <td>${formatearPorcentajeIPC(p.variacionInteranual)}</td>
+                </tr>
+            `).join('');
+        }
+
+        async function cargarIPC() {
+            const box = document.getElementById('ipcResumenBox');
+            const mesDisplay = document.getElementById('ipcUltimoMes');
+            const mensualDisplay = document.getElementById('ipcUltimaMensual');
+            const interanualDisplay = document.getElementById('ipcUltimaInteranual');
+            const meta = document.getElementById('ipcMeta');
+            const btnRefresh = document.getElementById('btnRefreshIPC');
+            if (!mesDisplay || !mensualDisplay || !interanualDisplay || !meta) return;
+
+            if (btnRefresh) btnRefresh.disabled = true;
+            box.classList.remove('cotizacion-error');
+            mesDisplay.textContent = 'Cargando...';
+            mensualDisplay.textContent = 'Cargando...';
+            interanualDisplay.textContent = 'Cargando...';
+            meta.textContent = 'Consultando serie oficial (INDEC / datos.gob.ar)...';
+
+            try {
+                const serieCruda = await obtenerIPCNivelGeneral();
+                serieIPC = calcularVariacionesIPC(serieCruda);
+
+                if (serieIPC.length === 0) throw new Error('Serie vacía');
+
+                const ultimo = serieIPC[serieIPC.length - 1];
+                mesDisplay.textContent = formatearMesIPC(ultimo.mes);
+                mensualDisplay.textContent = formatearPorcentajeIPC(ultimo.variacionMensual);
+                interanualDisplay.textContent = formatearPorcentajeIPC(ultimo.variacionInteranual);
+                meta.textContent = 'Serie: IPC Nivel General Nacional (base dic-2016=100) · Fuente: INDEC vía API de Series de Tiempo';
+
+                poblarSelectsIPC();
+                renderTablaIPC();
+            } catch (error) {
+                console.error('Error al obtener el IPC:', error);
+                box.classList.add('cotizacion-error');
+                mesDisplay.textContent = '—';
+                mensualDisplay.textContent = '—';
+                interanualDisplay.textContent = '—';
+                meta.textContent = '⚠️ No se pudo obtener la serie del IPC. Reintentá con el botón de abajo.';
+            } finally {
+                if (btnRefresh) btnRefresh.disabled = false;
             }
         }
 
@@ -1815,6 +2004,7 @@
             handleHashChange();
             cargarCotizacion();
             cargarBandaCambiaria();
+            cargarIPC();
         });
         
         function formatCurrency(amount) {

@@ -7,6 +7,7 @@
     --accent-market: #4facfe;
     --accent-best: #f7931e;
     --accent-regulatory: #7f00ff;
+    --accent-ipc: #16a085;
     --accent-danger: #dc3545;
     --accent-danger-dark: #c0392b;
     --accent-warning: #ffc107;
@@ -388,6 +389,10 @@ input:focus, select:focus {
 
 .bandas-box {
     border-left-color: var(--accent-regulatory);
+}
+
+.ipc-box {
+    border-left-color: var(--accent-ipc);
 }
 
 .cotizacion-error {
