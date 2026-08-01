@@ -25,6 +25,7 @@
                 <button class="tab-btn" onclick="switchTab('tna')">🎯 <span>Tasa Nominal</span></button>
                 <button class="tab-btn" onclick="switchTab('comparador')">🆚 <span>Comparador</span></button>
                 <button class="tab-btn" onclick="switchTab('ipc')">📈 <span>Inflación (IPC)</span></button>
+                <button class="tab-btn" onclick="switchTab('riesgopais')">🌎 <span>Riesgo País</span></button>
             </div>
         </aside>
 
@@ -743,6 +744,58 @@
                 </table>
             </div>
         </div>
+
+        <!-- RIESGO PAIS SECTION -->
+        <div id="riesgopais" class="tab-content">
+            <h1>🌎 Riesgo País (Histórico)</h1>
+
+            <div class="info">
+                <strong>💡 Info:</strong> Evolución diaria del Riesgo País (EMBI+ Argentina, en puntos básicos), con variación respecto al día hábil anterior. Fuente: Ámbito, vía ArgentinaDatos.
+            </div>
+
+            <div class="cotizaciones-box riesgo-box" id="riesgoPaisResumenBox">
+                <h3>📊 Último dato publicado</h3>
+                <div class="cotizacion-item">
+                    <span>🗓️ Fecha:</span>
+                    <span class="precio-dolar" id="riesgoPaisTabFecha">Cargando...</span>
+                </div>
+                <div class="cotizacion-item">
+                    <span>📉 Valor:</span>
+                    <span class="precio-dolar" id="riesgoPaisTabValor">Cargando...</span>
+                </div>
+                <div class="cotizacion-item">
+                    <span>🔁 Variación diaria:</span>
+                    <span class="precio-dolar" id="riesgoPaisTabVariacion">Cargando...</span>
+                </div>
+                <div class="cotizacion-meta" id="riesgoPaisTabMeta">Consultando historial (ArgentinaDatos / Ámbito)...</div>
+                <button type="button" class="btn-refresh" id="btnRefreshRiesgoPaisTab" onclick="cargarRiesgoPaisHistorial()">🔄 Actualizar</button>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="riesgoPaisDesde">📅 Desde</label>
+                    <input type="date" id="riesgoPaisDesde" onchange="renderTablaRiesgoPais()">
+                </div>
+                <div class="form-group">
+                    <label for="riesgoPaisHasta">📅 Hasta</label>
+                    <input type="date" id="riesgoPaisHasta" onchange="renderTablaRiesgoPais()">
+                </div>
+            </div>
+
+            <div class="highlight" style="margin-top: 0;">
+                <table class="tabla-comparacion" id="tablaRiesgoPais">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Valor (pb)</th>
+                            <th>Var. diaria (pb)</th>
+                            <th>Var. diaria (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaRiesgoPais"></tbody>
+                </table>
+            </div>
+        </div>
         </div>
         </main>
     </div>
@@ -1113,6 +1166,132 @@
                 valorDisplay.textContent = '—';
                 fechaDisplay.textContent = 'No disponible';
                 if (card) card.classList.add('riesgo-pais-error');
+            }
+        }
+
+        // ==========================================
+        // RIESGO PAIS - HISTORIAL (pestaña propia)
+        // ==========================================
+        let serieRiesgoPais = []; // [{ fecha, valor, variacionAbs, variacionPct }]
+
+        async function obtenerRiesgoPaisHistorial() {
+            const response = await fetch('https://api.argentinadatos.com/v1/finanzas/indices/riesgo-pais');
+            if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
+            const data = await response.json();
+            if (!Array.isArray(data)) throw new Error('Formato de respuesta inesperado');
+
+            return data
+                .map(p => ({ fecha: String(p.fecha).slice(0, 10), valor: Number(p.valor) }))
+                .filter(p => Number.isFinite(p.valor) && p.fecha)
+                .sort((a, b) => a.fecha.localeCompare(b.fecha));
+        }
+
+        function calcularVariacionesRiesgoPais(serie) {
+            return serie.map((punto, i) => {
+                const anterior = serie[i - 1];
+                const variacionAbs = anterior ? punto.valor - anterior.valor : null;
+                const variacionPct = anterior && anterior.valor !== 0
+                    ? (punto.valor / anterior.valor - 1) * 100
+                    : null;
+                return { ...punto, variacionAbs, variacionPct };
+            });
+        }
+
+        function formatearVariacionAbsPb(valor) {
+            if (!Number.isFinite(valor)) return '—';
+            const signo = valor > 0 ? '+' : '';
+            return `${signo}${Math.round(valor)} pb`;
+        }
+
+        function poblarFechasRiesgoPais() {
+            const inputDesde = document.getElementById('riesgoPaisDesde');
+            const inputHasta = document.getElementById('riesgoPaisHasta');
+            if (!inputDesde || !inputHasta || serieRiesgoPais.length === 0) return;
+
+            const primeraFecha = serieRiesgoPais[0].fecha;
+            const ultimaFecha = serieRiesgoPais[serieRiesgoPais.length - 1].fecha;
+
+            inputDesde.min = primeraFecha;
+            inputDesde.max = ultimaFecha;
+            inputHasta.min = primeraFecha;
+            inputHasta.max = ultimaFecha;
+
+            // Por defecto: últimos 90 días, para no listar años de historial de una
+            const fechaHastaObj = new Date(ultimaFecha + 'T00:00:00');
+            const fechaDesdeObj = new Date(fechaHastaObj);
+            fechaDesdeObj.setDate(fechaDesdeObj.getDate() - 90);
+            const desdeDefault = fechaDesdeObj.toISOString().slice(0, 10);
+
+            inputDesde.value = desdeDefault > primeraFecha ? desdeDefault : primeraFecha;
+            inputHasta.value = ultimaFecha;
+        }
+
+        function renderTablaRiesgoPais() {
+            const cuerpo = document.getElementById('cuerpoTablaRiesgoPais');
+            const inputDesde = document.getElementById('riesgoPaisDesde');
+            const inputHasta = document.getElementById('riesgoPaisHasta');
+            if (!cuerpo || !inputDesde || !inputHasta) return;
+
+            const desde = inputDesde.value;
+            const hasta = inputHasta.value;
+            if (!desde || !hasta) return;
+
+            const filas = serieRiesgoPais
+                .filter(p => p.fecha >= desde && p.fecha <= hasta)
+                .slice()
+                .reverse(); // más reciente primero
+
+            cuerpo.innerHTML = filas.map(p => {
+                const claseVariacion = !Number.isFinite(p.variacionAbs) ? '' : (p.variacionAbs > 0 ? 'valor-positivo' : (p.variacionAbs < 0 ? 'valor-negativo' : ''));
+                return `
+                <tr>
+                    <td>${p.fecha.split('-').reverse().join('/')}</td>
+                    <td>${Math.round(p.valor).toLocaleString('es-AR')}</td>
+                    <td class="${claseVariacion}">${formatearVariacionAbsPb(p.variacionAbs)}</td>
+                    <td class="${claseVariacion}">${formatearPorcentajeIPC(p.variacionPct)}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function cargarRiesgoPaisHistorial() {
+            const box = document.getElementById('riesgoPaisResumenBox');
+            const fechaDisplay = document.getElementById('riesgoPaisTabFecha');
+            const valorDisplay = document.getElementById('riesgoPaisTabValor');
+            const variacionDisplay = document.getElementById('riesgoPaisTabVariacion');
+            const meta = document.getElementById('riesgoPaisTabMeta');
+            const btnRefresh = document.getElementById('btnRefreshRiesgoPaisTab');
+            if (!fechaDisplay || !valorDisplay || !variacionDisplay || !meta) return;
+
+            if (btnRefresh) btnRefresh.disabled = true;
+            box.classList.remove('cotizacion-error');
+            fechaDisplay.textContent = 'Cargando...';
+            valorDisplay.textContent = 'Cargando...';
+            variacionDisplay.textContent = 'Cargando...';
+            meta.textContent = 'Consultando historial (ArgentinaDatos / Ámbito)...';
+
+            try {
+                const serieCruda = await obtenerRiesgoPaisHistorial();
+                serieRiesgoPais = calcularVariacionesRiesgoPais(serieCruda);
+
+                if (serieRiesgoPais.length === 0) throw new Error('Serie vacía');
+
+                const ultimo = serieRiesgoPais[serieRiesgoPais.length - 1];
+                fechaDisplay.textContent = formatearFechaCorta(ultimo.fecha);
+                valorDisplay.textContent = `${Math.round(ultimo.valor).toLocaleString('es-AR')} pb`;
+                variacionDisplay.textContent = `${formatearVariacionAbsPb(ultimo.variacionAbs)} (${formatearPorcentajeIPC(ultimo.variacionPct)})`;
+                meta.textContent = `${serieRiesgoPais.length.toLocaleString('es-AR')} registros · Fuente: Ámbito, vía ArgentinaDatos`;
+
+                poblarFechasRiesgoPais();
+                renderTablaRiesgoPais();
+            } catch (error) {
+                console.error('Error al obtener el historial de riesgo país:', error);
+                box.classList.add('cotizacion-error');
+                fechaDisplay.textContent = '—';
+                valorDisplay.textContent = '—';
+                variacionDisplay.textContent = '—';
+                meta.textContent = '⚠️ No se pudo obtener el historial. Reintentá con el botón de abajo.';
+            } finally {
+                if (btnRefresh) btnRefresh.disabled = false;
             }
         }
 
@@ -2044,6 +2223,7 @@
             cargarBandaCambiaria();
             cargarIPC();
             cargarRiesgoPais();
+            cargarRiesgoPaisHistorial();
         });
         
         function formatCurrency(amount) {

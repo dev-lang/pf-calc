@@ -8,6 +8,7 @@
     --accent-best: #f7931e;
     --accent-regulatory: #7f00ff;
     --accent-ipc: #16a085;
+    --accent-risk: #e74c3c;
     --accent-danger: #dc3545;
     --accent-danger-dark: #c0392b;
     --accent-warning: #ffc107;
@@ -429,6 +430,10 @@ input:focus, select:focus {
     border-left-color: var(--accent-ipc);
 }
 
+.riesgo-box {
+    border-left-color: var(--accent-risk);
+}
+
 .cotizacion-error {
     border-left-color: var(--accent-danger);
     background: var(--surface-tint-danger);
@@ -652,4 +657,14 @@ input:focus, select:focus {
     padding: 2px 10px;
     font-size: 12px;
     margin-left: 6px;
+}
+
+.valor-positivo {
+    color: var(--accent-danger);
+    font-weight: 600;
+}
+
+.valor-negativo {
+    color: var(--accent-ipc);
+    font-weight: 600;
 }
