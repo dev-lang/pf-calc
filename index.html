@@ -1136,7 +1136,8 @@
             selectDesde.innerHTML = opciones;
             selectHasta.innerHTML = opciones;
 
-            selectDesde.value = serieIPC[0].mes;
+            const desdeDefault = serieIPC.some(p => p.mes === '2026-01') ? '2026-01' : serieIPC[0].mes;
+            selectDesde.value = desdeDefault;
             selectHasta.value = serieIPC[serieIPC.length - 1].mes;
         }
 
