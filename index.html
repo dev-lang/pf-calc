@@ -1990,15 +1990,11 @@
                 contenido.classList.add('active');
             }
             
-            // Activar botón correspondiente
-            if (event && event.target) {
-                event.target.classList.add('active');
-            } else {
-                // Si se llama desde el hash, activar el botón correspondiente
-                const boton = document.querySelector(`button[onclick="switchTab('${tabName}')"]`);
-                if (boton) {
-                    boton.classList.add('active');
-                }
+            // Activar botón correspondiente (por tabName, sin depender del event global implícito,
+            // que rompía la carga automática al iniciar la página)
+            const boton = document.querySelector(`button[onclick="switchTab('${tabName}')"]`);
+            if (boton) {
+                boton.classList.add('active');
             }
             
             // Ocultar resultados cuando se cambia de tab
