@@ -422,6 +422,10 @@ input:focus, select:focus {
     border-left-color: var(--accent-best);
 }
 
+.peor-tasa-box {
+    border-left-color: var(--text-muted);
+}
+
 .bandas-box {
     border-left-color: var(--accent-regulatory);
 }
@@ -667,4 +671,83 @@ input:focus, select:focus {
 .valor-negativo {
     color: var(--accent-ipc);
     font-weight: 600;
+}
+
+/* ===== Gráficos (Chart.js) ===== */
+.chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3) 20px 20px;
+    margin-bottom: var(--space-3);
+    box-shadow: var(--shadow-card);
+}
+
+.chart-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.chart-toolbar select {
+    width: auto;
+    padding: 8px 10px;
+    font-size: 13px;
+}
+
+.chart-toolbar .btn-refresh {
+    margin-top: 0;
+}
+
+.chart-canvas-wrap {
+    position: relative;
+    height: 320px;
+}
+
+.quick-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: var(--space-3);
+}
+
+.btn-quick-filter {
+    background: var(--surface-tint-brand);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    color: var(--brand-1);
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-quick-filter:hover {
+    background: rgba(102, 126, 234, 0.2);
+}
+
+.btn-quick-filter.active {
+    background: var(--brand-1);
+    color: #fff;
+    border-color: var(--brand-1);
+}
+
+.checkbox-inline {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-body);
+    font-weight: 500;
+    margin: 0;
+}
+
+.checkbox-inline input[type="checkbox"] {
+    width: auto;
+    padding: 0;
+    border: none;
+    accent-color: var(--brand-1);
 }

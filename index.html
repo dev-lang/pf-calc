@@ -290,17 +290,32 @@
                 <strong>💡 Tip:</strong> Esta calculadora te ayuda a determinar el rendimiento de tu plazo fijo considerando diferentes tipos de capitalización de intereses.
             </div>
 
-            <div class="cotizaciones-box mejor-tasa-box" id="mejorTasaBox">
-                <h3>🏆 Mejor Tasa Actual</h3>
-                <div class="cotizacion-item">
-                    <span>🥇 Banco líder:</span>
-                    <span class="precio-dolar" id="mejorTasaBanco">Cargando...</span>
+            <div class="boxes-row">
+                <div class="cotizaciones-box mejor-tasa-box" id="mejorTasaBox">
+                    <h3>🏆 Mejor Tasa Actual</h3>
+                    <div class="cotizacion-item">
+                        <span>🥇 Banco líder:</span>
+                        <span class="precio-dolar" id="mejorTasaBanco">Cargando...</span>
+                    </div>
+                    <div class="cotizacion-item">
+                        <span>📈 TNA a 30 días:</span>
+                        <span class="precio-dolar" id="mejorTasaValor">Cargando...</span>
+                    </div>
+                    <div class="cotizacion-meta" id="mejorTasaMeta">Consultando tasas de todos los bancos...</div>
                 </div>
-                <div class="cotizacion-item">
-                    <span>📈 TNA a 30 días:</span>
-                    <span class="precio-dolar" id="mejorTasaValor">Cargando...</span>
+
+                <div class="cotizaciones-box peor-tasa-box" id="peorTasaBox">
+                    <h3>🐌 Peor Tasa Actual</h3>
+                    <div class="cotizacion-item">
+                        <span>🥉 Banco:</span>
+                        <span class="precio-dolar" id="peorTasaBanco">Cargando...</span>
+                    </div>
+                    <div class="cotizacion-item">
+                        <span>📉 TNA a 30 días:</span>
+                        <span class="precio-dolar" id="peorTasaValor">Cargando...</span>
+                    </div>
+                    <div class="cotizacion-meta" id="peorTasaMeta">Consultando tasas de todos los bancos...</div>
                 </div>
-                <div class="cotizacion-meta" id="mejorTasaMeta">Consultando tasas de todos los bancos...</div>
             </div>
 
             <form id="calculatorForm">
@@ -718,15 +733,36 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="ipcDesde">📅 Desde</label>
-                    <select id="ipcDesde" onchange="renderTablaIPC()">
+                    <select id="ipcDesde" onchange="actualizarVistaIPC()">
                         <option value="">Cargando...</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="ipcHasta">📅 Hasta</label>
-                    <select id="ipcHasta" onchange="renderTablaIPC()">
+                    <select id="ipcHasta" onchange="actualizarVistaIPC()">
                         <option value="">Cargando...</option>
                     </select>
+                </div>
+            </div>
+
+            <div class="quick-filters">
+                <button type="button" class="btn-quick-filter" onclick="aplicarFiltroRapidoIPC('anio', this)">📆 Último año (desde Ene)</button>
+                <button type="button" class="btn-quick-filter" onclick="aplicarFiltroRapidoIPC('12m', this)">🗓️ Últimos 12 meses</button>
+                <button type="button" class="btn-quick-filter" onclick="aplicarFiltroRapidoIPC('6m', this)">🗓️ Últimos 6 meses</button>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-toolbar">
+                    <label for="seriesIPC" style="margin: 0; font-size: 13px;">Mostrar:</label>
+                    <select id="seriesIPC" onchange="renderGraficoIPC()">
+                        <option value="ambas">Mensual + Interanual</option>
+                        <option value="mensual">Solo Mensual</option>
+                        <option value="interanual">Solo Interanual</option>
+                    </select>
+                    <button type="button" class="btn-refresh" onclick="exportarGraficoIPC()">📥 Exportar gráfico (PNG)</button>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="chartIPC"></canvas>
                 </div>
             </div>
 
@@ -774,12 +810,30 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="riesgoPaisDesde">📅 Desde</label>
-                    <input type="date" id="riesgoPaisDesde" onchange="renderTablaRiesgoPais()">
+                    <input type="date" id="riesgoPaisDesde" onchange="actualizarVistaRiesgoPais()">
                 </div>
                 <div class="form-group">
                     <label for="riesgoPaisHasta">📅 Hasta</label>
-                    <input type="date" id="riesgoPaisHasta" onchange="renderTablaRiesgoPais()">
+                    <input type="date" id="riesgoPaisHasta" onchange="actualizarVistaRiesgoPais()">
                 </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-toolbar">
+                    <label class="checkbox-inline">
+                        <input type="checkbox" id="mostrarVariacionRiesgoPais" onchange="renderGraficoRiesgoPais()">
+                        Superponer variación diaria
+                    </label>
+                    <select id="unidadVariacionRiesgoPais" onchange="renderGraficoRiesgoPais()">
+                        <option value="pb">en puntos básicos (pb)</option>
+                        <option value="pct">en porcentaje (%)</option>
+                    </select>
+                    <button type="button" class="btn-refresh" onclick="exportarGraficoRiesgoPais()">📥 Exportar gráfico (PNG)</button>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="chartRiesgoPais"></canvas>
+                </div>
+                <div class="cotizacion-meta" id="riesgoPaisChartAviso" style="margin-top: 10px;"></div>
             </div>
 
             <div class="highlight" style="margin-top: 0;">
@@ -800,6 +854,8 @@
         </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <script>
         // ==========================================
         // COTIZACION DEL DOLAR - DATOS EN VIVO (DolarAPI)
@@ -1058,6 +1114,7 @@
                     .sort((a, b) => b.tasa - a.tasa);
 
                 actualizarMejorTasaBox();
+                actualizarPeorTasaBox();
 
                 if (tasasBancosPlazoFijo.length === 0) {
                     selectBanco.innerHTML = '<option value="">No se pudieron cargar las tasas</option>';
@@ -1076,6 +1133,7 @@
                 selectBanco.innerHTML = '<option value="">No se pudieron cargar las tasas</option>';
                 tasasBancosPlazoFijo = [];
                 actualizarMejorTasaBox();
+                actualizarPeorTasaBox();
             }
         }
 
@@ -1099,6 +1157,29 @@
             bancoDisplay.textContent = mejor.nombre;
             valorDisplay.textContent = `${mejor.tasa.toFixed(2)}%`;
             meta.textContent = `🥇 Entre ${tasasBancosPlazoFijo.length} bancos relevados · Fuente: ArgentinaDatos (BCRA)`;
+            if (box) box.classList.remove('cotizacion-error');
+        }
+
+        function actualizarPeorTasaBox() {
+            const bancoDisplay = document.getElementById('peorTasaBanco');
+            const valorDisplay = document.getElementById('peorTasaValor');
+            const meta = document.getElementById('peorTasaMeta');
+            const box = document.getElementById('peorTasaBox');
+            if (!bancoDisplay || !valorDisplay || !meta) return;
+
+            if (tasasBancosPlazoFijo.length === 0) {
+                bancoDisplay.textContent = '—';
+                valorDisplay.textContent = '—';
+                meta.textContent = '⚠️ No se pudieron cargar las tasas de los bancos.';
+                if (box) box.classList.add('cotizacion-error');
+                return;
+            }
+
+            // La lista ya viene ordenada de mayor a menor tasa: el último es el peor
+            const peor = tasasBancosPlazoFijo[tasasBancosPlazoFijo.length - 1];
+            bancoDisplay.textContent = peor.nombre;
+            valorDisplay.textContent = `${peor.tasa.toFixed(2)}%`;
+            meta.textContent = `🥉 Entre ${tasasBancosPlazoFijo.length} bancos relevados · Fuente: ArgentinaDatos (BCRA)`;
             if (box) box.classList.remove('cotizacion-error');
         }
 
@@ -1253,6 +1334,107 @@
             }).join('');
         }
 
+        function obtenerFilasFiltradasRiesgoPais() {
+            const inputDesde = document.getElementById('riesgoPaisDesde');
+            const inputHasta = document.getElementById('riesgoPaisHasta');
+            if (!inputDesde || !inputHasta) return [];
+            const desde = inputDesde.value;
+            const hasta = inputHasta.value;
+            if (!desde || !hasta) return [];
+            return serieRiesgoPais.filter(p => p.fecha >= desde && p.fecha <= hasta); // orden cronológico ascendente
+        }
+
+        let chartRiesgoPaisInstance = null;
+
+        function renderGraficoRiesgoPais() {
+            const canvas = document.getElementById('chartRiesgoPais');
+            const aviso = document.getElementById('riesgoPaisChartAviso');
+            if (!canvas || typeof Chart === 'undefined') return;
+
+            const filas = obtenerFilasFiltradasRiesgoPais();
+            const checkboxVariacion = document.getElementById('mostrarVariacionRiesgoPais');
+            const selectUnidad = document.getElementById('unidadVariacionRiesgoPais');
+            const mostrarVariacion = checkboxVariacion ? checkboxVariacion.checked : false;
+            const unidad = selectUnidad ? selectUnidad.value : 'pb';
+            const usarEtiquetas = mostrarVariacion && typeof ChartDataLabels !== 'undefined';
+
+            if (aviso) {
+                aviso.textContent = (mostrarVariacion && filas.length > 60)
+                    ? `⚠️ Mostrando ${filas.length} puntos: con tantos datos las etiquetas de variación pueden superponerse. Achicá el rango (Desde/Hasta) para verlas más claras.`
+                    : '';
+            }
+
+            const labels = filas.map(p => p.fecha.split('-').reverse().join('/'));
+            const datasets = [{
+                type: 'line',
+                label: 'Riesgo País (pb)',
+                data: filas.map(p => p.valor),
+                borderColor: 'rgba(231, 76, 60, 1)',
+                backgroundColor: 'rgba(231, 76, 60, 0.12)',
+                borderWidth: 2,
+                tension: 0.2,
+                pointRadius: filas.length > 90 ? 0 : 2,
+                fill: true
+            }];
+
+            if (chartRiesgoPaisInstance) {
+                chartRiesgoPaisInstance.destroy();
+            }
+
+            chartRiesgoPaisInstance = new Chart(canvas.getContext('2d'), {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: usarEtiquetas ? {
+                            align: 'top',
+                            anchor: 'end',
+                            font: { size: 9, weight: '600' },
+                            color: (ctx) => {
+                                const p = filas[ctx.dataIndex];
+                                if (!p || !Number.isFinite(p.variacionAbs)) return '#8a90a2';
+                                return p.variacionAbs > 0 ? '#e74c3c' : (p.variacionAbs < 0 ? '#16a085' : '#8a90a2');
+                            },
+                            formatter: (value, ctx) => {
+                                const p = filas[ctx.dataIndex];
+                                if (!p) return '';
+                                const variacion = unidad === 'pb' ? p.variacionAbs : p.variacionPct;
+                                if (!Number.isFinite(variacion)) return '';
+                                const signo = variacion > 0 ? '+' : '';
+                                return unidad === 'pb' ? `${signo}${Math.round(variacion)}` : `${signo}${variacion.toFixed(1)}%`;
+                            }
+                        } : false
+                    },
+                    scales: {
+                        x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 10 } },
+                        y: { title: { display: true, text: 'Puntos básicos (pb)' } }
+                    }
+                },
+                plugins: usarEtiquetas ? [ChartDataLabels] : []
+            });
+        }
+
+        function exportarGraficoRiesgoPais() {
+            if (!chartRiesgoPaisInstance) return;
+            const inputDesde = document.getElementById('riesgoPaisDesde');
+            const inputHasta = document.getElementById('riesgoPaisHasta');
+            const desde = inputDesde ? inputDesde.value : '';
+            const hasta = inputHasta ? inputHasta.value : '';
+            const link = document.createElement('a');
+            link.href = chartRiesgoPaisInstance.toBase64Image('image/png', 1);
+            link.download = `riesgo-pais-${desde}_a_${hasta}.png`;
+            link.click();
+        }
+
+        function actualizarVistaRiesgoPais() {
+            renderTablaRiesgoPais();
+            renderGraficoRiesgoPais();
+        }
+
         async function cargarRiesgoPaisHistorial() {
             const box = document.getElementById('riesgoPaisResumenBox');
             const fechaDisplay = document.getElementById('riesgoPaisTabFecha');
@@ -1282,7 +1464,7 @@
                 meta.textContent = `${serieRiesgoPais.length.toLocaleString('es-AR')} registros · Fuente: Ámbito, vía ArgentinaDatos`;
 
                 poblarFechasRiesgoPais();
-                renderTablaRiesgoPais();
+                actualizarVistaRiesgoPais();
             } catch (error) {
                 console.error('Error al obtener el historial de riesgo país:', error);
                 box.classList.add('cotizacion-error');
@@ -1386,6 +1568,136 @@
             `).join('');
         }
 
+        function obtenerFilasFiltradasIPC() {
+            const selectDesde = document.getElementById('ipcDesde');
+            const selectHasta = document.getElementById('ipcHasta');
+            if (!selectDesde || !selectHasta) return [];
+            const desde = selectDesde.value;
+            const hasta = selectHasta.value;
+            if (!desde || !hasta) return [];
+            return serieIPC.filter(p => p.mes >= desde && p.mes <= hasta); // orden cronológico ascendente
+        }
+
+        let chartIPCInstance = null;
+
+        function renderGraficoIPC() {
+            const canvas = document.getElementById('chartIPC');
+            if (!canvas || typeof Chart === 'undefined') return;
+
+            const filas = obtenerFilasFiltradasIPC();
+            const modoSelect = document.getElementById('seriesIPC');
+            const modo = modoSelect ? modoSelect.value : 'ambas';
+
+            const labels = filas.map(p => formatearMesIPC(p.mes));
+            const datasets = [];
+
+            if (modo === 'ambas' || modo === 'mensual') {
+                datasets.push({
+                    type: 'bar',
+                    label: 'Variación mensual (%)',
+                    data: filas.map(p => p.variacionMensual),
+                    backgroundColor: 'rgba(102, 126, 234, 0.55)',
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'yMensual',
+                    order: 2
+                });
+            }
+
+            if (modo === 'ambas' || modo === 'interanual') {
+                datasets.push({
+                    type: 'line',
+                    label: 'Variación interanual (%)',
+                    data: filas.map(p => p.variacionInteranual),
+                    borderColor: 'rgba(231, 76, 60, 1)',
+                    backgroundColor: 'rgba(231, 76, 60, 0.15)',
+                    borderWidth: 2,
+                    tension: 0.25,
+                    pointRadius: 2,
+                    yAxisID: modo === 'ambas' ? 'yInteranual' : 'yMensual',
+                    order: 1
+                });
+            }
+
+            const scales = {
+                x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } }
+            };
+
+            if (modo === 'ambas') {
+                scales.yMensual = { type: 'linear', position: 'left', title: { display: true, text: 'Mensual (%)' } };
+                scales.yInteranual = { type: 'linear', position: 'right', title: { display: true, text: 'Interanual (%)' }, grid: { drawOnChartArea: false } };
+            } else {
+                scales.yMensual = { type: 'linear', position: 'left', title: { display: true, text: modo === 'mensual' ? 'Mensual (%)' : 'Interanual (%)' } };
+            }
+
+            if (chartIPCInstance) {
+                chartIPCInstance.destroy();
+            }
+
+            chartIPCInstance = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { display: true } },
+                    scales
+                }
+            });
+        }
+
+        function exportarGraficoIPC() {
+            if (!chartIPCInstance) return;
+            const selectDesde = document.getElementById('ipcDesde');
+            const selectHasta = document.getElementById('ipcHasta');
+            const desde = selectDesde ? selectDesde.value : '';
+            const hasta = selectHasta ? selectHasta.value : '';
+            const link = document.createElement('a');
+            link.href = chartIPCInstance.toBase64Image('image/png', 1);
+            link.download = `ipc-${desde}_a_${hasta}.png`;
+            link.click();
+        }
+
+        function actualizarVistaIPC() {
+            renderTablaIPC();
+            renderGraficoIPC();
+        }
+
+        function sumarMesesIPC(mesStr, delta) {
+            const [anio, mes] = mesStr.split('-').map(Number);
+            const fecha = new Date(anio, mes - 1 + delta, 1);
+            return `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        function aplicarFiltroRapidoIPC(tipo, boton) {
+            const selectDesde = document.getElementById('ipcDesde');
+            const selectHasta = document.getElementById('ipcHasta');
+            if (!selectDesde || !selectHasta || serieIPC.length === 0) return;
+
+            const ultimoMes = serieIPC[serieIPC.length - 1].mes;
+            const primerMes = serieIPC[0].mes;
+            let desdeCalculado;
+
+            if (tipo === 'anio') {
+                desdeCalculado = `${ultimoMes.slice(0, 4)}-01`;
+            } else if (tipo === '12m') {
+                desdeCalculado = sumarMesesIPC(ultimoMes, -11);
+            } else if (tipo === '6m') {
+                desdeCalculado = sumarMesesIPC(ultimoMes, -5);
+            } else {
+                return;
+            }
+
+            selectDesde.value = desdeCalculado >= primerMes ? desdeCalculado : primerMes;
+            selectHasta.value = ultimoMes;
+
+            document.querySelectorAll('.btn-quick-filter').forEach(btn => btn.classList.remove('active'));
+            if (boton) boton.classList.add('active');
+
+            actualizarVistaIPC();
+        }
+
         async function cargarIPC() {
             const box = document.getElementById('ipcResumenBox');
             const mesDisplay = document.getElementById('ipcUltimoMes');
@@ -1415,7 +1727,7 @@
                 meta.textContent = 'Serie: IPC Nivel General Nacional (base dic-2016=100) · Fuente: INDEC vía API de Series de Tiempo';
 
                 poblarSelectsIPC();
-                renderTablaIPC();
+                actualizarVistaIPC();
             } catch (error) {
                 console.error('Error al obtener el IPC:', error);
                 box.classList.add('cotizacion-error');
