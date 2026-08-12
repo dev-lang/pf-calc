@@ -828,12 +828,17 @@
                         <option value="pb">en puntos básicos (pb)</option>
                         <option value="pct">en porcentaje (%)</option>
                     </select>
+                    <label class="checkbox-inline">
+                        <input type="checkbox" id="mostrarTendenciaRiesgoPais" onchange="renderGraficoRiesgoPais()">
+                        📐 Mostrar línea de tendencia
+                    </label>
                     <button type="button" class="btn-refresh" onclick="exportarGraficoRiesgoPais()">📥 Exportar gráfico (PNG)</button>
                 </div>
                 <div class="chart-canvas-wrap">
                     <canvas id="chartRiesgoPais"></canvas>
                 </div>
-                <div class="cotizacion-meta" id="riesgoPaisChartAviso" style="margin-top: 10px;"></div>
+                <div class="cotizacion-meta" id="riesgoPaisTendenciaInfo"></div>
+                <div class="cotizacion-meta" id="riesgoPaisChartAviso" style="margin-top: 4px;"></div>
             </div>
 
             <div class="highlight" style="margin-top: 0;">
@@ -1346,16 +1351,39 @@
 
         let chartRiesgoPaisInstance = null;
 
+        function calcularRegresionLineal(valores) {
+            const n = valores.length;
+            if (n < 2) return null;
+
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            for (let i = 0; i < n; i++) {
+                sumX += i;
+                sumY += valores[i];
+                sumXY += i * valores[i];
+                sumX2 += i * i;
+            }
+
+            const denominador = n * sumX2 - sumX * sumX;
+            if (denominador === 0) return null; // todos los x iguales (no debería pasar con índices 0..n-1)
+
+            const pendiente = (n * sumXY - sumX * sumY) / denominador;
+            const intercepto = (sumY - pendiente * sumX) / n;
+            return { pendiente, intercepto };
+        }
+
         function renderGraficoRiesgoPais() {
             const canvas = document.getElementById('chartRiesgoPais');
             const aviso = document.getElementById('riesgoPaisChartAviso');
+            const tendenciaInfo = document.getElementById('riesgoPaisTendenciaInfo');
             if (!canvas || typeof Chart === 'undefined') return;
 
             const filas = obtenerFilasFiltradasRiesgoPais();
             const checkboxVariacion = document.getElementById('mostrarVariacionRiesgoPais');
             const selectUnidad = document.getElementById('unidadVariacionRiesgoPais');
+            const checkboxTendencia = document.getElementById('mostrarTendenciaRiesgoPais');
             const mostrarVariacion = checkboxVariacion ? checkboxVariacion.checked : false;
             const unidad = selectUnidad ? selectUnidad.value : 'pb';
+            const mostrarTendencia = checkboxTendencia ? checkboxTendencia.checked : false;
             const usarEtiquetas = mostrarVariacion && typeof ChartDataLabels !== 'undefined';
 
             if (aviso) {
@@ -1377,6 +1405,36 @@
                 fill: true
             }];
 
+            let regresion = null;
+            if (mostrarTendencia) {
+                regresion = calcularRegresionLineal(filas.map(p => p.valor));
+                if (regresion) {
+                    datasets.push({
+                        type: 'line',
+                        label: 'Tendencia (regresión lineal)',
+                        data: filas.map((_, i) => regresion.intercepto + regresion.pendiente * i),
+                        borderColor: 'rgba(52, 73, 94, 0.9)',
+                        borderDash: [6, 4],
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false,
+                        tension: 0,
+                        datalabels: { display: false } // nunca mostrar etiquetas de variación sobre la línea de tendencia
+                    });
+                }
+            }
+
+            if (tendenciaInfo) {
+                if (mostrarTendencia && regresion) {
+                    const signo = regresion.pendiente >= 0 ? '+' : '';
+                    tendenciaInfo.textContent = `📐 Tendencia: ${signo}${regresion.pendiente.toFixed(2)} pb/día hábil en este rango (${filas.length} datos, regresión lineal por mínimos cuadrados)`;
+                } else if (mostrarTendencia) {
+                    tendenciaInfo.textContent = '⚠️ No hay suficientes datos en el rango para calcular una tendencia.';
+                } else {
+                    tendenciaInfo.textContent = '';
+                }
+            }
+
             if (chartRiesgoPaisInstance) {
                 chartRiesgoPaisInstance.destroy();
             }
@@ -1389,7 +1447,7 @@
                     maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: { display: false },
+                        legend: { display: datasets.length > 1 },
                         datalabels: usarEtiquetas ? {
                             align: 'top',
                             anchor: 'end',
