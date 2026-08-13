@@ -11,10 +11,16 @@
         <aside class="sidebar">
             <div class="sidebar-brand">🏦 <span>PF Calc</span></div>
 
-            <div class="riesgo-pais-card" id="riesgoPaisCard">
-                <span class="riesgo-pais-label">🌎 Riesgo País</span>
-                <span class="riesgo-pais-valor" id="riesgoPaisValor">Cargando...</span>
-                <span class="riesgo-pais-meta" id="riesgoPaisFecha"></span>
+            <div class="sidebar-stat-card" id="riesgoPaisCard">
+                <span class="sidebar-stat-label">🌎 Riesgo País</span>
+                <span class="sidebar-stat-valor" id="riesgoPaisValor">Cargando...</span>
+                <span class="sidebar-stat-meta" id="riesgoPaisFecha"></span>
+            </div>
+
+            <div class="sidebar-stat-card" id="inflacionCard">
+                <span class="sidebar-stat-label">📈 Inflación (últ. mensual)</span>
+                <span class="sidebar-stat-valor" id="inflacionCardValor">Cargando...</span>
+                <span class="sidebar-stat-meta" id="inflacionCardFecha"></span>
             </div>
 
             <div class="tabs">
@@ -1246,12 +1252,12 @@
 
                 valorDisplay.textContent = `${valor.toLocaleString('es-AR')} pb`;
                 fechaDisplay.textContent = data.fecha ? `Al ${formatearFechaCorta(data.fecha)}` : '';
-                if (card) card.classList.remove('riesgo-pais-error');
+                if (card) card.classList.remove('stat-error');
             } catch (error) {
                 console.error('Error al obtener riesgo país:', error);
                 valorDisplay.textContent = '—';
                 fechaDisplay.textContent = 'No disponible';
-                if (card) card.classList.add('riesgo-pais-error');
+                if (card) card.classList.add('stat-error');
             }
         }
 
@@ -1763,6 +1769,9 @@
             const interanualDisplay = document.getElementById('ipcUltimaInteranual');
             const meta = document.getElementById('ipcMeta');
             const btnRefresh = document.getElementById('btnRefreshIPC');
+            const inflacionCard = document.getElementById('inflacionCard');
+            const inflacionCardValor = document.getElementById('inflacionCardValor');
+            const inflacionCardFecha = document.getElementById('inflacionCardFecha');
             if (!mesDisplay || !mensualDisplay || !interanualDisplay || !meta) return;
 
             if (btnRefresh) btnRefresh.disabled = true;
@@ -1771,6 +1780,8 @@
             mensualDisplay.textContent = 'Cargando...';
             interanualDisplay.textContent = 'Cargando...';
             meta.textContent = 'Consultando serie oficial (INDEC / datos.gob.ar)...';
+            if (inflacionCardValor) inflacionCardValor.textContent = 'Cargando...';
+            if (inflacionCardFecha) inflacionCardFecha.textContent = '';
 
             try {
                 const serieCruda = await obtenerIPCNivelGeneral();
@@ -1784,6 +1795,11 @@
                 interanualDisplay.textContent = formatearPorcentajeIPC(ultimo.variacionInteranual);
                 meta.textContent = 'Serie: IPC Nivel General Nacional (base dic-2016=100) · Fuente: INDEC vía API de Series de Tiempo';
 
+                // Mismo dato que la pestaña IPC, para que el sidebar y la pestaña nunca queden desincronizados
+                if (inflacionCardValor) inflacionCardValor.textContent = formatearPorcentajeIPC(ultimo.variacionMensual);
+                if (inflacionCardFecha) inflacionCardFecha.textContent = formatearMesIPC(ultimo.mes);
+                if (inflacionCard) inflacionCard.classList.remove('stat-error');
+
                 poblarSelectsIPC();
                 actualizarVistaIPC();
             } catch (error) {
@@ -1793,6 +1809,9 @@
                 mensualDisplay.textContent = '—';
                 interanualDisplay.textContent = '—';
                 meta.textContent = '⚠️ No se pudo obtener la serie del IPC. Reintentá con el botón de abajo.';
+                if (inflacionCardValor) inflacionCardValor.textContent = '—';
+                if (inflacionCardFecha) inflacionCardFecha.textContent = 'No disponible';
+                if (inflacionCard) inflacionCard.classList.add('stat-error');
             } finally {
                 if (btnRefresh) btnRefresh.disabled = false;
             }

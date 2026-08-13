@@ -99,18 +99,22 @@ body {
     margin-bottom: 28px;
 }
 
-.riesgo-pais-card {
+.sidebar-stat-card {
     background: rgba(255, 255, 255, 0.12);
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: var(--radius-md);
     padding: 10px 14px;
-    margin: 0 2px 24px;
+    margin: 0 2px 14px;
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
 
-.riesgo-pais-label {
+.sidebar-stat-card:last-of-type {
+    margin-bottom: 24px;
+}
+
+.sidebar-stat-label {
     font-size: 11px;
     color: rgba(255, 255, 255, 0.75);
     font-weight: 600;
@@ -118,18 +122,18 @@ body {
     letter-spacing: 0.03em;
 }
 
-.riesgo-pais-valor {
+.sidebar-stat-valor {
     font-size: 1.3em;
     font-weight: 700;
     color: #fff;
 }
 
-.riesgo-pais-meta {
+.sidebar-stat-meta {
     font-size: 11px;
     color: rgba(255, 255, 255, 0.6);
 }
 
-.riesgo-pais-card.riesgo-pais-error .riesgo-pais-valor {
+.sidebar-stat-card.stat-error .sidebar-stat-valor {
     color: #ffd6d6;
 }
 
@@ -540,7 +544,7 @@ input:focus, select:focus {
         display: none;
     }
 
-    .riesgo-pais-card {
+    .sidebar-stat-card {
         display: none;
     }
 
