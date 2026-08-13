@@ -23,6 +23,12 @@
                 <span class="sidebar-stat-meta" id="inflacionCardFecha"></span>
             </div>
 
+            <div class="sidebar-stat-card" id="dolarOficialCard">
+                <span class="sidebar-stat-label">💵 Dólar Oficial (venta)</span>
+                <span class="sidebar-stat-valor" id="dolarOficialValor">Cargando...</span>
+                <span class="sidebar-stat-meta" id="dolarOficialFecha"></span>
+            </div>
+
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchTab('plazo-fijo')">💰 <span>Plazo Fijo</span></button>
                 <button class="tab-btn" onclick="switchTab('cauciones')">📊 <span>Cauciones Bursátiles</span></button>
@@ -1255,6 +1261,36 @@
                 if (card) card.classList.remove('stat-error');
             } catch (error) {
                 console.error('Error al obtener riesgo país:', error);
+                valorDisplay.textContent = '—';
+                fechaDisplay.textContent = 'No disponible';
+                if (card) card.classList.add('stat-error');
+            }
+        }
+
+        // ==========================================
+        // DÓLAR OFICIAL (venta) - tarjeta fija del sidebar
+        // Fetch independiente del selector de tipo de dólar de la pestaña #dolares,
+        // para que el sidebar siempre muestre el oficial sin importar qué esté elegido ahí.
+        // ==========================================
+        async function cargarDolarOficialCard() {
+            const card = document.getElementById('dolarOficialCard');
+            const valorDisplay = document.getElementById('dolarOficialValor');
+            const fechaDisplay = document.getElementById('dolarOficialFecha');
+            if (!valorDisplay || !fechaDisplay) return;
+
+            try {
+                const response = await fetch('https://dolarapi.com/v1/dolares/oficial');
+                if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
+                const data = await response.json();
+                const venta = Number(data.venta);
+                if (!Number.isFinite(venta)) throw new Error('Valor inválido');
+
+                valorDisplay.textContent = formatCurrency(venta);
+                const fecha = data.fechaActualizacion ? new Date(data.fechaActualizacion) : null;
+                fechaDisplay.textContent = fecha && !isNaN(fecha) ? `Al ${formatearFechaCorta(fecha.toISOString().slice(0, 10))}` : '';
+                if (card) card.classList.remove('stat-error');
+            } catch (error) {
+                console.error('Error al obtener dólar oficial:', error);
                 valorDisplay.textContent = '—';
                 fechaDisplay.textContent = 'No disponible';
                 if (card) card.classList.add('stat-error');
@@ -2613,6 +2649,7 @@
             cargarIPC();
             cargarRiesgoPais();
             cargarRiesgoPaisHistorial();
+            cargarDolarOficialCard();
         });
         
         function formatCurrency(amount) {
