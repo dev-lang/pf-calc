@@ -738,6 +738,10 @@
                     <span>📅 Variación interanual:</span>
                     <span class="precio-dolar" id="ipcUltimaInteranual">Cargando...</span>
                 </div>
+                <div class="cotizacion-item">
+                    <span>🗓️ Acumulada (últ. 6 meses):</span>
+                    <span class="precio-dolar" id="ipcAcumulada6m">Cargando...</span>
+                </div>
                 <div class="cotizacion-meta" id="ipcMeta">Consultando serie oficial (INDEC / datos.gob.ar)...</div>
                 <button type="button" class="btn-refresh" id="btnRefreshIPC" onclick="cargarIPC()">🔄 Actualizar</button>
             </div>
@@ -1614,6 +1618,16 @@
             });
         }
 
+        function calcularInflacionAcumuladaIPC(serie, meses) {
+            // Inflación acumulada compuesta de los últimos N meses (no es la simple suma de las
+            // variaciones mensuales, sino el producto de los factores mes a mes menos 1).
+            if (!Array.isArray(serie) || serie.length < meses) return null;
+            const ultimosN = serie.slice(-meses);
+            if (ultimosN.some(p => !Number.isFinite(p.variacionMensual))) return null;
+            const factorAcumulado = ultimosN.reduce((factor, p) => factor * (1 + p.variacionMensual / 100), 1);
+            return (factorAcumulado - 1) * 100;
+        }
+
         function formatearMesIPC(mesStr) {
             const [anio, mes] = mesStr.split('-').map(Number);
             const nombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
@@ -1803,6 +1817,7 @@
             const mesDisplay = document.getElementById('ipcUltimoMes');
             const mensualDisplay = document.getElementById('ipcUltimaMensual');
             const interanualDisplay = document.getElementById('ipcUltimaInteranual');
+            const acumulada6mDisplay = document.getElementById('ipcAcumulada6m');
             const meta = document.getElementById('ipcMeta');
             const btnRefresh = document.getElementById('btnRefreshIPC');
             const inflacionCard = document.getElementById('inflacionCard');
@@ -1815,6 +1830,7 @@
             mesDisplay.textContent = 'Cargando...';
             mensualDisplay.textContent = 'Cargando...';
             interanualDisplay.textContent = 'Cargando...';
+            if (acumulada6mDisplay) acumulada6mDisplay.textContent = 'Cargando...';
             meta.textContent = 'Consultando serie oficial (INDEC / datos.gob.ar)...';
             if (inflacionCardValor) inflacionCardValor.textContent = 'Cargando...';
             if (inflacionCardFecha) inflacionCardFecha.textContent = '';
@@ -1829,6 +1845,9 @@
                 mesDisplay.textContent = formatearMesIPC(ultimo.mes);
                 mensualDisplay.textContent = formatearPorcentajeIPC(ultimo.variacionMensual);
                 interanualDisplay.textContent = formatearPorcentajeIPC(ultimo.variacionInteranual);
+                if (acumulada6mDisplay) {
+                    acumulada6mDisplay.textContent = formatearPorcentajeIPC(calcularInflacionAcumuladaIPC(serieIPC, 6));
+                }
                 meta.textContent = 'Serie: IPC Nivel General Nacional (base dic-2016=100) · Fuente: INDEC vía API de Series de Tiempo';
 
                 // Mismo dato que la pestaña IPC, para que el sidebar y la pestaña nunca queden desincronizados
@@ -1844,6 +1863,7 @@
                 mesDisplay.textContent = '—';
                 mensualDisplay.textContent = '—';
                 interanualDisplay.textContent = '—';
+                if (acumulada6mDisplay) acumulada6mDisplay.textContent = '—';
                 meta.textContent = '⚠️ No se pudo obtener la serie del IPC. Reintentá con el botón de abajo.';
                 if (inflacionCardValor) inflacionCardValor.textContent = '—';
                 if (inflacionCardFecha) inflacionCardFecha.textContent = 'No disponible';
