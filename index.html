@@ -37,6 +37,7 @@
                 <button class="tab-btn" onclick="switchTab('tna')">🎯 <span>Tasa Nominal</span></button>
                 <button class="tab-btn" onclick="switchTab('comparador')">🆚 <span>Comparador</span></button>
                 <button class="tab-btn" onclick="switchTab('ipc')">📈 <span>Inflación (IPC)</span></button>
+                <button class="tab-btn" onclick="switchTab('calc-inflacion')">🧮 <span>Calc. Inflación entre Fechas</span></button>
                 <button class="tab-btn" onclick="switchTab('riesgopais')">🌎 <span>Riesgo País</span></button>
             </div>
         </aside>
@@ -794,6 +795,50 @@
                     </thead>
                     <tbody id="cuerpoTablaIPC"></tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- CALCULADORA DE INFLACION ENTRE FECHAS -->
+        <div id="calc-inflacion" class="tab-content">
+            <h1>🧮 Calculadora de Inflación entre Fechas</h1>
+
+            <div class="info">
+                <strong>💡 Info:</strong> Calculá la inflación acumulada entre dos meses cualquiera, usando la misma serie oficial del IPC Nivel General (INDEC, base dic-2016=100) que la pestaña "Inflación (IPC)".
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="calcInfDesde">📅 Desde</label>
+                    <select id="calcInfDesde" onchange="calcularInflacionEntreFechasUI()">
+                        <option value="">Cargando...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="calcInfHasta">📅 Hasta</label>
+                    <select id="calcInfHasta" onchange="calcularInflacionEntreFechasUI()">
+                        <option value="">Cargando...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="calcInfMonto">💰 Monto inicial (opcional)</label>
+                    <input type="number" id="calcInfMonto" placeholder="Ej: 100000" oninput="calcularInflacionEntreFechasUI()">
+                </div>
+            </div>
+
+            <div class="cotizaciones-box" id="calcInfResumenBox">
+                <h3>📊 Resultado</h3>
+                <div class="cotizacion-item">
+                    <span>📈 Inflación acumulada:</span>
+                    <span class="precio-dolar" id="calcInfAcumulada">—</span>
+                </div>
+                <div class="cotizacion-item" id="calcInfMontoResultRow" style="display: none;">
+                    <span>💰 Monto equivalente:</span>
+                    <span class="precio-dolar" id="calcInfMontoResult">—</span>
+                </div>
+                <div class="cotizacion-meta" id="calcInfMeta">Elegí dos meses para calcular.</div>
             </div>
         </div>
 
@@ -1692,6 +1737,80 @@
             return serieIPC.filter(p => p.mes >= desde && p.mes <= hasta); // orden cronológico ascendente
         }
 
+        // ==========================================
+        // CALCULADORA DE INFLACION ENTRE FECHAS (reusa serieIPC)
+        // ==========================================
+        function poblarSelectsCalcInflacion() {
+            const selectDesde = document.getElementById('calcInfDesde');
+            const selectHasta = document.getElementById('calcInfHasta');
+            if (!selectDesde || !selectHasta || serieIPC.length === 0) return;
+
+            const opciones = serieIPC
+                .map(p => `<option value="${p.mes}">${formatearMesIPC(p.mes)}</option>`)
+                .join('');
+
+            selectDesde.innerHTML = opciones;
+            selectHasta.innerHTML = opciones;
+
+            selectDesde.value = serieIPC[0].mes;
+            selectHasta.value = serieIPC[serieIPC.length - 1].mes;
+
+            calcularInflacionEntreFechasUI();
+        }
+
+        function calcularInflacionEntreFechas(mesDesde, mesHasta) {
+            // Usa el índice directamente (no encadena variaciones mensuales redondeadas),
+            // así el resultado coincide exactamente con la serie oficial.
+            const puntoDesde = serieIPC.find(p => p.mes === mesDesde);
+            const puntoHasta = serieIPC.find(p => p.mes === mesHasta);
+            if (!puntoDesde || !puntoHasta) return null;
+            return (puntoHasta.indice / puntoDesde.indice - 1) * 100;
+        }
+
+        function calcularInflacionEntreFechasUI() {
+            const selectDesde = document.getElementById('calcInfDesde');
+            const selectHasta = document.getElementById('calcInfHasta');
+            const acumuladaDisplay = document.getElementById('calcInfAcumulada');
+            const meta = document.getElementById('calcInfMeta');
+            const montoInput = document.getElementById('calcInfMonto');
+            const montoRow = document.getElementById('calcInfMontoResultRow');
+            const montoResult = document.getElementById('calcInfMontoResult');
+            if (!selectDesde || !selectHasta || !acumuladaDisplay || !meta) return;
+
+            const desde = selectDesde.value;
+            const hasta = selectHasta.value;
+            if (!desde || !hasta || serieIPC.length === 0) return;
+
+            if (desde >= hasta) {
+                acumuladaDisplay.textContent = '—';
+                meta.textContent = '⚠️ El mes "Desde" debe ser anterior al mes "Hasta".';
+                if (montoRow) montoRow.style.display = 'none';
+                return;
+            }
+
+            const variacion = calcularInflacionEntreFechas(desde, hasta);
+            if (!Number.isFinite(variacion)) {
+                acumuladaDisplay.textContent = '—';
+                meta.textContent = '⚠️ No se pudo calcular con los meses seleccionados.';
+                if (montoRow) montoRow.style.display = 'none';
+                return;
+            }
+
+            acumuladaDisplay.textContent = formatearPorcentajeIPC(variacion);
+            meta.textContent = `Entre ${formatearMesIPC(desde)} y ${formatearMesIPC(hasta)} · Serie: IPC Nivel General Nacional (INDEC)`;
+
+            const monto = montoInput ? parseFloat(montoInput.value) : NaN;
+            if (montoRow && montoResult) {
+                if (Number.isFinite(monto) && monto > 0) {
+                    const equivalente = monto * (1 + variacion / 100);
+                    montoResult.textContent = formatCurrency(equivalente);
+                    montoRow.style.display = 'flex';
+                } else {
+                    montoRow.style.display = 'none';
+                }
+            }
+        }
+
         let chartIPCInstance = null;
 
         function renderGraficoIPC() {
@@ -1857,6 +1976,7 @@
 
                 poblarSelectsIPC();
                 actualizarVistaIPC();
+                poblarSelectsCalcInflacion();
             } catch (error) {
                 console.error('Error al obtener el IPC:', error);
                 box.classList.add('cotizacion-error');
