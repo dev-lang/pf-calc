@@ -137,6 +137,18 @@ body {
     color: #ffd6d6;
 }
 
+.sidebar-stat-card.stat-good .sidebar-stat-valor {
+    color: #8dffb0;
+}
+
+.sidebar-stat-card.stat-bad .sidebar-stat-valor {
+    color: #ffb0b0;
+}
+
+.sidebar-stat-card.stat-neutral .sidebar-stat-valor {
+    color: #ffe38d;
+}
+
 .main-content {
     flex: 1;
     min-width: 0;

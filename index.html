@@ -29,6 +29,12 @@
                 <span class="sidebar-stat-meta" id="dolarOficialFecha"></span>
             </div>
 
+            <div class="sidebar-stat-card" id="dolarIndicadorCard">
+                <span class="sidebar-stat-label">🧭 Dólar ¿Barato o Caro?</span>
+                <span class="sidebar-stat-valor" id="dolarIndicadorValor">Cargando...</span>
+                <span class="sidebar-stat-meta" id="dolarIndicadorMeta"></span>
+            </div>
+
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchTab('plazo-fijo')">💰 <span>Plazo Fijo</span></button>
                 <button class="tab-btn" onclick="switchTab('cauciones')">📊 <span>Cauciones Bursátiles</span></button>
@@ -1343,6 +1349,74 @@
                 valorDisplay.textContent = '—';
                 fechaDisplay.textContent = 'No disponible';
                 if (card) card.classList.add('stat-error');
+            }
+        }
+
+        // ==========================================
+        // INDICADOR DÓLAR BARATO / CARO - tarjeta fija del sidebar
+        // Compara el oficial minorista (venta) contra el mayorista, el blue y el MEP.
+        //
+        //   Barato: minorista <= (mayorista + 15)  Y  minorista < blue  Y  minorista < MEP
+        //   Caro:   minorista > blue
+        //   (cualquier otro caso queda como "Neutro")
+        // ==========================================
+        async function cargarIndicadorDolar() {
+            const card = document.getElementById('dolarIndicadorCard');
+            const valorDisplay = document.getElementById('dolarIndicadorValor');
+            const metaDisplay = document.getElementById('dolarIndicadorMeta');
+            if (!valorDisplay || !metaDisplay) return;
+
+            card.classList.remove('stat-good', 'stat-bad', 'stat-neutral', 'stat-error');
+            valorDisplay.textContent = 'Cargando...';
+            metaDisplay.textContent = 'Consultando cotizaciones...';
+
+            try {
+                const [oficialRes, mayoristaRes, blueRes, mepRes] = await Promise.all([
+                    fetch('https://dolarapi.com/v1/dolares/oficial'),
+                    fetch('https://dolarapi.com/v1/dolares/mayorista'),
+                    fetch('https://dolarapi.com/v1/dolares/blue'),
+                    fetch('https://dolarapi.com/v1/dolares/bolsa')
+                ]);
+                if (!oficialRes.ok || !mayoristaRes.ok || !blueRes.ok || !mepRes.ok) {
+                    throw new Error('Respuesta no OK de alguna cotización');
+                }
+
+                const [oficial, mayorista, blue, mep] = await Promise.all([
+                    oficialRes.json(), mayoristaRes.json(), blueRes.json(), mepRes.json()
+                ]);
+
+                const minorista = Number(oficial.venta);
+                const mayoristaVenta = Number(mayorista.venta);
+                const blueVenta = Number(blue.venta);
+                const mepVenta = Number(mep.venta);
+
+                if (![minorista, mayoristaVenta, blueVenta, mepVenta].every(Number.isFinite)) {
+                    throw new Error('Valor inválido en alguna cotización');
+                }
+
+                const esBarato = minorista <= (mayoristaVenta + 15) && minorista < blueVenta && minorista < mepVenta;
+                const esCaro = minorista > blueVenta;
+
+                card.classList.remove('stat-good', 'stat-bad', 'stat-neutral');
+                if (esBarato) {
+                    valorDisplay.textContent = '🟢 Barato';
+                    card.classList.add('stat-good');
+                } else if (esCaro) {
+                    valorDisplay.textContent = '🔴 Caro';
+                    card.classList.add('stat-bad');
+                } else {
+                    valorDisplay.textContent = '🟡 Neutro';
+                    card.classList.add('stat-neutral');
+                }
+
+                metaDisplay.textContent =
+                    `Minorista ${formatCurrency(minorista)} · Mayorista ${formatCurrency(mayoristaVenta)} · ` +
+                    `Blue ${formatCurrency(blueVenta)} · MEP ${formatCurrency(mepVenta)}`;
+            } catch (error) {
+                console.error('Error al calcular indicador de dólar barato/caro:', error);
+                valorDisplay.textContent = '—';
+                metaDisplay.textContent = 'No disponible';
+                card.classList.add('stat-error');
             }
         }
 
@@ -2790,6 +2864,7 @@
             cargarRiesgoPais();
             cargarRiesgoPaisHistorial();
             cargarDolarOficialCard();
+            cargarIndicadorDolar();
         });
         
         function formatCurrency(amount) {
