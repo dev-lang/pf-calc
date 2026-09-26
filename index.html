@@ -1357,7 +1357,7 @@
         // Compara el oficial minorista (venta) contra el mayorista, el blue y el MEP.
         //
         //   Barato: minorista <= (mayorista + 15)  Y  minorista < blue  Y  minorista < MEP
-        //   Caro:   minorista > blue
+        //   Caro:   minorista > (mayorista + 15)  Y  minorista > blue
         //   (cualquier otro caso queda como "Neutro")
         // ==========================================
         async function cargarIndicadorDolar() {
@@ -1395,7 +1395,7 @@
                 }
 
                 const esBarato = minorista <= (mayoristaVenta + 15) && minorista < blueVenta && minorista < mepVenta;
-                const esCaro = minorista > blueVenta;
+                const esCaro = minorista > (mayoristaVenta + 15) && minorista > blueVenta;
 
                 card.classList.remove('stat-good', 'stat-bad', 'stat-neutral');
                 if (esBarato) {
