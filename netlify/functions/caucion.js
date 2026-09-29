@@ -23,7 +23,10 @@ async function fetchPage(page, apiKey) {
   const res = await fetch(`${BASE_URL}${ENDPOINT}?pageNumber=${page}`, {
     headers: { 'x-api-key': apiKey, Accept: 'application/json' },
   });
-  if (!res.ok) throw new Error(`MAE respondió ${res.status}`);
+  if (!res.ok) {
+    const cuerpo = (await res.text().catch(() => '')).slice(0, 200);
+    throw new Error(`MAE respondió ${res.status} ${cuerpo}`.trim());
+  }
 
   // Header x-pagination: objeto con TotalPages (según el PDF)
   let totalPages = 1;
@@ -91,7 +94,11 @@ exports.handler = async () => {
     return respond(200, payload);
   } catch (err) {
     console.error('Error consultando MAE:', err.message); // nunca loguear la key
-    return respond(502, { error: 'No se pudo consultar MAE' });
+    return respond(502, {
+      error: 'No se pudo consultar MAE',
+      detalle: err.message,
+      causa: err.cause ? err.cause.code || err.cause.message : undefined,
+    });
   }
 };
 
