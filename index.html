@@ -427,6 +427,7 @@
                     <div class="form-group">
                         <label for="tasaCaucion">📈 TNA - Tasa Nominal Anual (%)</label>
                         <input type="number" id="tasaCaucion" name="tasaCaucion" min="0.01" step="0.01" required placeholder="Ej: 45.2">
+                        <div class="cotizacion-meta" id="tasaCaucionMeta">Consultando última tasa de caución (MAE)...</div>
                     </div>
                 </div>
 
@@ -2865,8 +2866,56 @@
             cargarRiesgoPaisHistorial();
             cargarDolarOficialCard();
             cargarIndicadorDolar();
+            initTasaCaucionDefault();
         });
         
+        // ==========================================
+        // CAUCIÓN - TNA por defecto (MAE Market Data, vía Netlify Function)
+        // ==========================================
+        // La API key vive en la variable de entorno MAE_API_KEY de Netlify; el front solo
+        // llama a la función proxy (netlify/functions/caucion.js).
+        let tasasCaucion = null; // { "001": { tna, fecha }, "007": {...} }
+
+        async function cargarTasaCaucionDefault() {
+            const meta = document.getElementById('tasaCaucionMeta');
+            try {
+                const r = await fetch('/.netlify/functions/caucion');
+                if (!r.ok) throw new Error('Respuesta no OK: ' + r.status);
+                const data = await r.json();
+                tasasCaucion = data.porPlazo || {};
+                aplicarTasaCaucionDefault();
+            } catch (e) {
+                console.error('No se pudo cargar la tasa de caución:', e);
+                tasasCaucion = null;
+                meta.textContent = '⚠️ No se pudo obtener la última tasa de caución. Cargala a mano.';
+            }
+        }
+
+        function aplicarTasaCaucionDefault() {
+            if (!tasasCaucion) return;
+            const input = document.getElementById('tasaCaucion');
+            const meta = document.getElementById('tasaCaucionMeta');
+            const plazo = String(document.getElementById('plazoCaucion').value).padStart(3, '0');
+            const d = tasasCaucion[plazo];
+
+            if (!d) {
+                meta.textContent = `Sin datos de MAE para el plazo de ${Number(plazo)} día(s).`;
+                return;
+            }
+            // No pisar lo que el usuario escribió a mano
+            if (!input.dataset.manual) input.value = d.tna.toFixed(2);
+            const dia = d.fecha ? d.fecha.slice(0, 10) : '';
+            meta.textContent = `Última tasa MAE a ${Number(plazo)} día(s): ${d.tna.toFixed(2)}% TNA · ${dia} · Fuente: A3 Mercados`;
+        }
+
+        function initTasaCaucionDefault() {
+            document.getElementById('tasaCaucion').addEventListener('input', function(e) {
+                e.target.dataset.manual = '1';
+            });
+            document.getElementById('plazoCaucion').addEventListener('change', aplicarTasaCaucionDefault);
+            cargarTasaCaucionDefault();
+        }
+
         function formatCurrency(amount) {
             return new Intl.NumberFormat('es-AR', {
                 style: 'currency',
