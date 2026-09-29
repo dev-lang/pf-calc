@@ -21,11 +21,20 @@ function pick(obj, name) {
 
 async function fetchPage(page, apiKey) {
   const res = await fetch(`${BASE_URL}${ENDPOINT}?pageNumber=${page}`, {
-    headers: { 'x-api-key': apiKey, Accept: 'application/json' },
+    headers: {
+      'x-api-key': apiKey,
+      Accept: 'application/json',
+      // Node manda "node" como User-Agent y muchos firewalls lo bloquean
+      'User-Agent': 'pf-calc/1.0 (+https://financear.netlify.app)',
+    },
   });
   if (!res.ok) {
-    const cuerpo = (await res.text().catch(() => '')).slice(0, 200);
-    throw new Error(`MAE respondió ${res.status} ${cuerpo}`.trim());
+    const crudo = await res.text().catch(() => '');
+    // Si es una página HTML (típico de un firewall), dejamos solo el texto del final
+    const texto = crudo.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    const resumen = crudo.trimStart().startsWith('<') ? texto.slice(-250) : crudo.slice(0, 200);
+    const server = res.headers.get('server') || res.headers.get('x-cdn') || '';
+    throw new Error(`MAE respondió ${res.status}${server ? ` [${server}]` : ''} ${resumen}`.trim());
   }
 
   // Header x-pagination: objeto con TotalPages (según el PDF)
