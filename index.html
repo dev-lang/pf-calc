@@ -234,7 +234,7 @@
 
                 <div id="comisionPersonalizadaAccion" class="comision-personalizada">
                     <div class="form-group">
-                        <label for="arancelAccion">🏛�?Arancel (%)</label>
+                        <label for="arancelAccion">🏛️ Arancel (%)</label>
                         <input type="number" id="arancelAccion" name="arancelAccion" min="0" max="5" step="0.001" value="0.5" placeholder="Ej: 0.5">
                     </div>
                     <div class="form-group">
@@ -270,15 +270,15 @@
                     </div>
                     <div id="detallePersonalizadoAcciones">
                         <div class="result-item sub-item">
-                            <span class="result-label">�?Arancel:</span>
+                            <span class="result-label">• Arancel:</span>
                             <span class="result-value" id="costoArancelAccion">$0</span>
                         </div>
                         <div class="result-item sub-item">
-                            <span class="result-label">�?Derecho Mercado:</span>
+                            <span class="result-label">• Derecho Mercado:</span>
                             <span class="result-value" id="costoDerechoMercadoAccion">$0</span>
                         </div>
                         <div class="result-item sub-item">
-                            <span class="result-label">�?IVA (21%):</span>
+                            <span class="result-label">• IVA (21%):</span>
                             <span class="result-value" id="costoIVAAccion">$0</span>
                         </div>
                     </div>
@@ -445,7 +445,7 @@
                 </div>
 
                 <div id="diasCustomCaucionGroup" class="form-group" style="display: none;">
-                    <label for="diasCustomCaucion">🗓�?Cantidad de días</label>
+                    <label for="diasCustomCaucion">🗓️ Cantidad de días</label>
                     <input type="number" id="diasCustomCaucion" name="diasCustomCaucion" min="1" max="365" step="1" placeholder="Ej: 10">
                 </div>
 
@@ -467,7 +467,7 @@
 
                 <div id="comisionPersonalizada" class="comision-personalizada" style="display: none;">
                     <div class="form-group">
-                        <label for="arancel">🏛�?Arancel (%)</label>
+                        <label for="arancel">🏛️ Arancel (%)</label>
                         <input type="number" id="arancel" name="arancel" min="0" max="5" step="0.001" value="2.705" placeholder="Ej: 2.705">
                     </div>
                     <div class="form-group">
@@ -495,7 +495,7 @@
 
                 <div id="comisionP3" class="comision-personalizada" style="display:none;">
                     <div class="form-group">
-                        <label for="arancelP3">🏛�?Arancel (% sobre intereses)</label>
+                        <label for="arancelP3">🏛️ Arancel (% sobre intereses)</label>
                         <input type="number" id="arancelP3" value="9.73" step="0.01">
                     </div>
                     <div class="form-group">
@@ -515,11 +515,11 @@
                     </div>
                     <div class="info-iva">
                         <strong>ℹ️ Fórmula:</strong><br>
-                        �?Comisión = (tasaComisión / 30 × plazo) × monto<br>
-                        �?Derechos = (tasaDerechos / 90 × plazo × monto)<br>
-                        �?IVA Comisión = Comisión × 21%<br>
-                        �?IVA Derechos = Derechos × 21%<br>
-                        �?Todos se descuentan del capital inicial
+                        • Comisión = (tasaComisión / 30 × plazo) × monto<br>
+                        • Derechos = (tasaDerechos / 90 × plazo × monto)<br>
+                        • IVA Comisión = Comisión × 21%<br>
+                        • IVA Derechos = Derechos × 21%<br>
+                        • Todos se descuentan del capital inicial
                     </div>
                 </div>
 
@@ -543,44 +543,44 @@
                     </div>
                     <div id="detallePersonalizado" style="display: none;">
                         <div class="result-item sub-item">
-                            <span class="result-label">�?Arancel:</span>
+                            <span class="result-label">• Arancel:</span>
                             <span class="result-value" id="costoArancel">$0</span>
                         </div>
                         <div class="result-item sub-item">
-                            <span class="result-label">�?Derecho Mercado:</span>
+                            <span class="result-label">• Derecho Mercado:</span>
                             <span class="result-value" id="costoDerechoMercado">$0</span>
                         </div>
                         <div class="result-item sub-item">
-                            <span class="result-label">�?IVA (21%):</span>
+                            <span class="result-label">• IVA (21%):</span>
                             <span class="result-value" id="costoIVA">$0</span>
                         </div>
                     </div>
                     <div id="detalleP3" style="display:none;">
-                        <div class="result-item sub-item"><span class="result-label">�?Arancel:</span><span class="result-value" id="costoArancelP3">$0</span></div>
-                        <div class="result-item sub-item"><span class="result-label">�?Derecho fijo:</span><span class="result-value" id="costoDerechoP3">$0</span></div>
-                        <div class="result-item sub-item"><span class="result-label">�?IVA (21% sobre Arancel + Derecho):</span><span class="result-value" id="costoIvaP3">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">• Arancel:</span><span class="result-value" id="costoArancelP3">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">• Derecho fijo:</span><span class="result-value" id="costoDerechoP3">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">• IVA (21% sobre Arancel + Derecho):</span><span class="result-value" id="costoIvaP3">$0</span></div>
                     </div>
                     <div id="detalleP4" style="display:none;">
-                        <div class="result-item sub-item"><span class="result-label">�?Comisión:</span><span class="result-value" id="costoComisionP4">$0</span></div>
-                        <div class="result-item sub-item"><span class="result-label">�?Derechos:</span><span class="result-value" id="costoDerechosP4">$0</span></div>
-                        <div class="result-item sub-item"><span class="result-label">�?IVA (21% sobre Comisión):</span><span class="result-value" id="costoIvaComisionP4">$0</span></div>
-                        <div class="result-item sub-item"><span class="result-label">�?IVA (21% sobre Derechos):</span><span class="result-value" id="costoIvaDerechosP4">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">• Comisión:</span><span class="result-value" id="costoComisionP4">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">• Derechos:</span><span class="result-value" id="costoDerechosP4">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">• IVA (21% sobre Comisión):</span><span class="result-value" id="costoIvaComisionP4">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">• IVA (21% sobre Derechos):</span><span class="result-value" id="costoIvaDerechosP4">$0</span></div>
                     </div>
 <div id="detalleP2" style="display: none;">
                         <div class="result-item sub-item">
-                            <span class="result-label">�?Comisión de compra:</span>
+                            <span class="result-label">• Comisión de compra:</span>
                             <span class="result-value" id="costoComisionP2">$0</span>
                         </div>
                         <div class="result-item sub-item">
-                            <span class="result-label">�?IVA Comisión (21%):</span>
+                            <span class="result-label">• IVA Comisión (21%):</span>
                             <span class="result-value" id="costoIvaComisionP2">$0</span>
                         </div>
                         <div class="result-item sub-item">
-                            <span class="result-label">�?Derechos de Mercado:</span>
+                            <span class="result-label">• Derechos de Mercado:</span>
                             <span class="result-value" id="costoDerechoP2">$0</span>
                         </div>
                         <div class="result-item sub-item">
-                            <span class="result-label">�?IVA Derechos de Mercado (21%):</span>
+                            <span class="result-label">• IVA Derechos de Mercado (21%):</span>
                             <span class="result-value" id="costoIvaDerechoP2">$0</span>
                         </div>
                     </div>
@@ -708,7 +708,7 @@
 
                 <div id="filasComparador"></div>
 
-                <button type="button" class="btn-agregar-fila" onclick="agregarFilaComparador()">�?Agregar opción a comparar</button>
+                <button type="button" class="btn-agregar-fila" onclick="agregarFilaComparador()">➕ Agregar opción a comparar</button>
 
                 <button type="submit" class="btn">🚀 Comparar</button>
             </form>
@@ -741,7 +741,7 @@
             <div class="cotizaciones-box ipc-box" id="ipcResumenBox">
                 <h3>📊 Último dato publicado</h3>
                 <div class="cotizacion-item">
-                    <span>🗓�?Mes:</span>
+                    <span>🗓️ Mes:</span>
                     <span class="precio-dolar" id="ipcUltimoMes">Cargando...</span>
                 </div>
                 <div class="cotizacion-item">
@@ -753,7 +753,7 @@
                     <span class="precio-dolar" id="ipcUltimaInteranual">Cargando...</span>
                 </div>
                 <div class="cotizacion-item">
-                    <span>🗓�?Acumulada (últ. 6 meses):</span>
+                    <span>🗓️ Acumulada (últ. 6 meses):</span>
                     <span class="precio-dolar" id="ipcAcumulada6m">Cargando...</span>
                 </div>
                 <div class="cotizacion-meta" id="ipcMeta">Consultando serie oficial (INDEC / datos.gob.ar)...</div>
@@ -777,8 +777,8 @@
 
             <div class="quick-filters">
                 <button type="button" class="btn-quick-filter" onclick="aplicarFiltroRapidoIPC('anio', this)">📆 Último año (desde Ene)</button>
-                <button type="button" class="btn-quick-filter" onclick="aplicarFiltroRapidoIPC('12m', this)">🗓�?Últimos 12 meses</button>
-                <button type="button" class="btn-quick-filter" onclick="aplicarFiltroRapidoIPC('6m', this)">🗓�?Últimos 6 meses</button>
+                <button type="button" class="btn-quick-filter" onclick="aplicarFiltroRapidoIPC('12m', this)">🗓️ Últimos 12 meses</button>
+                <button type="button" class="btn-quick-filter" onclick="aplicarFiltroRapidoIPC('6m', this)">🗓️ Últimos 6 meses</button>
             </div>
 
             <div class="chart-card">
@@ -845,11 +845,11 @@
                 <h3>📊 Resultado</h3>
                 <div class="cotizacion-item">
                     <span>📈 Inflación acumulada:</span>
-                    <span class="precio-dolar" id="calcInfAcumulada">�?/span>
+                    <span class="precio-dolar" id="calcInfAcumulada">—</span>
                 </div>
                 <div class="cotizacion-item" id="calcInfMontoResultRow" style="display: none;">
                     <span>💰 Monto equivalente:</span>
-                    <span class="precio-dolar" id="calcInfMontoResult">�?/span>
+                    <span class="precio-dolar" id="calcInfMontoResult">—</span>
                 </div>
                 <div class="cotizacion-meta" id="calcInfMeta">Elegí dos meses para calcular.</div>
             </div>
@@ -860,13 +860,13 @@
             <h1>🌎 Riesgo País (Histórico)</h1>
 
             <div class="info">
-                <strong>💡 Info:</strong> Evolución diaria del Riesgo País (EMBI+ Argentina, en puntos básicos), con variación respecto al día hábil anterior. Fuente: Ámbito, vía ArgentinaDatos. ⚠️ Esta fuente puede tener un rezago de algunos días hábiles respecto al valor de mercado en tiempo real �?la fecha del "Último dato publicado" de abajo siempre refleja el dato más reciente que la API tiene disponible.
+                <strong>💡 Info:</strong> Evolución diaria del Riesgo País (EMBI+ Argentina, en puntos básicos), con variación respecto al día hábil anterior. Fuente: Ámbito, vía ArgentinaDatos. ⚠️ Esta fuente puede tener un rezago de algunos días hábiles respecto al valor de mercado en tiempo real — la fecha del "Último dato publicado" de abajo siempre refleja el dato más reciente que la API tiene disponible.
             </div>
 
             <div class="cotizaciones-box riesgo-box" id="riesgoPaisResumenBox">
                 <h3>📊 Último dato publicado</h3>
                 <div class="cotizacion-item">
-                    <span>🗓�?Fecha:</span>
+                    <span>🗓️ Fecha:</span>
                     <span class="precio-dolar" id="riesgoPaisTabFecha">Cargando...</span>
                 </div>
                 <div class="cotizacion-item">
@@ -992,8 +992,8 @@
                 console.error('Error al obtener cotización:', error);
                 cotizacionActual = null;
                 box.classList.add('cotizacion-error');
-                compraDisplay.textContent = '�?;
-                ventaDisplay.textContent = '�?;
+                compraDisplay.textContent = '—';
+                ventaDisplay.textContent = '—';
                 meta.textContent = '⚠️ No se pudo obtener la cotización en vivo. Reintentá con el botón de abajo.';
                 if (btnCalcular) btnCalcular.disabled = true;
             } finally {
@@ -1120,10 +1120,10 @@
                             posicionDisplay.textContent = formatCurrency(valorMayorista);
                         }
                     } else {
-                        posicionDisplay.textContent = '�?;
+                        posicionDisplay.textContent = '—';
                     }
                 } else {
-                    posicionDisplay.textContent = '�?;
+                    posicionDisplay.textContent = '—';
                 }
 
                 meta.textContent = inflacionMap
@@ -1132,9 +1132,9 @@
             } catch (error) {
                 console.error('Error al calcular banda cambiaria:', error);
                 box.classList.add('cotizacion-error');
-                pisoDisplay.textContent = '�?;
-                techoDisplay.textContent = '�?;
-                posicionDisplay.textContent = '�?;
+                pisoDisplay.textContent = '—';
+                techoDisplay.textContent = '—';
+                posicionDisplay.textContent = '—';
                 meta.textContent = '⚠️ No se pudo calcular la banda cambiaria. Reintentá con el botón de abajo.';
             } finally {
                 if (btnRefresh) btnRefresh.disabled = false;
@@ -1224,8 +1224,8 @@
             if (!bancoDisplay || !valorDisplay || !meta) return;
 
             if (tasasBancosPlazoFijo.length === 0) {
-                bancoDisplay.textContent = '�?;
-                valorDisplay.textContent = '�?;
+                bancoDisplay.textContent = '—';
+                valorDisplay.textContent = '—';
                 meta.textContent = '⚠️ No se pudieron cargar las tasas de los bancos.';
                 if (box) box.classList.add('cotizacion-error');
                 return;
@@ -1247,8 +1247,8 @@
             if (!bancoDisplay || !valorDisplay || !meta) return;
 
             if (tasasBancosPlazoFijo.length === 0) {
-                bancoDisplay.textContent = '�?;
-                valorDisplay.textContent = '�?;
+                bancoDisplay.textContent = '—';
+                valorDisplay.textContent = '—';
                 meta.textContent = '⚠️ No se pudieron cargar las tasas de los bancos.';
                 if (box) box.classList.add('cotizacion-error');
                 return;
@@ -1323,7 +1323,7 @@
                 if (card) card.classList.remove('stat-error');
             } catch (error) {
                 console.error('Error al obtener riesgo país:', error);
-                valorDisplay.textContent = '�?;
+                valorDisplay.textContent = '—';
                 fechaDisplay.textContent = 'No disponible';
                 if (card) card.classList.add('stat-error');
             }
@@ -1353,7 +1353,7 @@
                 if (card) card.classList.remove('stat-error');
             } catch (error) {
                 console.error('Error al obtener dólar oficial:', error);
-                valorDisplay.textContent = '�?;
+                valorDisplay.textContent = '—';
                 fechaDisplay.textContent = 'No disponible';
                 if (card) card.classList.add('stat-error');
             }
@@ -1421,7 +1421,7 @@
                     `Blue ${formatCurrency(blueVenta)} · MEP ${formatCurrency(mepVenta)}`;
             } catch (error) {
                 console.error('Error al calcular indicador de dólar barato/caro:', error);
-                valorDisplay.textContent = '�?;
+                valorDisplay.textContent = '—';
                 metaDisplay.textContent = 'No disponible';
                 card.classList.add('stat-error');
             }
@@ -1456,7 +1456,7 @@
         }
 
         function formatearVariacionAbsPb(valor) {
-            if (!Number.isFinite(valor)) return '�?;
+            if (!Number.isFinite(valor)) return '—';
             const signo = valor > 0 ? '+' : '';
             return `${signo}${Math.round(valor)} pb`;
         }
@@ -1698,9 +1698,9 @@
             } catch (error) {
                 console.error('Error al obtener el historial de riesgo país:', error);
                 box.classList.add('cotizacion-error');
-                fechaDisplay.textContent = '�?;
-                valorDisplay.textContent = '�?;
-                variacionDisplay.textContent = '�?;
+                fechaDisplay.textContent = '—';
+                valorDisplay.textContent = '—';
+                variacionDisplay.textContent = '—';
                 meta.textContent = '⚠️ No se pudo obtener el historial. Reintentá con el botón de abajo.';
             } finally {
                 if (btnRefresh) btnRefresh.disabled = false;
@@ -1761,7 +1761,7 @@
         }
 
         function formatearPorcentajeIPC(valor) {
-            if (!Number.isFinite(valor)) return '�?;
+            if (!Number.isFinite(valor)) return '—';
             const signo = valor > 0 ? '+' : '';
             return `${signo}${valor.toFixed(1)}%`;
         }
@@ -1863,7 +1863,7 @@
             if (!desde || !hasta || serieIPC.length === 0) return;
 
             if (desde >= hasta) {
-                acumuladaDisplay.textContent = '�?;
+                acumuladaDisplay.textContent = '—';
                 meta.textContent = '⚠️ El mes "Desde" debe ser anterior al mes "Hasta".';
                 if (montoRow) montoRow.style.display = 'none';
                 return;
@@ -1871,7 +1871,7 @@
 
             const variacion = calcularInflacionEntreFechas(desde, hasta);
             if (!Number.isFinite(variacion)) {
-                acumuladaDisplay.textContent = '�?;
+                acumuladaDisplay.textContent = '—';
                 meta.textContent = '⚠️ No se pudo calcular con los meses seleccionados.';
                 if (montoRow) montoRow.style.display = 'none';
                 return;
@@ -2061,12 +2061,12 @@
             } catch (error) {
                 console.error('Error al obtener el IPC:', error);
                 box.classList.add('cotizacion-error');
-                mesDisplay.textContent = '�?;
-                mensualDisplay.textContent = '�?;
-                interanualDisplay.textContent = '�?;
-                if (acumulada6mDisplay) acumulada6mDisplay.textContent = '�?;
+                mesDisplay.textContent = '—';
+                mensualDisplay.textContent = '—';
+                interanualDisplay.textContent = '—';
+                if (acumulada6mDisplay) acumulada6mDisplay.textContent = '—';
                 meta.textContent = '⚠️ No se pudo obtener la serie del IPC. Reintentá con el botón de abajo.';
-                if (inflacionCardValor) inflacionCardValor.textContent = '�?;
+                if (inflacionCardValor) inflacionCardValor.textContent = '—';
                 if (inflacionCardFecha) inflacionCardFecha.textContent = 'No disponible';
                 if (inflacionCard) inflacionCard.classList.add('stat-error');
             } finally {
@@ -2538,10 +2538,10 @@
             fila.innerHTML = `
                 <div class="fila-opcion-header">
                     <strong>Opción #${id}</strong>
-                    <button type="button" class="btn-quitar-fila" onclick="quitarFilaComparador(${id})">�?Quitar</button>
+                    <button type="button" class="btn-quitar-fila" onclick="quitarFilaComparador(${id})">✕ Quitar</button>
                 </div>
                 <div class="form-group">
-                    <label>🏷�?Nombre de la opción</label>
+                    <label>🏷️ Nombre de la opción</label>
                     <input type="text" id="nombreComp${id}" value="${nombresPorTipo[tipoInicial]}" required>
                 </div>
                 <div class="form-group">
@@ -2624,7 +2624,7 @@
                 contenedor.innerHTML = `
                     <div class="comision-personalizada">
                         <div class="form-group">
-                            <label>🏛�?Arancel (%)</label>
+                            <label>🏛️ Arancel (%)</label>
                             <input type="number" id="arancelComp${id}" min="0" max="5" step="0.001" value="2.705">
                         </div>
                         <div class="form-group">
@@ -2652,7 +2652,7 @@
                 contenedor.innerHTML = `
                     <div class="comision-personalizada">
                         <div class="form-group">
-                            <label>🏛�?Arancel (% sobre intereses)</label>
+                            <label>🏛️ Arancel (% sobre intereses)</label>
                             <input type="number" id="arancelP3Comp${id}" step="0.01" value="9.73">
                         </div>
                         <div class="form-group">
