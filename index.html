@@ -11,41 +11,52 @@
         <aside class="sidebar">
             <div class="sidebar-brand">🏦 <span>V2</span></div>
 
-            <div class="sidebar-stat-card" id="riesgoPaisCard">
-                <span class="sidebar-stat-label">🌎 Riesgo País</span>
-                <span class="sidebar-stat-valor" id="riesgoPaisValor">Cargando...</span>
-                <span class="sidebar-stat-meta" id="riesgoPaisFecha"></span>
+            <div class="stats-strip">
+                <div class="sidebar-stat-card" id="riesgoPaisCard">
+                    <span class="sidebar-stat-label">🌎 Riesgo País</span>
+                    <span class="sidebar-stat-valor" id="riesgoPaisValor">Cargando...</span>
+                    <span class="sidebar-stat-meta" id="riesgoPaisFecha"></span>
+                </div>
+
+                <div class="sidebar-stat-card" id="inflacionCard">
+                    <span class="sidebar-stat-label">📈 Inflación (últ. mensual)</span>
+                    <span class="sidebar-stat-valor" id="inflacionCardValor">Cargando...</span>
+                    <span class="sidebar-stat-meta" id="inflacionCardFecha"></span>
+                </div>
+
+                <div class="sidebar-stat-card" id="dolarOficialCard">
+                    <span class="sidebar-stat-label">💵 Dólar Oficial (venta)</span>
+                    <span class="sidebar-stat-valor" id="dolarOficialValor">Cargando...</span>
+                    <span class="sidebar-stat-meta" id="dolarOficialFecha"></span>
+                </div>
+
+                <div class="sidebar-stat-card" id="dolarIndicadorCard">
+                    <span class="sidebar-stat-label">🧭 Dólar ¿Barato o Caro?</span>
+                    <span class="sidebar-stat-valor" id="dolarIndicadorValor">Cargando...</span>
+                    <span class="sidebar-stat-meta" id="dolarIndicadorMeta"></span>
+                </div>
             </div>
 
-            <div class="sidebar-stat-card" id="inflacionCard">
-                <span class="sidebar-stat-label">📈 Inflación (últ. mensual)</span>
-                <span class="sidebar-stat-valor" id="inflacionCardValor">Cargando...</span>
-                <span class="sidebar-stat-meta" id="inflacionCardFecha"></span>
-            </div>
-
-            <div class="sidebar-stat-card" id="dolarOficialCard">
-                <span class="sidebar-stat-label">💵 Dólar Oficial (venta)</span>
-                <span class="sidebar-stat-valor" id="dolarOficialValor">Cargando...</span>
-                <span class="sidebar-stat-meta" id="dolarOficialFecha"></span>
-            </div>
-
-            <div class="sidebar-stat-card" id="dolarIndicadorCard">
-                <span class="sidebar-stat-label">🧭 Dólar ¿Barato o Caro?</span>
-                <span class="sidebar-stat-valor" id="dolarIndicadorValor">Cargando...</span>
-                <span class="sidebar-stat-meta" id="dolarIndicadorMeta"></span>
-            </div>
-
-            <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('plazo-fijo')">💰 <span>Plazo Fijo</span></button>
-                <button class="tab-btn" onclick="switchTab('cauciones')">📊 <span>Cauciones Bursátiles</span></button>
-                <button class="tab-btn" onclick="switchTab('acciones')">📈 <span>Compra de Acciones</span></button>
-                <button class="tab-btn" onclick="switchTab('dolares')">💵 <span>Compra/Venta USD</span></button>
-                <button class="tab-btn" onclick="switchTab('tna')">🎯 <span>Tasa Nominal</span></button>
-                <button class="tab-btn" onclick="switchTab('comparador')">🆚 <span>Comparador</span></button>
-                <button class="tab-btn" onclick="switchTab('ipc')">📈 <span>Inflación (IPC)</span></button>
-                <button class="tab-btn" onclick="switchTab('calc-inflacion')">🧮 <span>Calc. Inflación entre Fechas</span></button>
-                <button class="tab-btn" onclick="switchTab('riesgopais')">🌎 <span>Riesgo País</span></button>
-            </div>
+            <nav class="tabs" aria-label="Calculadoras">
+                <div class="tab-group">
+                    <span class="tab-group-label">Invertir</span>
+                    <button class="tab-btn active" onclick="switchTab('plazo-fijo')">💰 <span class="tab-label">Plazo Fijo</span><span class="tab-short">Plazo fijo</span></button>
+                    <button class="tab-btn" onclick="switchTab('cauciones')">📊 <span class="tab-label">Cauciones Bursátiles</span><span class="tab-short">Caución</span></button>
+                    <button class="tab-btn" onclick="switchTab('acciones')">📈 <span class="tab-label">Compra de Acciones</span><span class="tab-short">Acciones</span></button>
+                    <button class="tab-btn" onclick="switchTab('tna')">🎯 <span class="tab-label">Tasa Nominal</span><span class="tab-short">TNA</span></button>
+                    <button class="tab-btn" onclick="switchTab('comparador')">🆚 <span class="tab-label">Comparador</span><span class="tab-short">Comparar</span></button>
+                </div>
+                <div class="tab-group">
+                    <span class="tab-group-label">Dólar</span>
+                    <button class="tab-btn" onclick="switchTab('dolares')">💵 <span class="tab-label">Compra/Venta USD</span><span class="tab-short">Dólar</span></button>
+                </div>
+                <div class="tab-group">
+                    <span class="tab-group-label">Indicadores</span>
+                    <button class="tab-btn" onclick="switchTab('ipc')">🛒 <span class="tab-label">Inflación (IPC)</span><span class="tab-short">IPC</span></button>
+                    <button class="tab-btn" onclick="switchTab('calc-inflacion')">🧮 <span class="tab-label">Calc. Inflación entre Fechas</span><span class="tab-short">Inflación</span></button>
+                    <button class="tab-btn" onclick="switchTab('riesgopais')">🌎 <span class="tab-label">Riesgo País</span><span class="tab-short">Riesgo país</span></button>
+                </div>
+            </nav>
         </aside>
 
         <main class="main-content">
@@ -105,21 +116,21 @@
                 <div id="comprarDolares" class="operacion-section">
                     <div class="form-group">
                         <label for="pesosAInvertir">💰 Pesos disponibles (ARS)</label>
-                        <input type="number" id="pesosAInvertir" name="pesosAInvertir" min="1" step="0.01" placeholder="Ej: 136000">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="pesosAInvertir" name="pesosAInvertir" data-min="1" placeholder="Ej: 136.000" data-fmt="money" data-prefix="$" required>
                     </div>
                 </div>
 
                 <div id="comprarObjetivoDolares" class="operacion-section" style="display: none;">
                     <div class="form-group">
                         <label for="dolaresObjetivo">🎯 Dólares que quiero comprar (USD)</label>
-                        <input type="number" id="dolaresObjetivo" name="dolaresObjetivo" min="0.01" step="0.01" placeholder="Ej: 100">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="dolaresObjetivo" name="dolaresObjetivo" data-min="0.01" placeholder="Ej: 100" data-fmt="money" data-prefix="US$" required>
                     </div>
                 </div>
 
                 <div id="venderDolares" class="operacion-section" style="display: none;">
                     <div class="form-group">
                         <label for="dolaresAVender">💵 Dólares a vender (USD)</label>
-                        <input type="number" id="dolaresAVender" name="dolaresAVender" min="0.01" step="0.01" placeholder="Ej: 100">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="dolaresAVender" name="dolaresAVender" data-min="0.01" placeholder="Ej: 100" data-fmt="money" data-prefix="US$" required>
                     </div>
                 </div>
 
@@ -135,8 +146,6 @@
                         <option value="cripto">Dólar Cripto</option>
                     </select>
                 </div>
-
-                <button type="submit" class="btn" id="btnCalcularDolares">🚀 Calcular Operación</button>
             </form>
 
             <div id="resultsDolares" class="results">
@@ -215,7 +224,7 @@
 
                     <div class="form-group">
                         <label for="precioAccion">💵 Precio por acción (ARS)</label>
-                        <input type="number" id="precioAccion" name="precioAccion" min="0.01" step="0.01" required placeholder="Ej: 1250.50">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="precioAccion" name="precioAccion" data-min="0.01" required placeholder="Ej: 1.250,50" data-fmt="money" data-prefix="$">
                     </div>
                 </div>
 
@@ -229,24 +238,22 @@
 
                 <div id="comisionFijaAccion" class="form-group" style="display: none;">
                     <label for="comisionAccion">📊 Comisión del broker (%)</label>
-                    <input type="number" id="comisionAccion" name="comisionAccion" min="0" max="10" step="0.01" value="1" placeholder="Ej: 1.0">
+                    <input type="text" inputmode="decimal" autocomplete="off" id="comisionAccion" name="comisionAccion" data-min="0" data-max="10" value="1" placeholder="Ej: 1,0" data-fmt="pct" data-suffix="%">
                 </div>
 
                 <div id="comisionPersonalizadaAccion" class="comision-personalizada">
                     <div class="form-group">
                         <label for="arancelAccion">🏛️ Arancel (%)</label>
-                        <input type="number" id="arancelAccion" name="arancelAccion" min="0" max="5" step="0.001" value="0.5" placeholder="Ej: 0.5">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="arancelAccion" name="arancelAccion" data-min="0" data-max="5" value="0.5" placeholder="Ej: 0,5" data-fmt="pct" data-suffix="%">
                     </div>
                     <div class="form-group">
                         <label for="derechoMercadoAccion">🏢 Derecho de Mercado (%)</label>
-                        <input type="number" id="derechoMercadoAccion" name="derechoMercadoAccion" min="0" max="5" step="0.001" value="0.08" placeholder="Ej: 0.08">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="derechoMercadoAccion" name="derechoMercadoAccion" data-min="0" data-max="5" value="0.08" placeholder="Ej: 0,08" data-fmt="pct" data-suffix="%">
                     </div>
                     <div class="info-iva">
                         <strong>ℹ️ IVA:</strong> Se calcula automáticamente como 21% sobre (Arancel + Derecho de Mercado)
                     </div>
                 </div>
-
-                <button type="submit" class="btn">🚀 Calcular Compra</button>
             </form>
 
             <div id="resultsAcciones" class="results">
@@ -341,12 +348,12 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="capital">💵 Capital inicial (ARS)</label>
-                        <input type="number" id="capital" name="capital" min="1" step="0.01" required placeholder="Ej: 100000">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="capital" name="capital" data-min="1" required placeholder="Ej: 100.000" data-fmt="money" data-prefix="$">
                     </div>
 
                     <div class="form-group">
                         <label for="plazo">📅 Plazo (días)</label>
-                        <input type="number" id="plazo" name="plazo" min="1" required placeholder="Ej: 30, 90, 180, 365">
+                        <input type="number" inputmode="numeric" id="plazo" name="plazo" min="1" required placeholder="Ej: 30, 90, 180, 365" data-suffix="días" data-chips="30,60,90,180,365">
                     </div>
                 </div>
 
@@ -360,7 +367,7 @@
 
                 <div class="form-group">
                     <label for="tasa">📈 Tasa de interés anual (%)</label>
-                    <input type="number" id="tasa" name="tasa" min="0.01" step="0.01" required placeholder="Ej: 35.5">
+                    <input type="text" inputmode="decimal" autocomplete="off" id="tasa" name="tasa" data-min="0.01" required placeholder="Ej: 35,5" data-fmt="pct" data-suffix="%">
                 </div>
 
                 <div class="form-group" id="grupoBancoTasa" style="display: none;">
@@ -378,8 +385,6 @@
                         <option value="mensual">Interés Compuesto (mensual)</option>
                     </select>
                 </div>
-
-                <button type="submit" class="btn">🚀 Calcular Rendimiento</button>
             </form>
 
             <div id="results" class="results">
@@ -421,12 +426,12 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="capitalCaucion">💵 Capital a invertir (ARS)</label>
-                        <input type="number" id="capitalCaucion" name="capitalCaucion" min="1" step="0.01" required placeholder="Ej: 50000">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="capitalCaucion" name="capitalCaucion" data-min="1" required placeholder="Ej: 50.000" data-fmt="money" data-prefix="$">
                     </div>
 
                     <div class="form-group">
                         <label for="tasaCaucion">📈 TNA - Tasa Nominal Anual (%)</label>
-                        <input type="number" id="tasaCaucion" name="tasaCaucion" min="0.01" step="0.01" required placeholder="Ej: 45.2">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="tasaCaucion" name="tasaCaucion" data-min="0.01" required placeholder="Ej: 45,2" data-fmt="pct" data-suffix="%">
                         <div class="cotizacion-meta" id="tasaCaucionMeta">Consultando última tasa de caución (MAE)...</div>
                     </div>
                 </div>
@@ -446,7 +451,7 @@
 
                 <div id="diasCustomCaucionGroup" class="form-group" style="display: none;">
                     <label for="diasCustomCaucion">🗓️ Cantidad de días</label>
-                    <input type="number" id="diasCustomCaucion" name="diasCustomCaucion" min="1" max="365" step="1" placeholder="Ej: 10">
+                    <input type="number" inputmode="numeric" id="diasCustomCaucion" name="diasCustomCaucion" min="1" max="365" step="1" placeholder="Ej: 10" data-suffix="días">
                 </div>
 
                 <div class="form-group">
@@ -462,17 +467,17 @@
 
                 <div id="comisionFija" class="form-group">
                     <label for="comision">📊 Comisión del broker (%)</label>
-                    <input type="number" id="comision" name="comision" min="0" max="10" step="0.01" value="0" placeholder="Ej: 0.5">
+                    <input type="text" inputmode="decimal" autocomplete="off" id="comision" name="comision" data-min="0" data-max="10" value="0" placeholder="Ej: 0,5" data-fmt="pct" data-suffix="%">
                 </div>
 
                 <div id="comisionPersonalizada" class="comision-personalizada" style="display: none;">
                     <div class="form-group">
                         <label for="arancel">🏛️ Arancel (%)</label>
-                        <input type="number" id="arancel" name="arancel" min="0" max="5" step="0.001" value="2.705" placeholder="Ej: 2.705">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="arancel" name="arancel" data-min="0" data-max="5" value="2.705" placeholder="Ej: 2,705" data-fmt="pct" data-suffix="%">
                     </div>
                     <div class="form-group">
                         <label for="derechoMercado">🏢 Derecho de Mercado (%)</label>
-                        <input type="number" id="derechoMercado" name="derechoMercado" min="0" max="5" step="0.001" value="0.501" placeholder="Ej: 0.501">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="derechoMercado" name="derechoMercado" data-min="0" data-max="5" value="0.501" placeholder="Ej: 0,501" data-fmt="pct" data-suffix="%">
                     </div>
                     <div class="info-iva">
                         <strong>ℹ️ IVA:</strong> Se calcula automáticamente como 21% sobre (Arancel + Derecho de Mercado)
@@ -482,11 +487,11 @@
                 <div id="comisionP2" class="comision-personalizada" style="display: none;">
                     <div class="form-group">
                         <label for="comisionP2Pct">💳 Comisión de compra (%, sobre el capital)</label>
-                        <input type="number" id="comisionP2Pct" name="comisionP2Pct" min="0" max="5" step="0.00001" value="0.00493" placeholder="Ej: 0.00493">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="comisionP2Pct" name="comisionP2Pct" data-min="0" data-max="5" value="0.00493" placeholder="Ej: 0,00493" data-fmt="pct" data-suffix="%">
                     </div>
                     <div class="form-group">
                         <label for="derechoP2Pct">🏢 Derechos de Mercado (%, sobre el capital)</label>
-                        <input type="number" id="derechoP2Pct" name="derechoP2Pct" min="0" max="5" step="0.00001" value="0.0005" placeholder="Ej: 0.0005">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="derechoP2Pct" name="derechoP2Pct" data-min="0" data-max="5" value="0.0005" placeholder="Ej: 0,0005" data-fmt="pct" data-suffix="%">
                     </div>
                     <div class="info-iva">
                         <strong>ℹ️ IVA discriminado:</strong> A diferencia de la opción "Personalizada", acá el 21% de IVA se calcula por separado sobre la Comisión y sobre el Derecho de Mercado (no sobre la suma), y ambos porcentajes se aplican sobre el capital invertido, no sobre los intereses.
@@ -496,22 +501,22 @@
                 <div id="comisionP3" class="comision-personalizada" style="display:none;">
                     <div class="form-group">
                         <label for="arancelP3">🏛️ Arancel (% sobre intereses)</label>
-                        <input type="number" id="arancelP3" value="9.73" step="0.01">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="arancelP3" value="9.73" data-fmt="pct" data-suffix="%">
                     </div>
                     <div class="form-group">
                         <label for="derechoFijoP3">🏢 Derecho fijo ($)</label>
-                        <input type="number" id="derechoFijoP3" value="75" step="0.01">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="derechoFijoP3" value="75" data-fmt="money" data-prefix="$">
                     </div>
                 </div>
 
                 <div id="comisionP4" class="comision-personalizada" style="display:none;">
                     <div class="form-group">
                         <label for="comisionP4Tasa">💳 Tasa de comisión diaria (% / 30 días)</label>
-                        <input type="number" id="comisionP4Tasa" value="0.00148" step="0.00001" placeholder="Ej: 0.00148">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="comisionP4Tasa" value="0.00148" placeholder="Ej: 0,00148" data-fmt="pct" data-suffix="%">
                     </div>
                     <div class="form-group">
                         <label for="derechoP4Tasa">🏢 Tasa de derechos diaria (% / 90 días)</label>
-                        <input type="number" id="derechoP4Tasa" value="0.00045" step="0.00001" placeholder="Ej: 0.00045">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="derechoP4Tasa" value="0.00045" placeholder="Ej: 0,00045" data-fmt="pct" data-suffix="%">
                     </div>
                     <div class="info-iva">
                         <strong>ℹ️ Fórmula:</strong><br>
@@ -522,8 +527,6 @@
                         • Todos se descuentan del capital inicial
                     </div>
                 </div>
-
-                <button type="submit" class="btn">🚀 Calcular Caución</button>
             </form>
 
             <div id="resultsCaucion" class="results">
@@ -632,26 +635,24 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="saldoInicialTNA">💵 Saldo inicial (ARS)</label>
-                        <input type="number" id="saldoInicialTNA" name="saldoInicialTNA" min="0.01" step="0.01" required placeholder="Ej: 100000">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="saldoInicialTNA" name="saldoInicialTNA" data-min="0.01" required placeholder="Ej: 100.000" data-fmt="money" data-prefix="$">
                     </div>
 
                     <div class="form-group">
                         <label for="diasTNA">📅 Plazo transcurrido (días)</label>
-                        <input type="number" id="diasTNA" name="diasTNA" min="1" required placeholder="Ej: 30, 90, 180">
+                        <input type="number" inputmode="numeric" id="diasTNA" name="diasTNA" min="1" required placeholder="Ej: 30, 90, 180" data-suffix="días" data-chips="7,30,60,90,180">
                     </div>
                 </div>
 
                 <div id="campoSaldoFinalTNA" class="form-group">
                     <label for="saldoFinalTNA">💰 Saldo final (ARS)</label>
-                    <input type="number" id="saldoFinalTNA" name="saldoFinalTNA" min="0.01" step="0.01" placeholder="Ej: 108500">
+                    <input type="text" inputmode="decimal" autocomplete="off" id="saldoFinalTNA" name="saldoFinalTNA" data-min="0.01" placeholder="Ej: 108.500" data-fmt="money" data-prefix="$">
                 </div>
 
                 <div id="campoRendimientoTNA" class="form-group" style="display: none;">
                     <label for="rendimientoTNA">📈 Rendimiento obtenido / intereses ganados (ARS)</label>
-                    <input type="number" id="rendimientoTNA" name="rendimientoTNA" min="0" step="0.01" placeholder="Ej: 8500">
+                    <input type="text" inputmode="decimal" autocomplete="off" id="rendimientoTNA" name="rendimientoTNA" data-min="0" placeholder="Ej: 8.500" data-fmt="money" data-prefix="$">
                 </div>
-
-                <button type="submit" class="btn">🚀 Calcular TNA</button>
             </form>
 
             <div id="resultsTNA" class="results">
@@ -697,20 +698,18 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="capitalComparador">💵 Capital a invertir (ARS)</label>
-                        <input type="number" id="capitalComparador" name="capitalComparador" min="1" step="0.01" required placeholder="Ej: 100000">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="capitalComparador" name="capitalComparador" data-min="1" required placeholder="Ej: 100.000" data-fmt="money" data-prefix="$">
                     </div>
 
                     <div class="form-group">
                         <label for="diasComparador">📅 Plazo (días), igual para todas las opciones</label>
-                        <input type="number" id="diasComparador" name="diasComparador" min="1" required placeholder="Ej: 30">
+                        <input type="number" inputmode="numeric" id="diasComparador" name="diasComparador" min="1" required placeholder="Ej: 30" data-suffix="días" data-chips="1,7,30,60,90">
                     </div>
                 </div>
 
                 <div id="filasComparador"></div>
 
                 <button type="button" class="btn-agregar-fila" onclick="agregarFilaComparador()">➕ Agregar opción a comparar</button>
-
-                <button type="submit" class="btn">🚀 Comparar</button>
             </form>
 
             <div id="resultsComparador" class="results">
@@ -837,7 +836,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="calcInfMonto">💰 Monto inicial (opcional)</label>
-                    <input type="number" id="calcInfMonto" placeholder="Ej: 100000" oninput="calcularInflacionEntreFechasUI()">
+                    <input type="text" inputmode="decimal" autocomplete="off" id="calcInfMonto" placeholder="Ej: 100.000" oninput="calcularInflacionEntreFechasUI()" data-fmt="money" data-prefix="$">
                 </div>
             </div>
 
@@ -988,6 +987,7 @@
                 meta.textContent = `Dólar ${nombresDolar[tipoDolar] || tipoDolar} · Actualizado: ${fechaTexto} · Fuente: DolarAPI`;
 
                 if (btnCalcular) btnCalcular.disabled = false;
+                if (window.pfUx) window.pfUx.recalcular('dolaresForm');
             } catch (error) {
                 console.error('Error al obtener cotización:', error);
                 cotizacionActual = null;
@@ -996,6 +996,7 @@
                 ventaDisplay.textContent = '—';
                 meta.textContent = '⚠️ No se pudo obtener la cotización en vivo. Reintentá con el botón de abajo.';
                 if (btnCalcular) btnCalcular.disabled = true;
+                if (window.pfUx) window.pfUx.recalcular('dolaresForm');
             } finally {
                 btnRefresh.disabled = false;
             }
@@ -1276,7 +1277,7 @@
             } else {
                 grupoBanco.style.display = 'none';
                 tasaInput.disabled = false;
-                tasaInput.placeholder = 'Ej: 35.5';
+                tasaInput.placeholder = 'Ej: 35,5';
             }
         }
 
@@ -1291,7 +1292,8 @@
             const tasa = option && option.dataset.tasa ? Number(option.dataset.tasa) : null;
 
             if (Number.isFinite(tasa)) {
-                tasaInput.value = tasa.toFixed(2);
+                tasaInput.value = tasa.toFixed(2).replace('.', ',');
+                if (window.pfUx) window.pfUx.recalcular('calculatorForm');
             }
         }
 
@@ -1880,7 +1882,7 @@
             acumuladaDisplay.textContent = formatearPorcentajeIPC(variacion);
             meta.textContent = `Entre ${formatearMesIPC(desde)} y ${formatearMesIPC(hasta)} · Serie: IPC Nivel General Nacional (INDEC)`;
 
-            const monto = montoInput ? parseFloat(montoInput.value) : NaN;
+            const monto = montoInput ? leerNumero(montoInput) : NaN;
             if (montoRow && montoResult) {
                 if (Number.isFinite(monto) && monto > 0) {
                     const equivalente = monto * (1 + variacion / 100);
@@ -2080,9 +2082,9 @@
         document.getElementById('calculatorForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const capital = parseFloat(document.getElementById('capital').value);
-            const tasaAnual = parseFloat(document.getElementById('tasa').value) / 100;
-            const plazo = parseInt(document.getElementById('plazo').value);
+            const capital = leerNumero(document.getElementById('capital'));
+            const tasaAnual = leerNumero(document.getElementById('tasa')) / 100;
+            const plazo = Math.trunc(leerNumero(document.getElementById('plazo')));
             const capitalizacion = document.getElementById('capitalizacion').value;
             
             let capitalFinal;
@@ -2117,19 +2119,17 @@
             document.getElementById('rendimientoMensual').textContent = rendimientoMensual.toFixed(2) + '%';
             
             document.getElementById('results').style.display = 'grid';
-            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
         });
 
         // Calculadora de Cauciones
         document.getElementById('caucionesForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const capital = parseFloat(document.getElementById('capitalCaucion').value);
-            const tnaAnual = parseFloat(document.getElementById('tasaCaucion').value) / 100;
+            const capital = leerNumero(document.getElementById('capitalCaucion'));
+            const tnaAnual = leerNumero(document.getElementById('tasaCaucion')) / 100;
             const dias = getDiasCaucion();
             if (!dias) {
-                alert('Ingresá una cantidad de días válida (entre 1 y 365).');
-                document.getElementById('diasCustomCaucion').focus();
+                this.dataset.mensaje = 'Ingresá una cantidad de días válida (entre 1 y 365).';
                 return;
             }
             const tipoComision = document.getElementById('tipoComision').value;
@@ -2143,7 +2143,7 @@
             let costoIVA = 0;
             
             if (tipoComision === 'fija') {
-                const comisionPorcentaje = parseFloat(document.getElementById('comision').value) / 100;
+                const comisionPorcentaje = leerNumero(document.getElementById('comision')) / 100;
                 totalCostos = interesesBrutos * comisionPorcentaje;
                 
                 // Ocultar desgloses de las otras opciones
@@ -2153,8 +2153,8 @@
                 document.getElementById('detalleP4').style.display = 'none';
             } else if (tipoComision === 'personalizada') {
                 // Comisión personalizada
-                const arancelPorcentaje = parseFloat(document.getElementById('arancel').value) / 100;
-                const derechoMercadoPorcentaje = parseFloat(document.getElementById('derechoMercado').value) / 100;
+                const arancelPorcentaje = leerNumero(document.getElementById('arancel')) / 100;
+                const derechoMercadoPorcentaje = leerNumero(document.getElementById('derechoMercado')) / 100;
                 
                 // Calcular cada componente sobre los intereses brutos
                 costoArancel = interesesBrutos * arancelPorcentaje;
@@ -2176,8 +2176,8 @@
             } else if (tipoComision === 'personalizada2') {
                 // Personalizada 2: comisión y derecho de mercado se calculan sobre el CAPITAL (no sobre los intereses),
                 // y el IVA (21%) se calcula por separado para cada uno de los dos conceptos.
-                const comisionP2Porcentaje = parseFloat(document.getElementById('comisionP2Pct').value) / 100;
-                const derechoP2Porcentaje = parseFloat(document.getElementById('derechoP2Pct').value) / 100;
+                const comisionP2Porcentaje = leerNumero(document.getElementById('comisionP2Pct')) / 100;
+                const derechoP2Porcentaje = leerNumero(document.getElementById('derechoP2Pct')) / 100;
                 
                 const costoComisionP2 = capital * comisionP2Porcentaje;
                 const costoIvaComisionP2 = costoComisionP2 * 0.21;
@@ -2196,8 +2196,8 @@
                 document.getElementById('costoDerechoP2').textContent = formatCurrency(costoDerechoP2);
                 document.getElementById('costoIvaDerechoP2').textContent = formatCurrency(costoIvaDerechoP2);
             } else if (tipoComision === 'personalizada3') {
-                const arancel = interesesBrutos * (parseFloat(document.getElementById('arancelP3').value) / 100);
-                const derecho = parseFloat(document.getElementById('derechoFijoP3').value);
+                const arancel = interesesBrutos * (leerNumero(document.getElementById('arancelP3')) / 100);
+                const derecho = leerNumero(document.getElementById('derechoFijoP3'));
                 const iva = (arancel + derecho) * 0.21;
                 totalCostos = arancel + derecho + iva;
                 
@@ -2210,8 +2210,8 @@
                 document.getElementById('costoIvaP3').textContent = formatCurrency(iva);
             } else if (tipoComision === 'personalizada4') {
                 // Personalizada 4: Comisión + Derechos variables por plazo, con IVA discriminado por separado
-                const tasaComision = parseFloat(document.getElementById('comisionP4Tasa').value);
-                const tasaDerechos = parseFloat(document.getElementById('derechoP4Tasa').value);
+                const tasaComision = leerNumero(document.getElementById('comisionP4Tasa'));
+                const tasaDerechos = leerNumero(document.getElementById('derechoP4Tasa'));
                 
                 const costoComisionP4 = (tasaComision / 30 * dias) * capital;
                 const derechosBase = (tasaDerechos / 90 * dias * capital);
@@ -2257,15 +2257,14 @@
             document.getElementById('gananciaDiaria').textContent = formatCurrency(gananciaDiaria);
             
             document.getElementById('resultsCaucion').style.display = 'grid';
-            document.getElementById('resultsCaucion').scrollIntoView({ behavior: 'smooth' });
         });
 
         // Calculadora de Acciones
         document.getElementById('accionesForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const cantidadAcciones = parseInt(document.getElementById('cantidadAccionesCompra').value);
-            const precioAccion = parseFloat(document.getElementById('precioAccion').value);
+            const cantidadAcciones = Math.trunc(leerNumero(document.getElementById('cantidadAccionesCompra')));
+            const precioAccion = leerNumero(document.getElementById('precioAccion'));
             const tipoComision = document.getElementById('tipoComisionAccion').value;
             
             // Valor bruto de las acciones (cantidad × precio)
@@ -2277,15 +2276,15 @@
             let costoIVA = 0;
             
             if (tipoComision === 'fija') {
-                const comisionPorcentaje = parseFloat(document.getElementById('comisionAccion').value) / 100;
+                const comisionPorcentaje = leerNumero(document.getElementById('comisionAccion')) / 100;
                 totalCostos = valorBrutoAcciones * comisionPorcentaje;
                 
                 // Ocultar desglose personalizado
                 document.getElementById('detallePersonalizadoAcciones').style.display = 'none';
             } else {
                 // Comisión personalizada
-                const arancelPorcentaje = parseFloat(document.getElementById('arancelAccion').value) / 100;
-                const derechoMercadoPorcentaje = parseFloat(document.getElementById('derechoMercadoAccion').value) / 100;
+                const arancelPorcentaje = leerNumero(document.getElementById('arancelAccion')) / 100;
+                const derechoMercadoPorcentaje = leerNumero(document.getElementById('derechoMercadoAccion')) / 100;
                 
                 // Calcular cada componente sobre el valor bruto de las acciones
                 costoArancel = valorBrutoAcciones * arancelPorcentaje;
@@ -2322,7 +2321,6 @@
             document.getElementById('costoPromedioAccion').textContent = formatCurrency(costoPromedioAccion);
             
             document.getElementById('resultsAcciones').style.display = 'grid';
-            document.getElementById('resultsAcciones').scrollIntoView({ behavior: 'smooth' });
         });
 
         // Función para alternar campos de comisión
@@ -2358,7 +2356,7 @@
             e.preventDefault();
 
             if (!cotizacionActual) {
-                alert('Todavía no se cargó la cotización. Esperá un momento o tocá "Actualizar cotización".');
+                this.dataset.mensaje = 'Esperando la cotización. Si no carga, tocá "Actualizar cotización".';
                 return;
             }
             
@@ -2366,7 +2364,7 @@
             
             if (operacionTipo === 'comprar') {
                 // Comprar dólares: entrego pesos, recibo USD
-                const pesosDisponibles = parseFloat(document.getElementById('pesosAInvertir').value);
+                const pesosDisponibles = leerNumero(document.getElementById('pesosAInvertir'));
                 const cotizacionVenta = cotizacionActual.venta; // Uso cotización de venta
                 const dolaresRecibidos = pesosDisponibles / cotizacionVenta;
                 
@@ -2382,7 +2380,7 @@
 
             } else if (operacionTipo === 'comprar-objetivo') {
                 // Comprar una cantidad específica de USD: ¿cuántos pesos necesito?
-                const dolaresObjetivo = parseFloat(document.getElementById('dolaresObjetivo').value);
+                const dolaresObjetivo = leerNumero(document.getElementById('dolaresObjetivo'));
                 const cotizacionVenta = cotizacionActual.venta; // Uso cotización de venta
                 const pesosNecesarios = dolaresObjetivo * cotizacionVenta;
 
@@ -2398,7 +2396,7 @@
 
             } else {
                 // Vender dólares: entrego USD, recibo pesos
-                const dolaresAVender = parseFloat(document.getElementById('dolaresAVender').value);
+                const dolaresAVender = leerNumero(document.getElementById('dolaresAVender'));
                 const cotizacionCompra = cotizacionActual.compra; // Uso cotización de compra
                 const pesosRecibidos = dolaresAVender * cotizacionCompra;
                 
@@ -2419,7 +2417,6 @@
             document.getElementById('spreadBancario').textContent = `${formatCurrency(spread)} (${spreadPorcentaje.toFixed(2)}%)`;
             
             document.getElementById('resultsDolares').style.display = 'grid';
-            document.getElementById('resultsDolares').scrollIntoView({ behavior: 'smooth' });
         });
 
         // Función para alternar campos de comisión en acciones
@@ -2485,17 +2482,17 @@
             e.preventDefault();
 
             const metodo = document.getElementById('metodoTNA').value;
-            const saldoInicial = parseFloat(document.getElementById('saldoInicialTNA').value);
-            const dias = parseInt(document.getElementById('diasTNA').value);
+            const saldoInicial = leerNumero(document.getElementById('saldoInicialTNA'));
+            const dias = Math.trunc(leerNumero(document.getElementById('diasTNA')));
 
             let saldoFinal;
             let intereses;
 
             if (metodo === 'saldos') {
-                saldoFinal = parseFloat(document.getElementById('saldoFinalTNA').value);
+                saldoFinal = leerNumero(document.getElementById('saldoFinalTNA'));
                 intereses = saldoFinal - saldoInicial;
             } else {
-                intereses = parseFloat(document.getElementById('rendimientoTNA').value);
+                intereses = leerNumero(document.getElementById('rendimientoTNA'));
                 saldoFinal = saldoInicial + intereses;
             }
 
@@ -2518,7 +2515,6 @@
             document.getElementById('teaResult').textContent = tea.toFixed(2) + '%';
 
             document.getElementById('resultsTNA').style.display = 'grid';
-            document.getElementById('resultsTNA').scrollIntoView({ behavior: 'smooth' });
         });
 
         // ==========================================
@@ -2554,7 +2550,7 @@
                 </div>
                 <div class="form-group">
                     <label>📈 TNA - Tasa Nominal Anual (%)</label>
-                    <input type="number" id="tnaComp${id}" min="0" step="0.01" value="${tnaPorTipo[tipoInicial]}" required>
+                    <input type="text" inputmode="decimal" autocomplete="off" id="tnaComp${id}" data-min="0" value="${tnaPorTipo[tipoInicial]}" required data-fmt="pct" data-suffix="%">
                 </div>
                 <div id="camposEspecificosComp${id}"></div>
             `;
@@ -2602,7 +2598,7 @@
                 contenedor.innerHTML = `
                     <div class="form-group">
                         <label>💳 Comisión sobre el interés (%)</label>
-                        <input type="number" id="comisionSimpleComp${id}" min="0" step="0.01" value="0">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="comisionSimpleComp${id}" data-min="0" value="0" data-fmt="pct" data-suffix="%">
                     </div>
                 `;
             }
@@ -2617,7 +2613,7 @@
                 contenedor.innerHTML = `
                     <div class="form-group">
                         <label>📊 Comisión del broker (%)</label>
-                        <input type="number" id="comisionFijaComp${id}" min="0" max="10" step="0.01" value="0">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="comisionFijaComp${id}" data-min="0" data-max="10" value="0" data-fmt="pct" data-suffix="%">
                     </div>
                 `;
             } else if (tipoComision === 'personalizada') {
@@ -2625,11 +2621,11 @@
                     <div class="comision-personalizada">
                         <div class="form-group">
                             <label>🏛️ Arancel (%)</label>
-                            <input type="number" id="arancelComp${id}" min="0" max="5" step="0.001" value="2.705">
+                            <input type="text" inputmode="decimal" autocomplete="off" id="arancelComp${id}" data-min="0" data-max="5" value="2.705" data-fmt="pct" data-suffix="%">
                         </div>
                         <div class="form-group">
                             <label>🏢 Derecho de Mercado (%)</label>
-                            <input type="number" id="derechoMercadoComp${id}" min="0" max="5" step="0.001" value="0.501">
+                            <input type="text" inputmode="decimal" autocomplete="off" id="derechoMercadoComp${id}" data-min="0" data-max="5" value="0.501" data-fmt="pct" data-suffix="%">
                         </div>
                         <div class="info-iva"><strong>ℹ️ IVA:</strong> 21% sobre (Arancel + Derecho de Mercado)</div>
                     </div>
@@ -2639,11 +2635,11 @@
                     <div class="comision-personalizada">
                         <div class="form-group">
                             <label>💳 Comisión de compra (%, sobre el capital)</label>
-                            <input type="number" id="comisionP2PctComp${id}" min="0" max="5" step="0.00001" value="0.00493">
+                            <input type="text" inputmode="decimal" autocomplete="off" id="comisionP2PctComp${id}" data-min="0" data-max="5" value="0.00493" data-fmt="pct" data-suffix="%">
                         </div>
                         <div class="form-group">
                             <label>🏢 Derechos de Mercado (%, sobre el capital)</label>
-                            <input type="number" id="derechoP2PctComp${id}" min="0" max="5" step="0.00001" value="0.0005">
+                            <input type="text" inputmode="decimal" autocomplete="off" id="derechoP2PctComp${id}" data-min="0" data-max="5" value="0.0005" data-fmt="pct" data-suffix="%">
                         </div>
                         <div class="info-iva"><strong>ℹ️ IVA discriminado:</strong> 21% por separado sobre Comisión y sobre Derecho de Mercado, ambos calculados sobre el capital.</div>
                     </div>
@@ -2653,11 +2649,11 @@
                     <div class="comision-personalizada">
                         <div class="form-group">
                             <label>🏛️ Arancel (% sobre intereses)</label>
-                            <input type="number" id="arancelP3Comp${id}" step="0.01" value="9.73">
+                            <input type="text" inputmode="decimal" autocomplete="off" id="arancelP3Comp${id}" value="9.73" data-fmt="pct" data-suffix="%">
                         </div>
                         <div class="form-group">
                             <label>🏢 Derecho fijo ($)</label>
-                            <input type="number" id="derechoFijoP3Comp${id}" step="0.01" value="75">
+                            <input type="text" inputmode="decimal" autocomplete="off" id="derechoFijoP3Comp${id}" value="75" data-fmt="money" data-prefix="$">
                         </div>
                     </div>
                 `;
@@ -2666,11 +2662,11 @@
                     <div class="comision-personalizada">
                         <div class="form-group">
                             <label>💳 Tasa de comisión diaria (% / 30 días)</label>
-                            <input type="number" id="comisionP4TasaComp${id}" value="0.00148" step="0.00001">
+                            <input type="text" inputmode="decimal" autocomplete="off" id="comisionP4TasaComp${id}" value="0.00148" data-fmt="pct" data-suffix="%">
                         </div>
                         <div class="form-group">
                             <label>🏢 Tasa de derechos diaria (% / 90 días)</label>
-                            <input type="number" id="derechoP4TasaComp${id}" value="0.00045" step="0.00001">
+                            <input type="text" inputmode="decimal" autocomplete="off" id="derechoP4TasaComp${id}" value="0.00045" data-fmt="pct" data-suffix="%">
                         </div>
                     </div>
                 `;
@@ -2682,6 +2678,8 @@
         function inicializarComparadorSiHaceFalta() {
             if (comparadorInicializado) return;
             comparadorInicializado = true;
+            // Si hay opciones guardadas de una visita anterior, se restauran esas
+            if (window.pfUx && window.pfUx.restaurarComparador()) return;
             agregarFilaComparador('plazoFijo');
             agregarFilaComparador('caucion');
         }
@@ -2692,32 +2690,32 @@
             let totalCostos = 0;
 
             if (tipoComision === 'fija') {
-                const comisionPorcentaje = parseFloat(document.getElementById(`comisionFijaComp${id}`).value) / 100;
+                const comisionPorcentaje = leerNumero(document.getElementById(`comisionFijaComp${id}`)) / 100;
                 totalCostos = interesBruto * comisionPorcentaje;
             } else if (tipoComision === 'personalizada') {
-                const arancelPorcentaje = parseFloat(document.getElementById(`arancelComp${id}`).value) / 100;
-                const derechoMercadoPorcentaje = parseFloat(document.getElementById(`derechoMercadoComp${id}`).value) / 100;
+                const arancelPorcentaje = leerNumero(document.getElementById(`arancelComp${id}`)) / 100;
+                const derechoMercadoPorcentaje = leerNumero(document.getElementById(`derechoMercadoComp${id}`)) / 100;
                 const costoArancel = interesBruto * arancelPorcentaje;
                 const costoDerechoMercado = interesBruto * derechoMercadoPorcentaje;
                 const costoIVA = (costoArancel + costoDerechoMercado) * 0.21;
                 totalCostos = costoArancel + costoDerechoMercado + costoIVA;
             } else if (tipoComision === 'personalizada2') {
-                const comisionP2Porcentaje = parseFloat(document.getElementById(`comisionP2PctComp${id}`).value) / 100;
-                const derechoP2Porcentaje = parseFloat(document.getElementById(`derechoP2PctComp${id}`).value) / 100;
+                const comisionP2Porcentaje = leerNumero(document.getElementById(`comisionP2PctComp${id}`)) / 100;
+                const derechoP2Porcentaje = leerNumero(document.getElementById(`derechoP2PctComp${id}`)) / 100;
                 const costoComisionP2 = capital * comisionP2Porcentaje;
                 const costoIvaComisionP2 = costoComisionP2 * 0.21;
                 const costoDerechoP2 = capital * derechoP2Porcentaje;
                 const costoIvaDerechoP2 = costoDerechoP2 * 0.21;
                 totalCostos = costoComisionP2 + costoIvaComisionP2 + costoDerechoP2 + costoIvaDerechoP2;
             } else if (tipoComision === 'personalizada3') {
-                const arancel = interesBruto * (parseFloat(document.getElementById(`arancelP3Comp${id}`).value) / 100);
-                const derecho = parseFloat(document.getElementById(`derechoFijoP3Comp${id}`).value);
+                const arancel = interesBruto * (leerNumero(document.getElementById(`arancelP3Comp${id}`)) / 100);
+                const derecho = leerNumero(document.getElementById(`derechoFijoP3Comp${id}`));
                 const iva = (arancel + derecho) * 0.21;
                 totalCostos = arancel + derecho + iva;
             } else if (tipoComision === 'personalizada4') {
-                const dias = parseInt(document.querySelector('#diasComparador').value);
-                const tasaComision = parseFloat(document.getElementById(`comisionP4TasaComp${id}`).value);
-                const tasaDerechos = parseFloat(document.getElementById(`derechoP4TasaComp${id}`).value);
+                const dias = Math.trunc(leerNumero(document.getElementById('diasComparador')));
+                const tasaComision = leerNumero(document.getElementById(`comisionP4TasaComp${id}`));
+                const tasaDerechos = leerNumero(document.getElementById(`derechoP4TasaComp${id}`));
                 
                 const costoComisionP4 = (tasaComision / 30 * dias) * capital;
                 const derechosBase = (tasaDerechos / 90 * dias * capital);
@@ -2734,12 +2732,12 @@
         document.getElementById('comparadorForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const capital = parseFloat(document.getElementById('capitalComparador').value);
-            const dias = parseInt(document.getElementById('diasComparador').value);
+            const capital = leerNumero(document.getElementById('capitalComparador'));
+            const dias = Math.trunc(leerNumero(document.getElementById('diasComparador')));
 
             const filas = document.querySelectorAll('#filasComparador .fila-opcion');
             if (filas.length === 0) {
-                alert('Agregá al menos una opción para comparar.');
+                this.dataset.mensaje = 'Agregá al menos una opción para comparar.';
                 return;
             }
 
@@ -2749,7 +2747,7 @@
                 const id = fila.id.replace('filaComparador', '');
                 const nombre = document.getElementById(`nombreComp${id}`).value || `Opción ${id}`;
                 const tipoInstrumento = document.getElementById(`tipoInstrumentoComp${id}`).value;
-                const tna = parseFloat(document.getElementById(`tnaComp${id}`).value) / 100;
+                const tna = leerNumero(document.getElementById(`tnaComp${id}`)) / 100;
 
                 let interesNeto;
 
@@ -2770,7 +2768,7 @@
                     interesNeto = calcularNetoCaucionComp(id, capital, interesBruto);
                 } else {
                     const interesBruto = capital * tna * (dias / 365);
-                    const comisionPct = parseFloat(document.getElementById(`comisionSimpleComp${id}`).value) / 100;
+                    const comisionPct = leerNumero(document.getElementById(`comisionSimpleComp${id}`)) / 100;
                     interesNeto = interesBruto * (1 - comisionPct);
                 }
 
@@ -2799,7 +2797,6 @@
             });
 
             document.getElementById('resultsComparador').style.display = 'grid';
-            document.getElementById('resultsComparador').scrollIntoView({ behavior: 'smooth' });
         });
 
         // Función para cambiar tabs
@@ -2827,20 +2824,6 @@
                 boton.classList.add('active');
             }
             
-            // Ocultar resultados cuando se cambia de tab
-            const resultados = document.getElementById('results');
-            if (resultados) resultados.style.display = 'none';
-            const resultadosCaucion = document.getElementById('resultsCaucion');
-            if (resultadosCaucion) resultadosCaucion.style.display = 'none';
-            const resultadosAcciones = document.getElementById('resultsAcciones');
-            if (resultadosAcciones) resultadosAcciones.style.display = 'none';
-            const resultadosDolares = document.getElementById('resultsDolares');
-            if (resultadosDolares) resultadosDolares.style.display = 'none';
-            const resultadosTNA = document.getElementById('resultsTNA');
-            if (resultadosTNA) resultadosTNA.style.display = 'none';
-            const resultadosComparador = document.getElementById('resultsComparador');
-            if (resultadosComparador) resultadosComparador.style.display = 'none';
-
             if (tabName === 'comparador') {
                 inicializarComparadorSiHaceFalta();
             }
@@ -2855,8 +2838,9 @@
         
         // Manejar cambios de hash y cargar la sección correcta al iniciar o actualizar
         function handleHashChange() {
-            const hash = window.location.hash.substring(1);
-            if (hash) {
+            // El hash puede traer parámetros compartidos: #plazo-fijo?capital=100000&plazo=30
+            const hash = window.location.hash.substring(1).split('?')[0];
+            if (hash && document.getElementById(hash)) {
                 switchTab(hash);
             } else {
                 // Si no hay hash, cargar la primera sección por defecto
@@ -2916,7 +2900,10 @@
                 return;
             }
             // No pisar lo que el usuario escribió a mano
-            if (!input.dataset.manual) input.value = d.tna.toFixed(2);
+            if (!input.dataset.manual) {
+                input.value = d.tna.toFixed(2).replace('.', ',');
+                if (window.pfUx) window.pfUx.recalcular('caucionesForm');
+            }
             const dia = d.fecha ? d.fecha.slice(0, 10) : '';
             meta.textContent = `Última tasa MAE a ${Number(plazo)} día(s): ${d.tna.toFixed(2)}% TNA · ${dia} · Fuente: A3 Mercados`;
         }
@@ -2927,7 +2914,7 @@
         function getDiasCaucion() {
             const sel = document.getElementById('plazoCaucion').value;
             if (sel !== 'custom') return parseInt(sel);
-            const dias = parseInt(document.getElementById('diasCustomCaucion').value);
+            const dias = Math.trunc(leerNumero(document.getElementById('diasCustomCaucion')));
             return Number.isInteger(dias) && dias >= 1 && dias <= 365 ? dias : null;
         }
 
@@ -2973,5 +2960,6 @@
             });
         });
     </script>
+    <script src="ux.js"></script>
 </body>
 </html>
