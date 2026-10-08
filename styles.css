@@ -17,7 +17,7 @@
     /* Texto: solo 3 niveles en todo el sitio */
     --text-title: #33404d;
     --text-body: #5a6270;
-    --text-muted: #8a90a2;
+    --text-muted: #6b7183;
 
     /* Bordes y fondos neutros */
     --border-light: #eef0f6;
@@ -45,6 +45,121 @@
     --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.04);
     --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.06);
     --shadow-container: 0 20px 40px rgba(0, 0, 0, 0.1);
+
+    /* Tintes de marca y superficies que cambian con el tema */
+    --brand-text: #4a5bcf;
+    --brand-tint: rgba(102, 126, 234, 0.1);
+    --brand-tint-strong: rgba(102, 126, 234, 0.2);
+    --brand-border: rgba(102, 126, 234, 0.3);
+    --brand-ring: rgba(102, 126, 234, 0.25);
+    --on-brand: #ffffff;
+    --input-bg: #ffffff;
+    --input-text: var(--text-title);
+    --desglose-bg: #fafafe;
+    --desglose-border: #d8d9ec;
+    --warning-tint: rgba(255, 193, 7, 0.1);
+    --warning-border: rgba(255, 193, 7, 0.3);
+    --sidebar-1: var(--brand-1);
+    --sidebar-2: var(--brand-2);
+    --sidebar-active-bg: rgba(255, 255, 255, 0.95);
+    --sidebar-active-text: #4c5fd5;
+
+    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+    color-scheme: light;
+}
+
+/* ===== Modo oscuro =====
+   Automático según el sistema, salvo que se elija "claro" u "oscuro" a mano
+   (data-theme en <html>, lo maneja ux.js). Los dos bloques son iguales. */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --brand-1: #8a9cf5;
+        --brand-2: #a17fd6;
+        --accent-market: #5cb8ff;
+        --accent-best: #ffa64d;
+        --accent-regulatory: #b57cff;
+        --accent-ipc: #3ccfae;
+        --accent-risk: #ff7b6e;
+        --accent-danger: #f06a75;
+        --accent-danger-dark: #ff9aa1;
+        --accent-warning-dark: #e9c65f;
+        --text-title: #e8eaf2;
+        --text-body: #b6bbca;
+        --text-muted: #8b91a4;
+        --border-light: #262a36;
+        --border-medium: #2f3443;
+        --border-input: #3a4152;
+        --surface: #181b24;
+        --surface-tint: #1f2330;
+        --page-bg: #0e1016;
+        --surface-tint-brand: rgba(138, 156, 245, 0.08);
+        --surface-tint-danger: #2a171a;
+        --surface-tint-winner: #2c2614;
+        --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
+        --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.35);
+        --shadow-container: 0 20px 40px rgba(0, 0, 0, 0.5);
+        --brand-text: #9aa9f7;
+        --brand-tint: rgba(138, 156, 245, 0.14);
+        --brand-tint-strong: rgba(138, 156, 245, 0.24);
+        --brand-border: rgba(138, 156, 245, 0.35);
+        --brand-ring: rgba(138, 156, 245, 0.35);
+        --on-brand: #10131d;
+        --input-bg: #12151d;
+        --desglose-bg: #1c2029;
+        --desglose-border: #363c4d;
+        --warning-tint: rgba(233, 198, 95, 0.1);
+        --warning-border: rgba(233, 198, 95, 0.3);
+        --sidebar-1: #3a48a0;
+        --sidebar-2: #532f78;
+        --sidebar-active-bg: #e8eaf2;
+        --sidebar-active-text: #2f3c8f;
+        color-scheme: dark;
+    }
+}
+
+:root[data-theme="dark"] {
+    --brand-1: #8a9cf5;
+    --brand-2: #a17fd6;
+    --accent-market: #5cb8ff;
+    --accent-best: #ffa64d;
+    --accent-regulatory: #b57cff;
+    --accent-ipc: #3ccfae;
+    --accent-risk: #ff7b6e;
+    --accent-danger: #f06a75;
+    --accent-danger-dark: #ff9aa1;
+    --accent-warning-dark: #e9c65f;
+    --text-title: #e8eaf2;
+    --text-body: #b6bbca;
+    --text-muted: #8b91a4;
+    --border-light: #262a36;
+    --border-medium: #2f3443;
+    --border-input: #3a4152;
+    --surface: #181b24;
+    --surface-tint: #1f2330;
+    --page-bg: #0e1016;
+    --surface-tint-brand: rgba(138, 156, 245, 0.08);
+    --surface-tint-danger: #2a171a;
+    --surface-tint-winner: #2c2614;
+    --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
+    --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.35);
+    --shadow-container: 0 20px 40px rgba(0, 0, 0, 0.5);
+    --brand-text: #9aa9f7;
+    --brand-tint: rgba(138, 156, 245, 0.14);
+    --brand-tint-strong: rgba(138, 156, 245, 0.24);
+    --brand-border: rgba(138, 156, 245, 0.35);
+    --brand-ring: rgba(138, 156, 245, 0.35);
+    --on-brand: #10131d;
+    --input-bg: #12151d;
+    --desglose-bg: #1c2029;
+    --desglose-border: #363c4d;
+    --warning-tint: rgba(233, 198, 95, 0.1);
+    --warning-border: rgba(233, 198, 95, 0.3);
+    --sidebar-1: #3a48a0;
+    --sidebar-2: #532f78;
+    --sidebar-active-bg: #e8eaf2;
+    --sidebar-active-text: #2f3c8f;
+    color-scheme: dark;
 }
 
 * {
@@ -54,8 +169,9 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--font-sans);
     background: var(--page-bg);
+    color: var(--text-body);
     min-height: 100vh;
 }
 
@@ -82,7 +198,7 @@ body {
 .sidebar {
     width: 250px;
     flex-shrink: 0;
-    background: linear-gradient(180deg, var(--brand-1) 0%, var(--brand-2) 100%);
+    background: linear-gradient(180deg, var(--sidebar-1) 0%, var(--sidebar-2) 100%);
     padding: 30px 18px;
     display: flex;
     flex-direction: column;
@@ -209,34 +325,44 @@ input, select {
     border: 2px solid var(--border-input);
     border-radius: var(--radius-md);
     font-size: 16px;
-    transition: all 0.3s ease;
-    background: rgba(255, 255, 255, 0.8);
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: var(--input-bg);
+    color: var(--input-text);
 }
 
 input:focus, select:focus {
     border-color: var(--brand-1);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    transform: translateY(-2px);
+    box-shadow: 0 0 0 3px var(--brand-ring);
+}
+
+input:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+}
+
+button {
+    font-family: inherit;
 }
 
 .btn {
     background: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 100%);
-    color: white;
+    color: var(--on-brand);
     border: none;
     padding: 15px 30px;
     border-radius: var(--radius-md);
     font-size: 18px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     width: 100%;
     margin-top: 20px;
 }
 
 .btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 10px 25px var(--brand-border);
 }
 
 .btn:active {
@@ -253,14 +379,14 @@ input:focus, select:focus {
 .btn-refresh {
     background: var(--surface);
     border: 1px solid var(--brand-1);
-    color: var(--brand-1);
+    color: var(--brand-text);
     padding: 8px 14px;
     border-radius: var(--radius-sm);
     font-size: 13px;
     cursor: pointer;
     margin-top: 10px;
     width: auto;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-refresh:hover {
@@ -324,7 +450,7 @@ input:focus, select:focus {
     color: rgba(255, 255, 255, 0.8);
     cursor: pointer;
     border-radius: var(--radius-md);
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     font-weight: 600;
     font-size: 14px;
     line-height: 1.3;
@@ -332,8 +458,8 @@ input:focus, select:focus {
 }
 
 .tab-btn.active {
-    background: rgba(255, 255, 255, 0.95);
-    color: var(--brand-1);
+    background: var(--sidebar-active-bg);
+    color: var(--sidebar-active-text);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
 }
 
@@ -365,8 +491,8 @@ input:focus, select:focus {
 }
 
 .info-iva {
-    background: rgba(255, 193, 7, 0.1);
-    border: 1px solid rgba(255, 193, 7, 0.3);
+    background: var(--warning-tint);
+    border: 1px solid var(--warning-border);
     border-radius: var(--radius-sm);
     padding: 10px;
     margin-top: 10px;
@@ -382,7 +508,7 @@ input:focus, select:focus {
 .operacion-section,
 .comision-personalizada,
 .fila-opcion {
-    border: 2px solid rgba(102, 126, 234, 0.2);
+    border: 2px solid var(--brand-tint-strong);
     border-radius: var(--radius-md);
     padding: 15px;
     margin: 10px 0;
@@ -395,8 +521,8 @@ input:focus, select:focus {
 }
 
 .costos-desglose {
-    background: #fafafe;
-    border: 1px dashed #d8d9ec;
+    background: var(--desglose-bg);
+    border: 1px dashed var(--desglose-border);
     border-radius: var(--radius-sm);
     padding: 15px;
     margin: 10px 0;
@@ -543,8 +669,8 @@ input:focus, select:focus {
 }
 
 .info {
-    background: rgba(102, 126, 234, 0.1);
-    border: 1px solid rgba(102, 126, 234, 0.3);
+    background: var(--brand-tint);
+    border: 1px solid var(--brand-border);
     border-radius: var(--radius-md);
     padding: 15px;
     margin-bottom: 20px;
@@ -672,8 +798,8 @@ input:focus, select:focus {
 }
 
 .btn-quitar-fila {
-    background: rgba(220, 53, 69, 0.85);
-    color: white;
+    background: var(--accent-danger);
+    color: var(--on-brand);
     border: none;
     border-radius: var(--radius-sm);
     padding: 6px 12px;
@@ -683,13 +809,13 @@ input:focus, select:focus {
 }
 
 .btn-quitar-fila:hover {
-    background: var(--accent-danger);
+    filter: brightness(1.1);
 }
 
 .btn-agregar-fila {
-    background: rgba(102, 126, 234, 0.12);
-    border: 2px dashed rgba(102, 126, 234, 0.4);
-    color: var(--brand-1);
+    background: var(--brand-tint);
+    border: 2px dashed var(--brand-border);
+    color: var(--brand-text);
     padding: var(--space-2);
     border-radius: var(--radius-md);
     font-size: 15px;
@@ -697,11 +823,11 @@ input:focus, select:focus {
     cursor: pointer;
     width: 100%;
     margin-bottom: 20px;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-agregar-fila:hover {
-    background: rgba(102, 126, 234, 0.2);
+    background: var(--brand-tint-strong);
 }
 
 .fila-grid {
@@ -740,8 +866,8 @@ input:focus, select:focus {
 }
 
 .badge-ganador {
-    background: var(--brand-1);
-    color: white;
+    background: var(--brand-text);
+    color: var(--on-brand);
     border-radius: var(--radius-xl);
     padding: 2px 10px;
     font-size: 12px;
@@ -756,6 +882,17 @@ input:focus, select:focus {
 .valor-negativo {
     color: var(--accent-ipc);
     font-weight: 600;
+}
+
+/* Flecha además del color, para no depender solo de rojo/verde */
+.valor-positivo::before {
+    content: "▲ ";
+    font-size: 0.8em;
+}
+
+.valor-negativo::before {
+    content: "▼ ";
+    font-size: 0.8em;
 }
 
 /* ===== Gráficos (Chart.js) ===== */
@@ -800,24 +937,24 @@ input:focus, select:focus {
 
 .btn-quick-filter {
     background: var(--surface-tint-brand);
-    border: 1px solid rgba(102, 126, 234, 0.3);
-    color: var(--brand-1);
+    border: 1px solid var(--brand-border);
+    color: var(--brand-text);
     padding: 8px 14px;
     border-radius: var(--radius-sm);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-quick-filter:hover {
-    background: rgba(102, 126, 234, 0.2);
+    background: var(--brand-tint-strong);
 }
 
 .btn-quick-filter.active {
-    background: var(--brand-1);
-    color: #fff;
-    border-color: var(--brand-1);
+    background: var(--brand-text);
+    color: var(--on-brand);
+    border-color: var(--brand-text);
 }
 
 .checkbox-inline {
@@ -834,7 +971,7 @@ input:focus, select:focus {
     width: auto;
     padding: 0;
     border: none;
-    accent-color: var(--brand-1);
+    accent-color: var(--brand-text);
 }
 
 /* ===== Inputs con prefijo / sufijo ($, US$, %, días) ===== */
@@ -868,11 +1005,6 @@ input:focus, select:focus {
     padding-right: calc(24px + var(--affix-suf-ch, 1) * 0.6em);
 }
 
-/* El input sube 2px al enfocarlo: el prefijo/sufijo lo acompaña */
-.input-affix:focus-within .affix {
-    transform: translateY(calc(-50% - 2px));
-}
-
 input[data-fmt] {
     font-variant-numeric: tabular-nums;
 }
@@ -887,8 +1019,8 @@ input[data-fmt] {
 
 .chip {
     background: var(--surface-tint-brand);
-    border: 1px solid rgba(102, 126, 234, 0.3);
-    color: var(--brand-1);
+    border: 1px solid var(--brand-border);
+    color: var(--brand-text);
     border-radius: 999px;
     padding: 4px 12px;
     font-size: 13px;
@@ -898,13 +1030,13 @@ input[data-fmt] {
 }
 
 .chip:hover {
-    background: rgba(102, 126, 234, 0.15);
+    background: var(--brand-tint-strong);
 }
 
 .chip.active {
-    background: var(--brand-1);
-    border-color: var(--brand-1);
-    color: #fff;
+    background: var(--brand-text);
+    border-color: var(--brand-text);
+    color: var(--on-brand);
 }
 
 /* ===== Validación inline ===== */
@@ -998,7 +1130,7 @@ input[aria-invalid="true"] {
 .result-hero-value {
     font-size: 2.1em;
     font-weight: 800;
-    color: var(--brand-1);
+    color: var(--brand-text);
     line-height: 1.15;
     font-variant-numeric: tabular-nums;
     overflow-wrap: anywhere;
@@ -1015,4 +1147,91 @@ input[aria-invalid="true"] {
 
 .result-item {
     gap: 12px;
+}
+
+/* ===== Marca y selector de tema ===== */
+.brand-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brand-logo {
+    width: 28px;
+    height: 28px;
+    flex: 0 0 auto;
+}
+
+.theme-toggle {
+    align-self: flex-start;
+    margin: 6px 0 0 14px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+    .theme-toggle {
+        align-self: center;
+        flex: 0 0 auto;
+        margin: 0 0 0 6px;
+    }
+}
+
+/* ===== Foco visible para teclado ===== */
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid var(--brand-1);
+    outline-offset: 2px;
+}
+
+.sidebar button:focus-visible {
+    outline-color: #fff;
+}
+
+.skip-link {
+    position: absolute;
+    left: 12px;
+    top: -60px;
+    z-index: 10;
+    background: var(--surface);
+    color: var(--text-title);
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-elevated);
+    font-weight: 600;
+}
+
+.skip-link:focus {
+    top: 12px;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }

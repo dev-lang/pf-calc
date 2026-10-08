@@ -367,6 +367,9 @@
         if (!hero) {
             hero = document.createElement('div');
             hero.className = 'result-hero';
+            // Solo el número principal se anuncia en lectores de pantalla (no toda la tabla)
+            hero.setAttribute('aria-live', 'polite');
+            hero.setAttribute('aria-atomic', 'true');
             hero.innerHTML = '<span class="result-hero-label"></span><span class="result-hero-value"></span><span class="result-hero-detail"></span>';
             resultados.prepend(hero);
         }
@@ -400,7 +403,7 @@
             const compartir = document.createElement('button');
             compartir.type = 'button';
             compartir.className = 'btn-refresh';
-            compartir.textContent = '🔗 Copiar link a este cálculo';
+            compartir.textContent = 'Copiar link a este cálculo';
             compartir.addEventListener('click', () => copiarLink(formId, compartir));
             acciones.appendChild(compartir);
         }
@@ -417,7 +420,7 @@
         columna.appendChild(vacio);
         columna.appendChild(resultados);
         if (acciones.childElementCount) columna.appendChild(acciones);
-        resultados.setAttribute('aria-live', 'polite');
+        if (!DESTACADOS[formId]) resultados.setAttribute('aria-live', 'polite');
     }
 
     // ------------------------------------------
@@ -598,7 +601,10 @@
         // sale (incluida la carga inicial al abrir la pestaña) dispara un recálculo.
         new MutationObserver(registros => {
             registros.forEach(r => r.addedNodes.forEach(n => {
-                if (n.nodeType === 1) mejorarTodo(n);
+                if (n.nodeType === 1) {
+                    mejorarTodo(n);
+                    asociarLabels(n);
+                }
             }));
             programarRecalculo('comparadorForm', 0);
         }).observe(document.getElementById('filasComparador'), { childList: true, subtree: true });
@@ -661,7 +667,116 @@
     }
 
     window.leerNumero = leerNumero;
+    // ------------------------------------------
+    // Tema claro / oscuro
+    // ------------------------------------------
+
+    const TEMA_KEY = 'pfcalc:tema';
+    const TEMAS = ['auto', 'dark', 'light'];
+    const NOMBRE_TEMA = { auto: 'Auto', dark: 'Oscuro', light: 'Claro' };
+
+    function temaGuardado() {
+        try {
+            const v = localStorage.getItem(TEMA_KEY);
+            return TEMAS.includes(v) ? v : 'auto';
+        } catch (e) {
+            return 'auto';
+        }
+    }
+
+    // Chart.js no lee CSS: le pasamos los colores del tema y redibujamos los gráficos
+    function actualizarColoresGraficos() {
+        if (typeof Chart === 'undefined') return;
+        const css = getComputedStyle(document.documentElement);
+        Chart.defaults.color = css.getPropertyValue('--text-body').trim();
+        Chart.defaults.borderColor = css.getPropertyValue('--border-light').trim();
+        /* global chartIPCInstance, chartRiesgoPaisInstance, renderGraficoIPC, renderGraficoRiesgoPais */
+        if (typeof chartIPCInstance !== 'undefined' && chartIPCInstance) renderGraficoIPC();
+        if (typeof chartRiesgoPaisInstance !== 'undefined' && chartRiesgoPaisInstance) renderGraficoRiesgoPais();
+    }
+
+    function aplicarTema(tema) {
+        const raiz = document.documentElement;
+        if (tema === 'auto') delete raiz.dataset.theme;
+        else raiz.dataset.theme = tema;
+
+        document.querySelectorAll('[data-theme-toggle]').forEach(boton => {
+            boton.textContent = `Tema: ${NOMBRE_TEMA[tema]}`;
+            boton.setAttribute('aria-label', `Cambiar tema. Actual: ${NOMBRE_TEMA[tema]}`);
+        });
+        const oscuro = getComputedStyle(raiz).colorScheme === 'dark';
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.content = oscuro ? '#0e1016' : '#667eea';
+        actualizarColoresGraficos();
+    }
+
+    function iniciarTema() {
+        aplicarTema(temaGuardado());
+        document.querySelectorAll('[data-theme-toggle]').forEach(boton => {
+            boton.addEventListener('click', () => {
+                const siguiente = TEMAS[(TEMAS.indexOf(temaGuardado()) + 1) % TEMAS.length];
+                try { localStorage.setItem(TEMA_KEY, siguiente); } catch (e) { /* sin persistencia */ }
+                aplicarTema(siguiente);
+            });
+        });
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if (temaGuardado() === 'auto') aplicarTema('auto');
+            });
+        }
+    }
+
+    // ------------------------------------------
+    // Accesibilidad de la navegación
+    // ------------------------------------------
+
+    function sincronizarNavegacion() {
+        document.querySelectorAll('.tab-btn').forEach(boton => {
+            if (boton.classList.contains('active')) boton.setAttribute('aria-current', 'page');
+            else boton.removeAttribute('aria-current');
+        });
+    }
+
+    function iniciarNavegacion() {
+        // switchTab es global en index.html; lo envolvemos para mantener aria-current al día
+        /* global switchTab */
+        const original = switchTab;
+        window.switchTab = function (tabName) {
+            original(tabName);
+            sincronizarNavegacion();
+        };
+        sincronizarNavegacion();
+
+        // Flechas, Inicio y Fin para moverse entre las secciones
+        const nav = document.querySelector('.tabs');
+        nav.addEventListener('keydown', e => {
+            const botones = Array.from(nav.querySelectorAll('.tab-btn'));
+            const i = botones.indexOf(document.activeElement);
+            if (i < 0) return;
+            let destino = null;
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') destino = botones[(i + 1) % botones.length];
+            else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') destino = botones[(i - 1 + botones.length) % botones.length];
+            else if (e.key === 'Home') destino = botones[0];
+            else if (e.key === 'End') destino = botones[botones.length - 1];
+            if (!destino) return;
+            e.preventDefault();
+            destino.focus();
+            destino.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        });
+    }
+
+    // Labels sin "for" (filas del comparador): se asocian al control de su grupo
+    function asociarLabels(raiz) {
+        raiz.querySelectorAll('.form-group > label:not([for])').forEach(label => {
+            const control = label.parentElement.querySelector('input[id], select[id]');
+            if (control) label.htmlFor = control.id;
+        });
+    }
+
     window.pfUx = { recalcular, restaurarComparador, parsearNumero };
 
     iniciar();
+    iniciarTema();
+    iniciarNavegacion();
+    asociarLabels(document);
 })();
