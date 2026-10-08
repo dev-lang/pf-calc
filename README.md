@@ -1,2 +1,2 @@
 # pf-calc
-repo automático calculadora rendimientos V2
+repo automático calculadora rendimientos

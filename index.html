@@ -1,0 +1,2977 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadoras</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="sidebar-brand">馃彟 <span>V2</span></div>
+
+            <div class="sidebar-stat-card" id="riesgoPaisCard">
+                <span class="sidebar-stat-label">馃寧 Riesgo Pa铆s</span>
+                <span class="sidebar-stat-valor" id="riesgoPaisValor">Cargando...</span>
+                <span class="sidebar-stat-meta" id="riesgoPaisFecha"></span>
+            </div>
+
+            <div class="sidebar-stat-card" id="inflacionCard">
+                <span class="sidebar-stat-label">馃搱 Inflaci贸n (煤lt. mensual)</span>
+                <span class="sidebar-stat-valor" id="inflacionCardValor">Cargando...</span>
+                <span class="sidebar-stat-meta" id="inflacionCardFecha"></span>
+            </div>
+
+            <div class="sidebar-stat-card" id="dolarOficialCard">
+                <span class="sidebar-stat-label">馃挼 D贸lar Oficial (venta)</span>
+                <span class="sidebar-stat-valor" id="dolarOficialValor">Cargando...</span>
+                <span class="sidebar-stat-meta" id="dolarOficialFecha"></span>
+            </div>
+
+            <div class="sidebar-stat-card" id="dolarIndicadorCard">
+                <span class="sidebar-stat-label">馃Л D贸lar 驴Barato o Caro?</span>
+                <span class="sidebar-stat-valor" id="dolarIndicadorValor">Cargando...</span>
+                <span class="sidebar-stat-meta" id="dolarIndicadorMeta"></span>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('plazo-fijo')">馃挵 <span>Plazo Fijo</span></button>
+                <button class="tab-btn" onclick="switchTab('cauciones')">馃搳 <span>Cauciones Burs谩tiles</span></button>
+                <button class="tab-btn" onclick="switchTab('acciones')">馃搱 <span>Compra de Acciones</span></button>
+                <button class="tab-btn" onclick="switchTab('dolares')">馃挼 <span>Compra/Venta USD</span></button>
+                <button class="tab-btn" onclick="switchTab('tna')">馃幆 <span>Tasa Nominal</span></button>
+                <button class="tab-btn" onclick="switchTab('comparador')">馃啔 <span>Comparador</span></button>
+                <button class="tab-btn" onclick="switchTab('ipc')">馃搱 <span>Inflaci贸n (IPC)</span></button>
+                <button class="tab-btn" onclick="switchTab('calc-inflacion')">馃М <span>Calc. Inflaci贸n entre Fechas</span></button>
+                <button class="tab-btn" onclick="switchTab('riesgopais')">馃寧 <span>Riesgo Pa铆s</span></button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+        <div class="tabs-content-wrapper">
+        <!-- DOLARES SECTION -->
+        <div id="dolares" class="tab-content">
+            <h1>馃挼 Calculadora de Compra/Venta USD</h1>
+            
+            <div class="info">
+                <strong>馃挕 Info:</strong> Calcula cu谩ntos pesos necesitas para comprar d贸lares o cu谩ntos d贸lares obtienes al vender pesos seg煤n las cotizaciones actuales (se obtienen en vivo desde DolarAPI).
+            </div>
+
+            <div class="boxes-row">
+                <div class="cotizaciones-box" id="cotizacionesBox">
+                    <h3>馃搳 Cotizaciones D贸lar Oficial</h3>
+                    <div class="cotizacion-item">
+                        <span>馃煝 Compra (Banco te compra USD):</span>
+                        <span class="precio-dolar" id="cotCompraDisplay">Cargando...</span>
+                    </div>
+                    <div class="cotizacion-item">
+                        <span>馃敶 Venta (Banco te vende USD):</span>
+                        <span class="precio-dolar" id="cotVentaDisplay">Cargando...</span>
+                    </div>
+                    <div class="cotizacion-meta" id="cotMeta">Consultando cotizaci贸n en vivo...</div>
+                    <button type="button" class="btn-refresh" id="btnRefreshCotizacion" onclick="cargarCotizacion()">馃攧 Actualizar cotizaci贸n</button>
+                </div>
+
+                <div class="cotizaciones-box bandas-box" id="bandasBox">
+                    <h3>馃搹 Bandas Cambiarias (BCRA)</h3>
+                    <div class="cotizacion-item">
+                        <span>馃敾 Piso:</span>
+                        <span class="precio-dolar" id="bandaPisoDisplay">Calculando...</span>
+                    </div>
+                    <div class="cotizacion-item">
+                        <span>馃敽 Techo:</span>
+                        <span class="precio-dolar" id="bandaTechoDisplay">Calculando...</span>
+                    </div>
+                    <div class="cotizacion-item">
+                        <span>馃搷 Mayorista vs. banda:</span>
+                        <span class="precio-dolar" id="bandaPosicionDisplay">Calculando...</span>
+                    </div>
+                    <div class="cotizacion-meta" id="bandaMeta">Calculando bandas seg煤n f贸rmula oficial del BCRA...</div>
+                    <button type="button" class="btn-refresh" id="btnRefreshBanda" onclick="cargarBandaCambiaria()">馃攧 Recalcular banda</button>
+                </div>
+            </div>
+
+            <form id="dolaresForm">
+                <div class="form-group">
+                    <label for="operacionTipo">馃攧 Tipo de operaci贸n</label>
+                    <select id="operacionTipo" name="operacionTipo" required onchange="toggleOperacionFields()">
+                        <option value="comprar">Comprar D贸lares (tengo pesos, 驴cu谩ntos USD me dan?)</option>
+                        <option value="comprar-objetivo">Comprar D贸lares (quiero X USD, 驴cu谩ntos pesos necesito?)</option>
+                        <option value="vender">Vender D贸lares (entrego USD, recibo pesos)</option>
+                    </select>
+                </div>
+
+                <div id="comprarDolares" class="operacion-section">
+                    <div class="form-group">
+                        <label for="pesosAInvertir">馃挵 Pesos disponibles (ARS)</label>
+                        <input type="number" id="pesosAInvertir" name="pesosAInvertir" min="1" step="0.01" placeholder="Ej: 136000">
+                    </div>
+                </div>
+
+                <div id="comprarObjetivoDolares" class="operacion-section" style="display: none;">
+                    <div class="form-group">
+                        <label for="dolaresObjetivo">馃幆 D贸lares que quiero comprar (USD)</label>
+                        <input type="number" id="dolaresObjetivo" name="dolaresObjetivo" min="0.01" step="0.01" placeholder="Ej: 100">
+                    </div>
+                </div>
+
+                <div id="venderDolares" class="operacion-section" style="display: none;">
+                    <div class="form-group">
+                        <label for="dolaresAVender">馃挼 D贸lares a vender (USD)</label>
+                        <input type="number" id="dolaresAVender" name="dolaresAVender" min="0.01" step="0.01" placeholder="Ej: 100">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="tipoDolar">馃彟 Tipo de d贸lar</label>
+                    <select id="tipoDolar" name="tipoDolar" required onchange="cargarCotizacion()">
+                        <option value="oficial">D贸lar Oficial</option>
+                        <option value="blue">D贸lar Blue</option>
+                        <option value="bolsa">D贸lar MEP (Bolsa)</option>
+                        <option value="contadoconliqui">D贸lar CCL</option>
+                        <option value="mayorista">D贸lar Mayorista</option>
+                        <option value="tarjeta">D贸lar Tarjeta</option>
+                        <option value="cripto">D贸lar Cripto</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn" id="btnCalcularDolares">馃殌 Calcular Operaci贸n</button>
+            </form>
+
+            <div id="resultsDolares" class="results">
+                <div id="resultadoCompra" class="resultado-operacion">
+                    <div class="result-item">
+                        <span class="result-label">Pesos entregados:</span>
+                        <span class="result-value" id="pesosEntregados">$0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Cotizaci贸n aplicada:</span>
+                        <span class="result-value" id="cotizacionAplicada">$0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">D贸lares recibidos:</span>
+                        <span class="result-value" id="dolaresRecibidos">US$ 0</span>
+                    </div>
+                </div>
+
+                <div id="resultadoCompraObjetivo" class="resultado-operacion" style="display: none;">
+                    <div class="result-item">
+                        <span class="result-label">D贸lares a comprar:</span>
+                        <span class="result-value" id="dolaresObjetivoResult">US$ 0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Cotizaci贸n aplicada:</span>
+                        <span class="result-value" id="cotizacionAplicadaObjetivo">$0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Pesos necesarios:</span>
+                        <span class="result-value" id="pesosNecesarios">$0</span>
+                    </div>
+                </div>
+
+                <div id="resultadoVenta" class="resultado-operacion" style="display: none;">
+                    <div class="result-item">
+                        <span class="result-label">D贸lares entregados:</span>
+                        <span class="result-value" id="dolaresEntregados">US$ 0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Cotizaci贸n aplicada:</span>
+                        <span class="result-value" id="cotizacionAplicadaVenta">$0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Pesos recibidos:</span>
+                        <span class="result-value" id="pesosRecibidos">$0</span>
+                    </div>
+                </div>
+                
+                <div class="highlight">
+                    <div class="result-item">
+                        <span class="result-label">馃搳 Tipo de operaci贸n:</span>
+                        <span class="result-value" id="tipoOperacionResult">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">馃挶 Spread bancario:</span>
+                        <span class="result-value" id="spreadBancario">$0 (0%)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACCIONES SECTION -->
+        <div id="acciones" class="tab-content">
+            <h1>馃搱 Calculadora de Compra de Acciones</h1>
+            
+            <div class="info">
+                <strong>馃挕 Info:</strong> Calcula el costo total de comprar acciones incluyendo todos los aranceles, derechos de mercado e IVA correspondientes.
+            </div>
+
+            <form id="accionesForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cantidadAccionesCompra">馃搳 Cantidad de acciones a comprar</label>
+                        <input type="number" id="cantidadAccionesCompra" name="cantidadAccionesCompra" min="1" step="1" required placeholder="Ej: 50">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="precioAccion">馃挼 Precio por acci贸n (ARS)</label>
+                        <input type="number" id="precioAccion" name="precioAccion" min="0.01" step="0.01" required placeholder="Ej: 1250.50">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="tipoComisionAccion">馃挸 Tipo de comisi贸n</label>
+                    <select id="tipoComisionAccion" name="tipoComisionAccion" required onchange="toggleComisionFieldsAcciones()">
+                        <option value="fija">Comisi贸n Fija (%)</option>
+                        <option value="personalizada" selected>Personalizada (Arancel + Derecho + IVA)</option>
+                    </select>
+                </div>
+
+                <div id="comisionFijaAccion" class="form-group" style="display: none;">
+                    <label for="comisionAccion">馃搳 Comisi贸n del broker (%)</label>
+                    <input type="number" id="comisionAccion" name="comisionAccion" min="0" max="10" step="0.01" value="1" placeholder="Ej: 1.0">
+                </div>
+
+                <div id="comisionPersonalizadaAccion" class="comision-personalizada">
+                    <div class="form-group">
+                        <label for="arancelAccion">馃彌锔?Arancel (%)</label>
+                        <input type="number" id="arancelAccion" name="arancelAccion" min="0" max="5" step="0.001" value="0.5" placeholder="Ej: 0.5">
+                    </div>
+                    <div class="form-group">
+                        <label for="derechoMercadoAccion">馃彚 Derecho de Mercado (%)</label>
+                        <input type="number" id="derechoMercadoAccion" name="derechoMercadoAccion" min="0" max="5" step="0.001" value="0.08" placeholder="Ej: 0.08">
+                    </div>
+                    <div class="info-iva">
+                        <strong>鈩癸笍 IVA:</strong> Se calcula autom谩ticamente como 21% sobre (Arancel + Derecho de Mercado)
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">馃殌 Calcular Compra</button>
+            </form>
+
+            <div id="resultsAcciones" class="results">
+                <div class="result-item">
+                    <span class="result-label">Cantidad de acciones:</span>
+                    <span class="result-value" id="cantidadAccionesResult">0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Precio por acci贸n:</span>
+                    <span class="result-value" id="precioAccionResult">$0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Valor bruto de las acciones:</span>
+                    <span class="result-value" id="valorBrutoAcciones">$0</span>
+                </div>
+                
+                <div id="desgloseCostosAcciones" class="costos-desglose">
+                    <div class="result-item">
+                        <span class="result-label">馃挵 Total costos operativos:</span>
+                        <span class="result-value" id="totalCostosAcciones">$0</span>
+                    </div>
+                    <div id="detallePersonalizadoAcciones">
+                        <div class="result-item sub-item">
+                            <span class="result-label">鈥?Arancel:</span>
+                            <span class="result-value" id="costoArancelAccion">$0</span>
+                        </div>
+                        <div class="result-item sub-item">
+                            <span class="result-label">鈥?Derecho Mercado:</span>
+                            <span class="result-value" id="costoDerechoMercadoAccion">$0</span>
+                        </div>
+                        <div class="result-item sub-item">
+                            <span class="result-label">鈥?IVA (21%):</span>
+                            <span class="result-value" id="costoIVAAccion">$0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="highlight">
+                    <div class="result-item">
+                        <span class="result-label">馃搳 Costo total de la operaci贸n:</span>
+                        <span class="result-value" id="costoTotalOperacion">$0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">馃搱 % de costos sobre valor de acciones:</span>
+                        <span class="result-value" id="porcentajeCostos">0%</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">馃挵 Costo promedio por acci贸n (con gastos):</span>
+                        <span class="result-value" id="costoPromedioAccion">$0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PLAZO FIJO SECTION -->
+        <div id="plazo-fijo" class="tab-content active">
+            <h1>馃挵 Calculadora de Plazo Fijo</h1>
+            
+            <div class="info">
+                <strong>馃挕 Tip:</strong> Esta calculadora te ayuda a determinar el rendimiento de tu plazo fijo considerando diferentes tipos de capitalizaci贸n de intereses.
+            </div>
+
+            <div class="boxes-row">
+                <div class="cotizaciones-box mejor-tasa-box" id="mejorTasaBox">
+                    <h3>馃弳 Mejor Tasa Actual</h3>
+                    <div class="cotizacion-item">
+                        <span>馃 Banco l铆der:</span>
+                        <span class="precio-dolar" id="mejorTasaBanco">Cargando...</span>
+                    </div>
+                    <div class="cotizacion-item">
+                        <span>馃搱 TNA a 30 d铆as:</span>
+                        <span class="precio-dolar" id="mejorTasaValor">Cargando...</span>
+                    </div>
+                    <div class="cotizacion-meta" id="mejorTasaMeta">Consultando tasas de todos los bancos...</div>
+                </div>
+
+                <div class="cotizaciones-box peor-tasa-box" id="peorTasaBox">
+                    <h3>馃悓 Peor Tasa Actual</h3>
+                    <div class="cotizacion-item">
+                        <span>馃 Banco:</span>
+                        <span class="precio-dolar" id="peorTasaBanco">Cargando...</span>
+                    </div>
+                    <div class="cotizacion-item">
+                        <span>馃搲 TNA a 30 d铆as:</span>
+                        <span class="precio-dolar" id="peorTasaValor">Cargando...</span>
+                    </div>
+                    <div class="cotizacion-meta" id="peorTasaMeta">Consultando tasas de todos los bancos...</div>
+                </div>
+            </div>
+
+            <form id="calculatorForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="capital">馃挼 Capital inicial (ARS)</label>
+                        <input type="number" id="capital" name="capital" min="1" step="0.01" required placeholder="Ej: 100000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="plazo">馃搮 Plazo (d铆as)</label>
+                        <input type="number" id="plazo" name="plazo" min="1" required placeholder="Ej: 30, 90, 180, 365">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="fuenteTasa">馃搳 Fuente de tasa</label>
+                    <select id="fuenteTasa" name="fuenteTasa" onchange="toggleFuenteTasaPlazoFijo()">
+                        <option value="personalizada">Personalizada</option>
+                        <option value="banco">Banco (tasa a 30 d铆as)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tasa">馃搱 Tasa de inter茅s anual (%)</label>
+                    <input type="number" id="tasa" name="tasa" min="0.01" step="0.01" required placeholder="Ej: 35.5">
+                </div>
+
+                <div class="form-group" id="grupoBancoTasa" style="display: none;">
+                    <label for="bancoTasaPlazoFijo">馃彟 Banco</label>
+                    <select id="bancoTasaPlazoFijo" name="bancoTasaPlazoFijo" onchange="actualizarTasaDesdeBanco()">
+                        <option value="">Cargando bancos...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="capitalizacion">馃攧 Tipo de capitalizaci贸n</label>
+                    <select id="capitalizacion" name="capitalizacion" required>
+                        <option value="simple">Inter茅s Simple</option>
+                        <option value="compuesta">Inter茅s Compuesto (diario)</option>
+                        <option value="mensual">Inter茅s Compuesto (mensual)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn">馃殌 Calcular Rendimiento</button>
+            </form>
+
+            <div id="results" class="results">
+                <div class="result-item">
+                    <span class="result-label">Capital inicial:</span>
+                    <span class="result-value" id="capitalInicial">$0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Intereses ganados:</span>
+                    <span class="result-value" id="intereses">$0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Capital final:</span>
+                    <span class="result-value" id="capitalFinal">$0</span>
+                </div>
+                
+                <div class="highlight">
+                    <div class="result-item">
+                        <span class="result-label">馃搳 Rendimiento total:</span>
+                        <span class="result-value" id="rendimientoTotal">0%</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">馃搱 Rendimiento mensual promedio:</span>
+                        <span class="result-value" id="rendimientoMensual">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CAUCIONES SECTION -->
+        <div id="cauciones" class="tab-content">
+            <h1>馃搳 Calculadora de Cauciones Burs谩tiles</h1>
+            
+            <div class="info">
+                <strong>馃挕 Info:</strong> Las cauciones burs谩tiles son operaciones de pr茅stamo a muy corto plazo. Ideal para invertir dinero disponible por per铆odos cortos.
+            </div>
+
+            <form id="caucionesForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="capitalCaucion">馃挼 Capital a invertir (ARS)</label>
+                        <input type="number" id="capitalCaucion" name="capitalCaucion" min="1" step="0.01" required placeholder="Ej: 50000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tasaCaucion">馃搱 TNA - Tasa Nominal Anual (%)</label>
+                        <input type="number" id="tasaCaucion" name="tasaCaucion" min="0.01" step="0.01" required placeholder="Ej: 45.2">
+                        <div class="cotizacion-meta" id="tasaCaucionMeta">Consultando 煤ltima tasa de cauci贸n (MAE)...</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="plazoCaucion">馃搮 Tipo de liquidaci贸n</label>
+                    <select id="plazoCaucion" name="plazoCaucion" required>
+                        <option value="1">T+1 (1 d铆a h谩bil)</option>
+                        <option value="2">T+2 (2 d铆as h谩biles)</option>
+                        <option value="3">T+3 (3 d铆as h谩biles)</option>
+                        <option value="7">1 semana</option>
+                        <option value="15">15 d铆as</option>
+                        <option value="30">30 d铆as</option>
+                        <option value="custom">Personalizado...</option>
+                    </select>
+                </div>
+
+                <div id="diasCustomCaucionGroup" class="form-group" style="display: none;">
+                    <label for="diasCustomCaucion">馃棑锔?Cantidad de d铆as</label>
+                    <input type="number" id="diasCustomCaucion" name="diasCustomCaucion" min="1" max="365" step="1" placeholder="Ej: 10">
+                </div>
+
+                <div class="form-group">
+                    <label for="tipoComision">馃挸 Tipo de comisi贸n</label>
+                    <select id="tipoComision" name="tipoComision" required onchange="toggleComisionFields()">
+                        <option value="fija">Comisi贸n Fija (%)</option>
+                        <option value="personalizada">Personalizada (Arancel + Derecho + IVA)</option>
+                        <option value="personalizada2">Personalizada 2 (Comisi贸n + Derecho, IVA discriminado)</option>
+                        <option value="personalizada3">Personalizada 3 (IOL: Arancel sobre inter茅s + Derecho fijo + IVA)</option>
+                        <option value="personalizada4">Personalizada 4 (Comisi贸n + Derechos variables por plazo)</option>
+                    </select>
+                </div>
+
+                <div id="comisionFija" class="form-group">
+                    <label for="comision">馃搳 Comisi贸n del broker (%)</label>
+                    <input type="number" id="comision" name="comision" min="0" max="10" step="0.01" value="0" placeholder="Ej: 0.5">
+                </div>
+
+                <div id="comisionPersonalizada" class="comision-personalizada" style="display: none;">
+                    <div class="form-group">
+                        <label for="arancel">馃彌锔?Arancel (%)</label>
+                        <input type="number" id="arancel" name="arancel" min="0" max="5" step="0.001" value="2.705" placeholder="Ej: 2.705">
+                    </div>
+                    <div class="form-group">
+                        <label for="derechoMercado">馃彚 Derecho de Mercado (%)</label>
+                        <input type="number" id="derechoMercado" name="derechoMercado" min="0" max="5" step="0.001" value="0.501" placeholder="Ej: 0.501">
+                    </div>
+                    <div class="info-iva">
+                        <strong>鈩癸笍 IVA:</strong> Se calcula autom谩ticamente como 21% sobre (Arancel + Derecho de Mercado)
+                    </div>
+                </div>
+
+                <div id="comisionP2" class="comision-personalizada" style="display: none;">
+                    <div class="form-group">
+                        <label for="comisionP2Pct">馃挸 Comisi贸n de compra (%, sobre el capital)</label>
+                        <input type="number" id="comisionP2Pct" name="comisionP2Pct" min="0" max="5" step="0.00001" value="0.00493" placeholder="Ej: 0.00493">
+                    </div>
+                    <div class="form-group">
+                        <label for="derechoP2Pct">馃彚 Derechos de Mercado (%, sobre el capital)</label>
+                        <input type="number" id="derechoP2Pct" name="derechoP2Pct" min="0" max="5" step="0.00001" value="0.0005" placeholder="Ej: 0.0005">
+                    </div>
+                    <div class="info-iva">
+                        <strong>鈩癸笍 IVA discriminado:</strong> A diferencia de la opci贸n "Personalizada", ac谩 el 21% de IVA se calcula por separado sobre la Comisi贸n y sobre el Derecho de Mercado (no sobre la suma), y ambos porcentajes se aplican sobre el capital invertido, no sobre los intereses.
+                    </div>
+                </div>
+
+                <div id="comisionP3" class="comision-personalizada" style="display:none;">
+                    <div class="form-group">
+                        <label for="arancelP3">馃彌锔?Arancel (% sobre intereses)</label>
+                        <input type="number" id="arancelP3" value="9.73" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="derechoFijoP3">馃彚 Derecho fijo ($)</label>
+                        <input type="number" id="derechoFijoP3" value="75" step="0.01">
+                    </div>
+                </div>
+
+                <div id="comisionP4" class="comision-personalizada" style="display:none;">
+                    <div class="form-group">
+                        <label for="comisionP4Tasa">馃挸 Tasa de comisi贸n diaria (% / 30 d铆as)</label>
+                        <input type="number" id="comisionP4Tasa" value="0.00148" step="0.00001" placeholder="Ej: 0.00148">
+                    </div>
+                    <div class="form-group">
+                        <label for="derechoP4Tasa">馃彚 Tasa de derechos diaria (% / 90 d铆as)</label>
+                        <input type="number" id="derechoP4Tasa" value="0.00045" step="0.00001" placeholder="Ej: 0.00045">
+                    </div>
+                    <div class="info-iva">
+                        <strong>鈩癸笍 F贸rmula:</strong><br>
+                        鈥?Comisi贸n = (tasaComisi贸n / 30 脳 plazo) 脳 monto<br>
+                        鈥?Derechos = (tasaDerechos / 90 脳 plazo 脳 monto)<br>
+                        鈥?IVA Comisi贸n = Comisi贸n 脳 21%<br>
+                        鈥?IVA Derechos = Derechos 脳 21%<br>
+                        鈥?Todos se descuentan del capital inicial
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">馃殌 Calcular Cauci贸n</button>
+            </form>
+
+            <div id="resultsCaucion" class="results">
+                <div class="result-item">
+                    <span class="result-label">Capital invertido:</span>
+                    <span class="result-value" id="capitalInicialCaucion">$0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Intereses brutos:</span>
+                    <span class="result-value" id="interesesBrutos">$0</span>
+                </div>
+                
+                <div id="desgloseCostos" class="costos-desglose">
+                    <div class="result-item">
+                        <span class="result-label">馃挵 Total costos:</span>
+                        <span class="result-value" id="totalCostos">$0</span>
+                    </div>
+                    <div id="detallePersonalizado" style="display: none;">
+                        <div class="result-item sub-item">
+                            <span class="result-label">鈥?Arancel:</span>
+                            <span class="result-value" id="costoArancel">$0</span>
+                        </div>
+                        <div class="result-item sub-item">
+                            <span class="result-label">鈥?Derecho Mercado:</span>
+                            <span class="result-value" id="costoDerechoMercado">$0</span>
+                        </div>
+                        <div class="result-item sub-item">
+                            <span class="result-label">鈥?IVA (21%):</span>
+                            <span class="result-value" id="costoIVA">$0</span>
+                        </div>
+                    </div>
+                    <div id="detalleP3" style="display:none;">
+                        <div class="result-item sub-item"><span class="result-label">鈥?Arancel:</span><span class="result-value" id="costoArancelP3">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">鈥?Derecho fijo:</span><span class="result-value" id="costoDerechoP3">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">鈥?IVA (21% sobre Arancel + Derecho):</span><span class="result-value" id="costoIvaP3">$0</span></div>
+                    </div>
+                    <div id="detalleP4" style="display:none;">
+                        <div class="result-item sub-item"><span class="result-label">鈥?Comisi贸n:</span><span class="result-value" id="costoComisionP4">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">鈥?Derechos:</span><span class="result-value" id="costoDerechosP4">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">鈥?IVA (21% sobre Comisi贸n):</span><span class="result-value" id="costoIvaComisionP4">$0</span></div>
+                        <div class="result-item sub-item"><span class="result-label">鈥?IVA (21% sobre Derechos):</span><span class="result-value" id="costoIvaDerechosP4">$0</span></div>
+                    </div>
+<div id="detalleP2" style="display: none;">
+                        <div class="result-item sub-item">
+                            <span class="result-label">鈥?Comisi贸n de compra:</span>
+                            <span class="result-value" id="costoComisionP2">$0</span>
+                        </div>
+                        <div class="result-item sub-item">
+                            <span class="result-label">鈥?IVA Comisi贸n (21%):</span>
+                            <span class="result-value" id="costoIvaComisionP2">$0</span>
+                        </div>
+                        <div class="result-item sub-item">
+                            <span class="result-label">鈥?Derechos de Mercado:</span>
+                            <span class="result-value" id="costoDerechoP2">$0</span>
+                        </div>
+                        <div class="result-item sub-item">
+                            <span class="result-label">鈥?IVA Derechos de Mercado (21%):</span>
+                            <span class="result-value" id="costoIvaDerechoP2">$0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Intereses netos:</span>
+                    <span class="result-value" id="interesesNetos">$0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Capital final:</span>
+                    <span class="result-value" id="capitalFinalCaucion">$0</span>
+                </div>
+                
+                <div class="highlight">
+                    <div class="result-item">
+                        <span class="result-label">馃搳 Rendimiento neto:</span>
+                        <span class="result-value" id="rendimientoNetoCaucion">0%</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">馃搱 TNA efectiva:</span>
+                        <span class="result-value" id="tnaEfectiva">0%</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">馃挵 Ganancia diaria promedio:</span>
+                        <span class="result-value" id="gananciaDiaria">$0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TASA NOMINAL (TNA) SECTION -->
+        <div id="tna" class="tab-content">
+            <h1>馃幆 Calculadora de Tasa Nominal</h1>
+
+            <div class="info">
+                <strong>馃挕 Info:</strong> Calcul谩 la TNA (Tasa Nominal Anual) de una inversi贸n a partir de c贸mo evolucion贸 tu saldo, sin necesidad de conocer la tasa de antemano.
+            </div>
+
+            <form id="tnaForm">
+                <div class="form-group">
+                    <label for="metodoTNA">馃攢 驴Con qu茅 datos cont谩s?</label>
+                    <select id="metodoTNA" name="metodoTNA" required onchange="toggleMetodoTNA()">
+                        <option value="saldos">A) Saldo inicial y saldo final</option>
+                        <option value="rendimiento">B) Saldo inicial y rendimiento obtenido ($)</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="saldoInicialTNA">馃挼 Saldo inicial (ARS)</label>
+                        <input type="number" id="saldoInicialTNA" name="saldoInicialTNA" min="0.01" step="0.01" required placeholder="Ej: 100000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="diasTNA">馃搮 Plazo transcurrido (d铆as)</label>
+                        <input type="number" id="diasTNA" name="diasTNA" min="1" required placeholder="Ej: 30, 90, 180">
+                    </div>
+                </div>
+
+                <div id="campoSaldoFinalTNA" class="form-group">
+                    <label for="saldoFinalTNA">馃挵 Saldo final (ARS)</label>
+                    <input type="number" id="saldoFinalTNA" name="saldoFinalTNA" min="0.01" step="0.01" placeholder="Ej: 108500">
+                </div>
+
+                <div id="campoRendimientoTNA" class="form-group" style="display: none;">
+                    <label for="rendimientoTNA">馃搱 Rendimiento obtenido / intereses ganados (ARS)</label>
+                    <input type="number" id="rendimientoTNA" name="rendimientoTNA" min="0" step="0.01" placeholder="Ej: 8500">
+                </div>
+
+                <button type="submit" class="btn">馃殌 Calcular TNA</button>
+            </form>
+
+            <div id="resultsTNA" class="results">
+                <div class="result-item">
+                    <span class="result-label">Saldo inicial:</span>
+                    <span class="result-value" id="saldoInicialResultTNA">$0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Saldo final:</span>
+                    <span class="result-value" id="saldoFinalResultTNA">$0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Intereses ganados:</span>
+                    <span class="result-value" id="interesesResultTNA">$0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Rendimiento del per铆odo:</span>
+                    <span class="result-value" id="rendimientoPeriodoTNA">0%</span>
+                </div>
+
+                <div class="highlight">
+                    <div class="result-item">
+                        <span class="result-label">馃搳 TNA (Tasa Nominal Anual):</span>
+                        <span class="result-value" id="tnaResult">0%</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">馃搱 TEA (Tasa Efectiva Anual, con reinversi贸n):</span>
+                        <span class="result-value" id="teaResult">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMPARADOR SECTION -->
+        <div id="comparador" class="tab-content">
+            <h1>馃啔 Comparador de Inversiones</h1>
+
+            <div class="info">
+                <strong>馃挕 Info:</strong> Carg谩 el mismo capital y plazo, agreg谩 tantas opciones como quieras (Plazo Fijo, Cauci贸n, o una tasa personalizada) y compar谩 cu谩l te conviene m谩s, ya con los costos descontados.
+            </div>
+
+            <form id="comparadorForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="capitalComparador">馃挼 Capital a invertir (ARS)</label>
+                        <input type="number" id="capitalComparador" name="capitalComparador" min="1" step="0.01" required placeholder="Ej: 100000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="diasComparador">馃搮 Plazo (d铆as), igual para todas las opciones</label>
+                        <input type="number" id="diasComparador" name="diasComparador" min="1" required placeholder="Ej: 30">
+                    </div>
+                </div>
+
+                <div id="filasComparador"></div>
+
+                <button type="button" class="btn-agregar-fila" onclick="agregarFilaComparador()">鉃?Agregar opci贸n a comparar</button>
+
+                <button type="submit" class="btn">馃殌 Comparar</button>
+            </form>
+
+            <div id="resultsComparador" class="results">
+                <div class="highlight" style="margin-top: 0;">
+                    <table class="tabla-comparacion" id="tablaComparacion">
+                        <thead>
+                            <tr>
+                                <th>Opci贸n</th>
+                                <th>Inter茅s neto</th>
+                                <th>Rendimiento</th>
+                                <th>TNA efectiva</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpoTablaComparacion"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- IPC / INFLACION SECTION -->
+        <div id="ipc" class="tab-content">
+            <h1>馃搱 Inflaci贸n (IPC Nivel General)</h1>
+
+            <div class="info">
+                <strong>馃挕 Info:</strong> Evoluci贸n del 脥ndice de Precios al Consumidor (Nivel General, Nacional), con variaci贸n mensual e interanual calculadas a partir de la serie oficial del INDEC (base diciembre 2016 = 100), publicada en la API de Series de Tiempo de datos.gob.ar.
+            </div>
+
+            <div class="cotizaciones-box ipc-box" id="ipcResumenBox">
+                <h3>馃搳 脷ltimo dato publicado</h3>
+                <div class="cotizacion-item">
+                    <span>馃棑锔?Mes:</span>
+                    <span class="precio-dolar" id="ipcUltimoMes">Cargando...</span>
+                </div>
+                <div class="cotizacion-item">
+                    <span>馃搱 Variaci贸n mensual:</span>
+                    <span class="precio-dolar" id="ipcUltimaMensual">Cargando...</span>
+                </div>
+                <div class="cotizacion-item">
+                    <span>馃搮 Variaci贸n interanual:</span>
+                    <span class="precio-dolar" id="ipcUltimaInteranual">Cargando...</span>
+                </div>
+                <div class="cotizacion-item">
+                    <span>馃棑锔?Acumulada (煤lt. 6 meses):</span>
+                    <span class="precio-dolar" id="ipcAcumulada6m">Cargando...</span>
+                </div>
+                <div class="cotizacion-meta" id="ipcMeta">Consultando serie oficial (INDEC / datos.gob.ar)...</div>
+                <button type="button" class="btn-refresh" id="btnRefreshIPC" onclick="cargarIPC()">馃攧 Actualizar</button>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ipcDesde">馃搮 Desde</label>
+                    <select id="ipcDesde" onchange="actualizarVistaIPC()">
+                        <option value="">Cargando...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ipcHasta">馃搮 Hasta</label>
+                    <select id="ipcHasta" onchange="actualizarVistaIPC()">
+                        <option value="">Cargando...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="quick-filters">
+                <button type="button" class="btn-quick-filter" onclick="aplicarFiltroRapidoIPC('anio', this)">馃搯 脷ltimo a帽o (desde Ene)</button>
+                <button type="button" class="btn-quick-filter" onclick="aplicarFiltroRapidoIPC('12m', this)">馃棑锔?脷ltimos 12 meses</button>
+                <button type="button" class="btn-quick-filter" onclick="aplicarFiltroRapidoIPC('6m', this)">馃棑锔?脷ltimos 6 meses</button>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-toolbar">
+                    <label for="seriesIPC" style="margin: 0; font-size: 13px;">Mostrar:</label>
+                    <select id="seriesIPC" onchange="renderGraficoIPC()">
+                        <option value="ambas">Mensual + Interanual</option>
+                        <option value="mensual">Solo Mensual</option>
+                        <option value="interanual">Solo Interanual</option>
+                    </select>
+                    <button type="button" class="btn-refresh" onclick="exportarGraficoIPC()">馃摜 Exportar gr谩fico (PNG)</button>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="chartIPC"></canvas>
+                </div>
+            </div>
+
+            <div class="highlight" style="margin-top: 0;">
+                <table class="tabla-comparacion" id="tablaIPC">
+                    <thead>
+                        <tr>
+                            <th>Mes</th>
+                            <th>脥ndice</th>
+                            <th>Var. Mensual</th>
+                            <th>Var. Interanual</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaIPC"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CALCULADORA DE INFLACION ENTRE FECHAS -->
+        <div id="calc-inflacion" class="tab-content">
+            <h1>馃М Calculadora de Inflaci贸n entre Fechas</h1>
+
+            <div class="info">
+                <strong>馃挕 Info:</strong> Calcul谩 la inflaci贸n acumulada entre dos meses cualquiera, usando la misma serie oficial del IPC Nivel General (INDEC, base dic-2016=100) que la pesta帽a "Inflaci贸n (IPC)".
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="calcInfDesde">馃搮 Desde</label>
+                    <select id="calcInfDesde" onchange="calcularInflacionEntreFechasUI()">
+                        <option value="">Cargando...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="calcInfHasta">馃搮 Hasta</label>
+                    <select id="calcInfHasta" onchange="calcularInflacionEntreFechasUI()">
+                        <option value="">Cargando...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="calcInfMonto">馃挵 Monto inicial (opcional)</label>
+                    <input type="number" id="calcInfMonto" placeholder="Ej: 100000" oninput="calcularInflacionEntreFechasUI()">
+                </div>
+            </div>
+
+            <div class="cotizaciones-box" id="calcInfResumenBox">
+                <h3>馃搳 Resultado</h3>
+                <div class="cotizacion-item">
+                    <span>馃搱 Inflaci贸n acumulada:</span>
+                    <span class="precio-dolar" id="calcInfAcumulada">鈥?/span>
+                </div>
+                <div class="cotizacion-item" id="calcInfMontoResultRow" style="display: none;">
+                    <span>馃挵 Monto equivalente:</span>
+                    <span class="precio-dolar" id="calcInfMontoResult">鈥?/span>
+                </div>
+                <div class="cotizacion-meta" id="calcInfMeta">Eleg铆 dos meses para calcular.</div>
+            </div>
+        </div>
+
+        <!-- RIESGO PAIS SECTION -->
+        <div id="riesgopais" class="tab-content">
+            <h1>馃寧 Riesgo Pa铆s (Hist贸rico)</h1>
+
+            <div class="info">
+                <strong>馃挕 Info:</strong> Evoluci贸n diaria del Riesgo Pa铆s (EMBI+ Argentina, en puntos b谩sicos), con variaci贸n respecto al d铆a h谩bil anterior. Fuente: 脕mbito, v铆a ArgentinaDatos. 鈿狅笍 Esta fuente puede tener un rezago de algunos d铆as h谩biles respecto al valor de mercado en tiempo real 鈥?la fecha del "脷ltimo dato publicado" de abajo siempre refleja el dato m谩s reciente que la API tiene disponible.
+            </div>
+
+            <div class="cotizaciones-box riesgo-box" id="riesgoPaisResumenBox">
+                <h3>馃搳 脷ltimo dato publicado</h3>
+                <div class="cotizacion-item">
+                    <span>馃棑锔?Fecha:</span>
+                    <span class="precio-dolar" id="riesgoPaisTabFecha">Cargando...</span>
+                </div>
+                <div class="cotizacion-item">
+                    <span>馃搲 Valor:</span>
+                    <span class="precio-dolar" id="riesgoPaisTabValor">Cargando...</span>
+                </div>
+                <div class="cotizacion-item">
+                    <span>馃攣 Variaci贸n diaria:</span>
+                    <span class="precio-dolar" id="riesgoPaisTabVariacion">Cargando...</span>
+                </div>
+                <div class="cotizacion-meta" id="riesgoPaisTabMeta">Consultando historial (ArgentinaDatos / 脕mbito)...</div>
+                <button type="button" class="btn-refresh" id="btnRefreshRiesgoPaisTab" onclick="cargarRiesgoPaisHistorial()">馃攧 Actualizar</button>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="riesgoPaisDesde">馃搮 Desde</label>
+                    <input type="date" id="riesgoPaisDesde" onchange="actualizarVistaRiesgoPais()">
+                </div>
+                <div class="form-group">
+                    <label for="riesgoPaisHasta">馃搮 Hasta</label>
+                    <input type="date" id="riesgoPaisHasta" onchange="actualizarVistaRiesgoPais()">
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-toolbar">
+                    <label class="checkbox-inline">
+                        <input type="checkbox" id="mostrarVariacionRiesgoPais" onchange="renderGraficoRiesgoPais()">
+                        Superponer variaci贸n diaria
+                    </label>
+                    <select id="unidadVariacionRiesgoPais" onchange="renderGraficoRiesgoPais()">
+                        <option value="pb">en puntos b谩sicos (pb)</option>
+                        <option value="pct">en porcentaje (%)</option>
+                    </select>
+                    <label class="checkbox-inline">
+                        <input type="checkbox" id="mostrarTendenciaRiesgoPais" onchange="renderGraficoRiesgoPais()">
+                        馃搻 Mostrar l铆nea de tendencia
+                    </label>
+                    <button type="button" class="btn-refresh" onclick="exportarGraficoRiesgoPais()">馃摜 Exportar gr谩fico (PNG)</button>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="chartRiesgoPais"></canvas>
+                </div>
+                <div class="cotizacion-meta" id="riesgoPaisTendenciaInfo"></div>
+                <div class="cotizacion-meta" id="riesgoPaisChartAviso" style="margin-top: 4px;"></div>
+            </div>
+
+            <div class="highlight" style="margin-top: 0;">
+                <table class="tabla-comparacion" id="tablaRiesgoPais">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Valor (pb)</th>
+                            <th>Var. diaria (pb)</th>
+                            <th>Var. diaria (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaRiesgoPais"></tbody>
+                </table>
+            </div>
+        </div>
+        </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script>
+        // ==========================================
+        // COTIZACION DEL DOLAR - DATOS EN VIVO (DolarAPI)
+        // ==========================================
+        // API p煤blica y gratuita: https://dolarapi.com (sin key, CORS habilitado)
+        let cotizacionActual = null; // { compra, venta, fechaActualizacion, casa }
+
+        const nombresDolar = {
+            oficial: 'Oficial',
+            blue: 'Blue',
+            bolsa: 'MEP (Bolsa)',
+            contadoconliqui: 'CCL',
+            mayorista: 'Mayorista',
+            tarjeta: 'Tarjeta',
+            cripto: 'Cripto'
+        };
+
+        async function cargarCotizacion() {
+            const tipoDolar = document.getElementById('tipoDolar').value;
+            const box = document.getElementById('cotizacionesBox');
+            const compraDisplay = document.getElementById('cotCompraDisplay');
+            const ventaDisplay = document.getElementById('cotVentaDisplay');
+            const meta = document.getElementById('cotMeta');
+            const btnRefresh = document.getElementById('btnRefreshCotizacion');
+            const btnCalcular = document.getElementById('btnCalcularDolares');
+
+            box.classList.remove('cotizacion-error');
+            compraDisplay.textContent = 'Cargando...';
+            ventaDisplay.textContent = 'Cargando...';
+            meta.textContent = 'Consultando cotizaci贸n en vivo...';
+            btnRefresh.disabled = true;
+            if (btnCalcular) btnCalcular.disabled = true;
+
+            try {
+                const response = await fetch(`https://dolarapi.com/v1/dolares/${tipoDolar}`);
+                if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
+                const data = await response.json();
+
+                cotizacionActual = {
+                    compra: data.compra,
+                    venta: data.venta,
+                    fechaActualizacion: data.fechaActualizacion,
+                    casa: tipoDolar
+                };
+
+                compraDisplay.textContent = formatCurrency(data.compra);
+                ventaDisplay.textContent = formatCurrency(data.venta);
+
+                const fecha = new Date(data.fechaActualizacion);
+                const fechaTexto = isNaN(fecha) ? '' : fecha.toLocaleString('es-AR');
+                meta.textContent = `D贸lar ${nombresDolar[tipoDolar] || tipoDolar} 路 Actualizado: ${fechaTexto} 路 Fuente: DolarAPI`;
+
+                if (btnCalcular) btnCalcular.disabled = false;
+            } catch (error) {
+                console.error('Error al obtener cotizaci贸n:', error);
+                cotizacionActual = null;
+                box.classList.add('cotizacion-error');
+                compraDisplay.textContent = '鈥?;
+                ventaDisplay.textContent = '鈥?;
+                meta.textContent = '鈿狅笍 No se pudo obtener la cotizaci贸n en vivo. Reintent谩 con el bot贸n de abajo.';
+                if (btnCalcular) btnCalcular.disabled = true;
+            } finally {
+                btnRefresh.disabled = false;
+            }
+        }
+
+        // Cargar cotizaci贸n apenas se abre la p谩gina
+        // (Se ejecutar谩 en el DOMContentLoaded del final del script)
+
+        // ==========================================
+        // BANDAS CAMBIARIAS (esquema BCRA vigente desde 11/04/2025)
+        // ==========================================
+        // Fase 1 (11/abr/2025 - 31/dic/2025): piso -1% mensual, techo +1% mensual (interpolado d铆a a d铆a)
+        // Fase 2 (desde 1/ene/2026): piso y techo se ajustan mensualmente seg煤n IPC con rezago T-2
+        // C谩lculo estimado a partir de par谩metros p煤blicos del BCRA + IPC de ArgentinaDatos/INDEC.
+        // Puede diferir levemente del valor que el BCRA publica oficialmente.
+
+        async function obtenerInflacionMensualMap() {
+            try {
+                const response = await fetch('https://api.argentinadatos.com/v1/finanzas/indices/inflacion');
+                if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
+                const data = await response.json();
+                const lista = Array.isArray(data)
+                    ? data
+                    : Array.isArray(data?.value)
+                        ? data.value
+                        : Array.isArray(data?.data)
+                            ? data.data
+                            : [];
+
+                const mapa = {};
+                lista.forEach(item => {
+                    const fecha = item.fecha || item.date;
+                    const valor = Number(item.valor ?? item.value);
+                    if (fecha && Number.isFinite(valor)) {
+                        mapa[String(fecha).slice(0, 7)] = valor; // clave "YYYY-MM"
+                    }
+                });
+                return mapa;
+            } catch (error) {
+                console.error('Error al obtener inflaci贸n mensual:', error);
+                return null;
+            }
+        }
+
+        function calcularBandaEnFecha(inflacionMap, fechaObjetivo) {
+            const ANCHOR_DATE = new Date('2025-04-11T00:00:00');
+            const FIN_FASE1 = new Date('2025-12-31T23:59:59');
+            const INICIO_FASE2 = new Date('2026-01-01T00:00:00');
+
+            let piso = 1000;
+            let techo = 1400;
+
+            // Fase 1: interpolaci贸n diaria del 卤1% mensual
+            const finInterpolacion = fechaObjetivo < FIN_FASE1 ? fechaObjetivo : FIN_FASE1;
+            const diasFase1 = Math.max(0, (finInterpolacion - ANCHOR_DATE) / 86400000);
+            const mesesFase1 = diasFase1 / 30.4368;
+            piso = piso * Math.pow(0.99, mesesFase1);
+            techo = techo * Math.pow(1.01, mesesFase1);
+
+            // Fase 2: ajuste mensual por IPC con rezago T-2, mes a mes desde enero 2026
+            if (fechaObjetivo >= INICIO_FASE2 && inflacionMap) {
+                const cursor = new Date('2026-01-01T00:00:00');
+                while (cursor <= fechaObjetivo) {
+                    const mesRef = new Date(cursor);
+                    mesRef.setMonth(mesRef.getMonth() - 2);
+                    const key = `${mesRef.getFullYear()}-${String(mesRef.getMonth() + 1).padStart(2, '0')}`;
+                    const ipc = inflacionMap[key];
+                    if (Number.isFinite(ipc)) {
+                        piso = piso * (1 - ipc / 100);
+                        techo = techo * (1 + ipc / 100);
+                    }
+                    cursor.setMonth(cursor.getMonth() + 1);
+                }
+            }
+
+            return { piso, techo };
+        }
+
+        async function cargarBandaCambiaria() {
+            const pisoDisplay = document.getElementById('bandaPisoDisplay');
+            const techoDisplay = document.getElementById('bandaTechoDisplay');
+            const posicionDisplay = document.getElementById('bandaPosicionDisplay');
+            const meta = document.getElementById('bandaMeta');
+            const box = document.getElementById('bandasBox');
+            const btnRefresh = document.getElementById('btnRefreshBanda');
+            if (!pisoDisplay || !techoDisplay || !posicionDisplay || !meta) return;
+
+            if (btnRefresh) btnRefresh.disabled = true;
+            pisoDisplay.textContent = 'Calculando...';
+            techoDisplay.textContent = 'Calculando...';
+            posicionDisplay.textContent = 'Calculando...';
+            box.classList.remove('cotizacion-error');
+
+            try {
+                const [inflacionMap, mayoristaResponse] = await Promise.all([
+                    obtenerInflacionMensualMap(),
+                    fetch('https://dolarapi.com/v1/dolares/mayorista')
+                ]);
+
+                const { piso, techo } = calcularBandaEnFecha(inflacionMap, new Date());
+                pisoDisplay.textContent = formatCurrency(piso);
+                techoDisplay.textContent = formatCurrency(techo);
+
+                if (mayoristaResponse.ok) {
+                    const mayoristaData = await mayoristaResponse.json();
+                    const valorMayorista = Number(mayoristaData.venta ?? mayoristaData.compra);
+
+                    if (Number.isFinite(valorMayorista)) {
+                        const rango = techo - piso;
+                        const posicionPct = rango > 0 ? ((valorMayorista - piso) / rango) * 100 : null;
+
+                        if (Number.isFinite(posicionPct)) {
+                            const posicionClamp = Math.min(100, Math.max(0, posicionPct));
+                            let cercania = 'dentro de la banda';
+                            if (posicionPct < 0) cercania = 'por debajo del piso';
+                            else if (posicionPct > 100) cercania = 'por encima del techo';
+                            else if (posicionClamp < 20) cercania = 'cerca del piso';
+                            else if (posicionClamp > 80) cercania = 'cerca del techo';
+
+                            posicionDisplay.textContent = `${formatCurrency(valorMayorista)} (${posicionClamp.toFixed(0)}%, ${cercania})`;
+                        } else {
+                            posicionDisplay.textContent = formatCurrency(valorMayorista);
+                        }
+                    } else {
+                        posicionDisplay.textContent = '鈥?;
+                    }
+                } else {
+                    posicionDisplay.textContent = '鈥?;
+                }
+
+                meta.textContent = inflacionMap
+                    ? '馃搻 Estimado seg煤n f贸rmula oficial del BCRA (Fase 2: 卤IPC con rezago T-2). Puede diferir levemente del valor que publica el BCRA.'
+                    : '鈿狅笍 No se pudo obtener el IPC m谩s reciente; el c谩lculo puede estar desactualizado.';
+            } catch (error) {
+                console.error('Error al calcular banda cambiaria:', error);
+                box.classList.add('cotizacion-error');
+                pisoDisplay.textContent = '鈥?;
+                techoDisplay.textContent = '鈥?;
+                posicionDisplay.textContent = '鈥?;
+                meta.textContent = '鈿狅笍 No se pudo calcular la banda cambiaria. Reintent谩 con el bot贸n de abajo.';
+            } finally {
+                if (btnRefresh) btnRefresh.disabled = false;
+            }
+        }
+
+        let tasasBancosPlazoFijo = [];
+
+        function obtenerTasa30DiasBanco(banco) {
+            if (Array.isArray(banco.tasas) && banco.tasas.length > 0) {
+                const tasa30 = banco.tasas.find(t => {
+                    const plazoMin = Number(t.plazoMinDias);
+                    const plazoMax = Number(t.plazoMaxDias);
+                    return Number.isFinite(plazoMin) && Number.isFinite(plazoMax) && plazoMin <= 30 && plazoMax >= 30;
+                });
+
+                if (tasa30 && Number.isFinite(Number(tasa30.tna))) {
+                    return Number(tasa30.tna) * 100;
+                }
+            }
+
+            const tasaFallback = Number(banco.tnaClientes ?? banco.tnaNoClientes);
+            return Number.isFinite(tasaFallback) ? tasaFallback * 100 : null;
+        }
+
+        async function cargarTasasPlazoFijo() {
+            const selectBanco = document.getElementById('bancoTasaPlazoFijo');
+            const fuenteTasa = document.getElementById('fuenteTasa');
+            if (!selectBanco || !fuenteTasa) return;
+
+            selectBanco.innerHTML = '<option value="">Cargando bancos...</option>';
+
+            try {
+                const response = await fetch('https://api.argentinadatos.com/v1/finanzas/tasas/plazoFijo');
+                if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
+
+                const data = await response.json();
+                const bancos = Array.isArray(data)
+                    ? data
+                    : Array.isArray(data?.value)
+                        ? data.value
+                        : Array.isArray(data?.data)
+                            ? data.data
+                            : [];
+
+                tasasBancosPlazoFijo = bancos
+                    .map(banco => {
+                        const tasa = obtenerTasa30DiasBanco(banco);
+                        if (!Number.isFinite(tasa) || tasa <= 0) return null;
+                        return {
+                            nombre: banco.entidad || 'Banco',
+                            tasa
+                        };
+                    })
+                    .filter(Boolean)
+                    .sort((a, b) => b.tasa - a.tasa);
+
+                actualizarMejorTasaBox();
+                actualizarPeorTasaBox();
+
+                if (tasasBancosPlazoFijo.length === 0) {
+                    selectBanco.innerHTML = '<option value="">No se pudieron cargar las tasas</option>';
+                    return;
+                }
+
+                selectBanco.innerHTML = '<option value="">Seleccion谩 un banco</option>' + tasasBancosPlazoFijo
+                    .map(({ nombre, tasa }) => `<option value="${nombre}" data-tasa="${tasa}">${nombre} (${tasa.toFixed(2)}%)</option>`)
+                    .join('');
+
+                if (fuenteTasa.value === 'banco') {
+                    actualizarTasaDesdeBanco();
+                }
+            } catch (error) {
+                console.error('Error al obtener tasas de bancos:', error);
+                selectBanco.innerHTML = '<option value="">No se pudieron cargar las tasas</option>';
+                tasasBancosPlazoFijo = [];
+                actualizarMejorTasaBox();
+                actualizarPeorTasaBox();
+            }
+        }
+
+        function actualizarMejorTasaBox() {
+            const bancoDisplay = document.getElementById('mejorTasaBanco');
+            const valorDisplay = document.getElementById('mejorTasaValor');
+            const meta = document.getElementById('mejorTasaMeta');
+            const box = document.getElementById('mejorTasaBox');
+            if (!bancoDisplay || !valorDisplay || !meta) return;
+
+            if (tasasBancosPlazoFijo.length === 0) {
+                bancoDisplay.textContent = '鈥?;
+                valorDisplay.textContent = '鈥?;
+                meta.textContent = '鈿狅笍 No se pudieron cargar las tasas de los bancos.';
+                if (box) box.classList.add('cotizacion-error');
+                return;
+            }
+
+            // La lista ya viene ordenada de mayor a menor tasa
+            const mejor = tasasBancosPlazoFijo[0];
+            bancoDisplay.textContent = mejor.nombre;
+            valorDisplay.textContent = `${mejor.tasa.toFixed(2)}%`;
+            meta.textContent = `馃 Entre ${tasasBancosPlazoFijo.length} bancos relevados 路 Fuente: ArgentinaDatos (BCRA)`;
+            if (box) box.classList.remove('cotizacion-error');
+        }
+
+        function actualizarPeorTasaBox() {
+            const bancoDisplay = document.getElementById('peorTasaBanco');
+            const valorDisplay = document.getElementById('peorTasaValor');
+            const meta = document.getElementById('peorTasaMeta');
+            const box = document.getElementById('peorTasaBox');
+            if (!bancoDisplay || !valorDisplay || !meta) return;
+
+            if (tasasBancosPlazoFijo.length === 0) {
+                bancoDisplay.textContent = '鈥?;
+                valorDisplay.textContent = '鈥?;
+                meta.textContent = '鈿狅笍 No se pudieron cargar las tasas de los bancos.';
+                if (box) box.classList.add('cotizacion-error');
+                return;
+            }
+
+            // La lista ya viene ordenada de mayor a menor tasa: el 煤ltimo es el peor
+            const peor = tasasBancosPlazoFijo[tasasBancosPlazoFijo.length - 1];
+            bancoDisplay.textContent = peor.nombre;
+            valorDisplay.textContent = `${peor.tasa.toFixed(2)}%`;
+            meta.textContent = `馃 Entre ${tasasBancosPlazoFijo.length} bancos relevados 路 Fuente: ArgentinaDatos (BCRA)`;
+            if (box) box.classList.remove('cotizacion-error');
+        }
+
+        function toggleFuenteTasaPlazoFijo() {
+            const fuente = document.getElementById('fuenteTasa').value;
+            const grupoBanco = document.getElementById('grupoBancoTasa');
+            const tasaInput = document.getElementById('tasa');
+
+            if (!grupoBanco || !tasaInput) return;
+
+            if (fuente === 'banco') {
+                grupoBanco.style.display = 'block';
+                tasaInput.disabled = true;
+                actualizarTasaDesdeBanco();
+            } else {
+                grupoBanco.style.display = 'none';
+                tasaInput.disabled = false;
+                tasaInput.placeholder = 'Ej: 35.5';
+            }
+        }
+
+        function actualizarTasaDesdeBanco() {
+            const fuente = document.getElementById('fuenteTasa').value;
+            const selectBanco = document.getElementById('bancoTasaPlazoFijo');
+            const tasaInput = document.getElementById('tasa');
+
+            if (!selectBanco || !tasaInput || fuente !== 'banco') return;
+
+            const option = selectBanco.options[selectBanco.selectedIndex];
+            const tasa = option && option.dataset.tasa ? Number(option.dataset.tasa) : null;
+
+            if (Number.isFinite(tasa)) {
+                tasaInput.value = tasa.toFixed(2);
+            }
+        }
+
+        // ==========================================
+        // RIESGO PA脥S (ArgentinaDatos, fuente: 脕mbito)
+        // ==========================================
+        function formatearFechaCorta(fechaStr) {
+            const partes = String(fechaStr).split('-');
+            if (partes.length !== 3) return fechaStr;
+            const [anio, mes, dia] = partes;
+            return `${dia}/${mes}/${anio.slice(2)}`;
+        }
+
+        async function cargarRiesgoPais() {
+            const card = document.getElementById('riesgoPaisCard');
+            const valorDisplay = document.getElementById('riesgoPaisValor');
+            const fechaDisplay = document.getElementById('riesgoPaisFecha');
+            if (!valorDisplay || !fechaDisplay) return;
+
+            try {
+                const response = await fetch('https://api.argentinadatos.com/v1/finanzas/indices/riesgo-pais/ultimo');
+                if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
+                const data = await response.json();
+                const valor = Number(data.valor);
+                if (!Number.isFinite(valor)) throw new Error('Valor inv谩lido');
+
+                valorDisplay.textContent = `${valor.toLocaleString('es-AR')} pb`;
+                fechaDisplay.textContent = data.fecha ? `Al ${formatearFechaCorta(data.fecha)}` : '';
+                if (card) card.classList.remove('stat-error');
+            } catch (error) {
+                console.error('Error al obtener riesgo pa铆s:', error);
+                valorDisplay.textContent = '鈥?;
+                fechaDisplay.textContent = 'No disponible';
+                if (card) card.classList.add('stat-error');
+            }
+        }
+
+        // ==========================================
+        // D脫LAR OFICIAL (venta) - tarjeta fija del sidebar
+        // Fetch independiente del selector de tipo de d贸lar de la pesta帽a #dolares,
+        // para que el sidebar siempre muestre el oficial sin importar qu茅 est茅 elegido ah铆.
+        // ==========================================
+        async function cargarDolarOficialCard() {
+            const card = document.getElementById('dolarOficialCard');
+            const valorDisplay = document.getElementById('dolarOficialValor');
+            const fechaDisplay = document.getElementById('dolarOficialFecha');
+            if (!valorDisplay || !fechaDisplay) return;
+
+            try {
+                const response = await fetch('https://dolarapi.com/v1/dolares/oficial');
+                if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
+                const data = await response.json();
+                const venta = Number(data.venta);
+                if (!Number.isFinite(venta)) throw new Error('Valor inv谩lido');
+
+                valorDisplay.textContent = formatCurrency(venta);
+                const fecha = data.fechaActualizacion ? new Date(data.fechaActualizacion) : null;
+                fechaDisplay.textContent = fecha && !isNaN(fecha) ? `Al ${formatearFechaCorta(fecha.toISOString().slice(0, 10))}` : '';
+                if (card) card.classList.remove('stat-error');
+            } catch (error) {
+                console.error('Error al obtener d贸lar oficial:', error);
+                valorDisplay.textContent = '鈥?;
+                fechaDisplay.textContent = 'No disponible';
+                if (card) card.classList.add('stat-error');
+            }
+        }
+
+        // ==========================================
+        // INDICADOR D脫LAR BARATO / CARO - tarjeta fija del sidebar
+        // Compara el oficial minorista (venta) contra el mayorista, el blue y el MEP.
+        //
+        //   Barato: minorista <= (mayorista + 15)  Y  minorista < blue  Y  minorista < MEP
+        //   Caro:   minorista > (mayorista + 15)  Y  minorista > blue
+        //   (cualquier otro caso queda como "Neutro")
+        // ==========================================
+        async function cargarIndicadorDolar() {
+            const card = document.getElementById('dolarIndicadorCard');
+            const valorDisplay = document.getElementById('dolarIndicadorValor');
+            const metaDisplay = document.getElementById('dolarIndicadorMeta');
+            if (!valorDisplay || !metaDisplay) return;
+
+            card.classList.remove('stat-good', 'stat-bad', 'stat-neutral', 'stat-error');
+            valorDisplay.textContent = 'Cargando...';
+            metaDisplay.textContent = 'Consultando cotizaciones...';
+
+            try {
+                const [oficialRes, mayoristaRes, blueRes, mepRes] = await Promise.all([
+                    fetch('https://dolarapi.com/v1/dolares/oficial'),
+                    fetch('https://dolarapi.com/v1/dolares/mayorista'),
+                    fetch('https://dolarapi.com/v1/dolares/blue'),
+                    fetch('https://dolarapi.com/v1/dolares/bolsa')
+                ]);
+                if (!oficialRes.ok || !mayoristaRes.ok || !blueRes.ok || !mepRes.ok) {
+                    throw new Error('Respuesta no OK de alguna cotizaci贸n');
+                }
+
+                const [oficial, mayorista, blue, mep] = await Promise.all([
+                    oficialRes.json(), mayoristaRes.json(), blueRes.json(), mepRes.json()
+                ]);
+
+                const minorista = Number(oficial.venta);
+                const mayoristaVenta = Number(mayorista.venta);
+                const blueVenta = Number(blue.venta);
+                const mepVenta = Number(mep.venta);
+
+                if (![minorista, mayoristaVenta, blueVenta, mepVenta].every(Number.isFinite)) {
+                    throw new Error('Valor inv谩lido en alguna cotizaci贸n');
+                }
+
+                const esBarato = minorista <= (mayoristaVenta + 15) && minorista < blueVenta && minorista < mepVenta;
+                const esCaro = minorista > (mayoristaVenta + 15) && minorista > blueVenta;
+
+                card.classList.remove('stat-good', 'stat-bad', 'stat-neutral');
+                if (esBarato) {
+                    valorDisplay.textContent = '馃煝 Barato';
+                    card.classList.add('stat-good');
+                } else if (esCaro) {
+                    valorDisplay.textContent = '馃敶 Caro';
+                    card.classList.add('stat-bad');
+                } else {
+                    valorDisplay.textContent = '馃煛 Neutro';
+                    card.classList.add('stat-neutral');
+                }
+
+                metaDisplay.textContent =
+                    `Minorista ${formatCurrency(minorista)} 路 Mayorista ${formatCurrency(mayoristaVenta)} 路 ` +
+                    `Blue ${formatCurrency(blueVenta)} 路 MEP ${formatCurrency(mepVenta)}`;
+            } catch (error) {
+                console.error('Error al calcular indicador de d贸lar barato/caro:', error);
+                valorDisplay.textContent = '鈥?;
+                metaDisplay.textContent = 'No disponible';
+                card.classList.add('stat-error');
+            }
+        }
+
+        // ==========================================
+        // RIESGO PAIS - HISTORIAL (pesta帽a propia)
+        // ==========================================
+        let serieRiesgoPais = []; // [{ fecha, valor, variacionAbs, variacionPct }]
+
+        async function obtenerRiesgoPaisHistorial() {
+            const response = await fetch('https://api.argentinadatos.com/v1/finanzas/indices/riesgo-pais');
+            if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
+            const data = await response.json();
+            if (!Array.isArray(data)) throw new Error('Formato de respuesta inesperado');
+
+            return data
+                .map(p => ({ fecha: String(p.fecha).slice(0, 10), valor: Number(p.valor) }))
+                .filter(p => Number.isFinite(p.valor) && p.fecha)
+                .sort((a, b) => a.fecha.localeCompare(b.fecha));
+        }
+
+        function calcularVariacionesRiesgoPais(serie) {
+            return serie.map((punto, i) => {
+                const anterior = serie[i - 1];
+                const variacionAbs = anterior ? punto.valor - anterior.valor : null;
+                const variacionPct = anterior && anterior.valor !== 0
+                    ? (punto.valor / anterior.valor - 1) * 100
+                    : null;
+                return { ...punto, variacionAbs, variacionPct };
+            });
+        }
+
+        function formatearVariacionAbsPb(valor) {
+            if (!Number.isFinite(valor)) return '鈥?;
+            const signo = valor > 0 ? '+' : '';
+            return `${signo}${Math.round(valor)} pb`;
+        }
+
+        function poblarFechasRiesgoPais() {
+            const inputDesde = document.getElementById('riesgoPaisDesde');
+            const inputHasta = document.getElementById('riesgoPaisHasta');
+            if (!inputDesde || !inputHasta || serieRiesgoPais.length === 0) return;
+
+            const primeraFecha = serieRiesgoPais[0].fecha;
+            const ultimaFecha = serieRiesgoPais[serieRiesgoPais.length - 1].fecha;
+
+            inputDesde.min = primeraFecha;
+            inputDesde.max = ultimaFecha;
+            inputHasta.min = primeraFecha;
+            inputHasta.max = ultimaFecha;
+
+            // Por defecto: 煤ltimos 90 d铆as, para no listar a帽os de historial de una
+            const fechaHastaObj = new Date(ultimaFecha + 'T00:00:00');
+            const fechaDesdeObj = new Date(fechaHastaObj);
+            fechaDesdeObj.setDate(fechaDesdeObj.getDate() - 90);
+            const desdeDefault = fechaDesdeObj.toISOString().slice(0, 10);
+
+            inputDesde.value = desdeDefault > primeraFecha ? desdeDefault : primeraFecha;
+            inputHasta.value = ultimaFecha;
+        }
+
+        function renderTablaRiesgoPais() {
+            const cuerpo = document.getElementById('cuerpoTablaRiesgoPais');
+            const inputDesde = document.getElementById('riesgoPaisDesde');
+            const inputHasta = document.getElementById('riesgoPaisHasta');
+            if (!cuerpo || !inputDesde || !inputHasta) return;
+
+            const desde = inputDesde.value;
+            const hasta = inputHasta.value;
+            if (!desde || !hasta) return;
+
+            const filas = serieRiesgoPais
+                .filter(p => p.fecha >= desde && p.fecha <= hasta)
+                .slice()
+                .reverse(); // m谩s reciente primero
+
+            cuerpo.innerHTML = filas.map(p => {
+                const claseVariacion = !Number.isFinite(p.variacionAbs) ? '' : (p.variacionAbs > 0 ? 'valor-positivo' : (p.variacionAbs < 0 ? 'valor-negativo' : ''));
+                return `
+                <tr>
+                    <td>${p.fecha.split('-').reverse().join('/')}</td>
+                    <td>${Math.round(p.valor).toLocaleString('es-AR')}</td>
+                    <td class="${claseVariacion}">${formatearVariacionAbsPb(p.variacionAbs)}</td>
+                    <td class="${claseVariacion}">${formatearPorcentajeIPC(p.variacionPct)}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function obtenerFilasFiltradasRiesgoPais() {
+            const inputDesde = document.getElementById('riesgoPaisDesde');
+            const inputHasta = document.getElementById('riesgoPaisHasta');
+            if (!inputDesde || !inputHasta) return [];
+            const desde = inputDesde.value;
+            const hasta = inputHasta.value;
+            if (!desde || !hasta) return [];
+            return serieRiesgoPais.filter(p => p.fecha >= desde && p.fecha <= hasta); // orden cronol贸gico ascendente
+        }
+
+        let chartRiesgoPaisInstance = null;
+
+        function calcularRegresionLineal(valores) {
+            const n = valores.length;
+            if (n < 2) return null;
+
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            for (let i = 0; i < n; i++) {
+                sumX += i;
+                sumY += valores[i];
+                sumXY += i * valores[i];
+                sumX2 += i * i;
+            }
+
+            const denominador = n * sumX2 - sumX * sumX;
+            if (denominador === 0) return null; // todos los x iguales (no deber铆a pasar con 铆ndices 0..n-1)
+
+            const pendiente = (n * sumXY - sumX * sumY) / denominador;
+            const intercepto = (sumY - pendiente * sumX) / n;
+            return { pendiente, intercepto };
+        }
+
+        function renderGraficoRiesgoPais() {
+            const canvas = document.getElementById('chartRiesgoPais');
+            const aviso = document.getElementById('riesgoPaisChartAviso');
+            const tendenciaInfo = document.getElementById('riesgoPaisTendenciaInfo');
+            if (!canvas || typeof Chart === 'undefined') return;
+
+            const filas = obtenerFilasFiltradasRiesgoPais();
+            const checkboxVariacion = document.getElementById('mostrarVariacionRiesgoPais');
+            const selectUnidad = document.getElementById('unidadVariacionRiesgoPais');
+            const checkboxTendencia = document.getElementById('mostrarTendenciaRiesgoPais');
+            const mostrarVariacion = checkboxVariacion ? checkboxVariacion.checked : false;
+            const unidad = selectUnidad ? selectUnidad.value : 'pb';
+            const mostrarTendencia = checkboxTendencia ? checkboxTendencia.checked : false;
+            const usarEtiquetas = mostrarVariacion && typeof ChartDataLabels !== 'undefined';
+
+            if (aviso) {
+                aviso.textContent = (mostrarVariacion && filas.length > 60)
+                    ? `鈿狅笍 Mostrando ${filas.length} puntos: con tantos datos las etiquetas de variaci贸n pueden superponerse. Achic谩 el rango (Desde/Hasta) para verlas m谩s claras.`
+                    : '';
+            }
+
+            const labels = filas.map(p => p.fecha.split('-').reverse().join('/'));
+            const datasets = [{
+                type: 'line',
+                label: 'Riesgo Pa铆s (pb)',
+                data: filas.map(p => p.valor),
+                borderColor: 'rgba(231, 76, 60, 1)',
+                backgroundColor: 'rgba(231, 76, 60, 0.12)',
+                borderWidth: 2,
+                tension: 0.2,
+                pointRadius: filas.length > 90 ? 0 : 2,
+                fill: true
+            }];
+
+            let regresion = null;
+            if (mostrarTendencia) {
+                regresion = calcularRegresionLineal(filas.map(p => p.valor));
+                if (regresion) {
+                    datasets.push({
+                        type: 'line',
+                        label: 'Tendencia (regresi贸n lineal)',
+                        data: filas.map((_, i) => regresion.intercepto + regresion.pendiente * i),
+                        borderColor: 'rgba(52, 73, 94, 0.9)',
+                        borderDash: [6, 4],
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false,
+                        tension: 0,
+                        datalabels: { display: false } // nunca mostrar etiquetas de variaci贸n sobre la l铆nea de tendencia
+                    });
+                }
+            }
+
+            if (tendenciaInfo) {
+                if (mostrarTendencia && regresion) {
+                    const signo = regresion.pendiente >= 0 ? '+' : '';
+                    tendenciaInfo.textContent = `馃搻 Tendencia: ${signo}${regresion.pendiente.toFixed(2)} pb/d铆a h谩bil en este rango (${filas.length} datos, regresi贸n lineal por m铆nimos cuadrados)`;
+                } else if (mostrarTendencia) {
+                    tendenciaInfo.textContent = '鈿狅笍 No hay suficientes datos en el rango para calcular una tendencia.';
+                } else {
+                    tendenciaInfo.textContent = '';
+                }
+            }
+
+            if (chartRiesgoPaisInstance) {
+                chartRiesgoPaisInstance.destroy();
+            }
+
+            chartRiesgoPaisInstance = new Chart(canvas.getContext('2d'), {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: datasets.length > 1 },
+                        datalabels: usarEtiquetas ? {
+                            align: 'top',
+                            anchor: 'end',
+                            font: { size: 9, weight: '600' },
+                            color: (ctx) => {
+                                const p = filas[ctx.dataIndex];
+                                if (!p || !Number.isFinite(p.variacionAbs)) return '#8a90a2';
+                                return p.variacionAbs > 0 ? '#e74c3c' : (p.variacionAbs < 0 ? '#16a085' : '#8a90a2');
+                            },
+                            formatter: (value, ctx) => {
+                                const p = filas[ctx.dataIndex];
+                                if (!p) return '';
+                                const variacion = unidad === 'pb' ? p.variacionAbs : p.variacionPct;
+                                if (!Number.isFinite(variacion)) return '';
+                                const signo = variacion > 0 ? '+' : '';
+                                return unidad === 'pb' ? `${signo}${Math.round(variacion)}` : `${signo}${variacion.toFixed(1)}%`;
+                            }
+                        } : false
+                    },
+                    scales: {
+                        x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 10 } },
+                        y: { title: { display: true, text: 'Puntos b谩sicos (pb)' } }
+                    }
+                },
+                plugins: usarEtiquetas ? [ChartDataLabels] : []
+            });
+        }
+
+        function exportarGraficoRiesgoPais() {
+            if (!chartRiesgoPaisInstance) return;
+            const inputDesde = document.getElementById('riesgoPaisDesde');
+            const inputHasta = document.getElementById('riesgoPaisHasta');
+            const desde = inputDesde ? inputDesde.value : '';
+            const hasta = inputHasta ? inputHasta.value : '';
+            const link = document.createElement('a');
+            link.href = chartRiesgoPaisInstance.toBase64Image('image/png', 1);
+            link.download = `riesgo-pais-${desde}_a_${hasta}.png`;
+            link.click();
+        }
+
+        function actualizarVistaRiesgoPais() {
+            renderTablaRiesgoPais();
+            renderGraficoRiesgoPais();
+        }
+
+        async function cargarRiesgoPaisHistorial() {
+            const box = document.getElementById('riesgoPaisResumenBox');
+            const fechaDisplay = document.getElementById('riesgoPaisTabFecha');
+            const valorDisplay = document.getElementById('riesgoPaisTabValor');
+            const variacionDisplay = document.getElementById('riesgoPaisTabVariacion');
+            const meta = document.getElementById('riesgoPaisTabMeta');
+            const btnRefresh = document.getElementById('btnRefreshRiesgoPaisTab');
+            if (!fechaDisplay || !valorDisplay || !variacionDisplay || !meta) return;
+
+            if (btnRefresh) btnRefresh.disabled = true;
+            box.classList.remove('cotizacion-error');
+            fechaDisplay.textContent = 'Cargando...';
+            valorDisplay.textContent = 'Cargando...';
+            variacionDisplay.textContent = 'Cargando...';
+            meta.textContent = 'Consultando historial (ArgentinaDatos / 脕mbito)...';
+
+            try {
+                const serieCruda = await obtenerRiesgoPaisHistorial();
+                serieRiesgoPais = calcularVariacionesRiesgoPais(serieCruda);
+
+                if (serieRiesgoPais.length === 0) throw new Error('Serie vac铆a');
+
+                const ultimo = serieRiesgoPais[serieRiesgoPais.length - 1];
+                fechaDisplay.textContent = formatearFechaCorta(ultimo.fecha);
+                valorDisplay.textContent = `${Math.round(ultimo.valor).toLocaleString('es-AR')} pb`;
+                variacionDisplay.textContent = `${formatearVariacionAbsPb(ultimo.variacionAbs)} (${formatearPorcentajeIPC(ultimo.variacionPct)})`;
+                meta.textContent = `${serieRiesgoPais.length.toLocaleString('es-AR')} registros 路 Fuente: 脕mbito, v铆a ArgentinaDatos`;
+
+                poblarFechasRiesgoPais();
+                actualizarVistaRiesgoPais();
+            } catch (error) {
+                console.error('Error al obtener el historial de riesgo pa铆s:', error);
+                box.classList.add('cotizacion-error');
+                fechaDisplay.textContent = '鈥?;
+                valorDisplay.textContent = '鈥?;
+                variacionDisplay.textContent = '鈥?;
+                meta.textContent = '鈿狅笍 No se pudo obtener el historial. Reintent谩 con el bot贸n de abajo.';
+            } finally {
+                if (btnRefresh) btnRefresh.disabled = false;
+            }
+        }
+
+        // ==========================================
+        // IPC NIVEL GENERAL (INDEC v铆a API de Series de Tiempo - datos.gob.ar)
+        // ==========================================
+        const IPC_SERIES_ID = '148.3_INIVELNAL_DICI_M_26'; // IPC Nivel General, Nacional, base dic-2016=100
+        let serieIPC = []; // [{ mes, indice, variacionMensual, variacionInteranual }]
+
+        async function obtenerIPCNivelGeneral() {
+            const url = `https://apis.datos.gob.ar/series/api/series/?ids=${IPC_SERIES_ID}&start_date=2016-12&format=json&limit=1000`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
+            const json = await response.json();
+            if (!Array.isArray(json.data)) throw new Error('Formato de respuesta inesperado');
+
+            return json.data
+                .map(([fecha, indice]) => ({ mes: String(fecha).slice(0, 7), indice: Number(indice) }))
+                .filter(p => Number.isFinite(p.indice))
+                .sort((a, b) => a.mes.localeCompare(b.mes));
+        }
+
+        function calcularVariacionesIPC(serie) {
+            // serie: [{mes, indice}] ordenada cronol贸gicamente ascendente
+            return serie.map((punto, i) => {
+                const mesAnterior = serie[i - 1];
+                const mismoMesAnioAnterior = serie[i - 12];
+
+                const variacionMensual = mesAnterior
+                    ? (punto.indice / mesAnterior.indice - 1) * 100
+                    : null; // dic-2016 es la base: no hay mes anterior
+
+                const variacionInteranual = mismoMesAnioAnterior
+                    ? (punto.indice / mismoMesAnioAnterior.indice - 1) * 100
+                    : null; // reci茅n calculable desde 12 meses despu茅s del inicio de la serie
+
+                return { ...punto, variacionMensual, variacionInteranual };
+            });
+        }
+
+        function calcularInflacionAcumuladaIPC(serie, meses) {
+            // Inflaci贸n acumulada compuesta de los 煤ltimos N meses (no es la simple suma de las
+            // variaciones mensuales, sino el producto de los factores mes a mes menos 1).
+            if (!Array.isArray(serie) || serie.length < meses) return null;
+            const ultimosN = serie.slice(-meses);
+            if (ultimosN.some(p => !Number.isFinite(p.variacionMensual))) return null;
+            const factorAcumulado = ultimosN.reduce((factor, p) => factor * (1 + p.variacionMensual / 100), 1);
+            return (factorAcumulado - 1) * 100;
+        }
+
+        function formatearMesIPC(mesStr) {
+            const [anio, mes] = mesStr.split('-').map(Number);
+            const nombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            return `${nombres[mes - 1]} ${anio}`;
+        }
+
+        function formatearPorcentajeIPC(valor) {
+            if (!Number.isFinite(valor)) return '鈥?;
+            const signo = valor > 0 ? '+' : '';
+            return `${signo}${valor.toFixed(1)}%`;
+        }
+
+        function poblarSelectsIPC() {
+            const selectDesde = document.getElementById('ipcDesde');
+            const selectHasta = document.getElementById('ipcHasta');
+            if (!selectDesde || !selectHasta || serieIPC.length === 0) return;
+
+            const opciones = serieIPC
+                .map(p => `<option value="${p.mes}">${formatearMesIPC(p.mes)}</option>`)
+                .join('');
+
+            selectDesde.innerHTML = opciones;
+            selectHasta.innerHTML = opciones;
+
+            const desdeDefault = serieIPC.some(p => p.mes === '2026-01') ? '2026-01' : serieIPC[0].mes;
+            selectDesde.value = desdeDefault;
+            selectHasta.value = serieIPC[serieIPC.length - 1].mes;
+        }
+
+        function renderTablaIPC() {
+            const cuerpo = document.getElementById('cuerpoTablaIPC');
+            const selectDesde = document.getElementById('ipcDesde');
+            const selectHasta = document.getElementById('ipcHasta');
+            if (!cuerpo || !selectDesde || !selectHasta) return;
+
+            const desde = selectDesde.value;
+            const hasta = selectHasta.value;
+            if (!desde || !hasta) return;
+
+            const filas = serieIPC
+                .filter(p => p.mes >= desde && p.mes <= hasta)
+                .slice()
+                .reverse(); // m谩s reciente primero, como un historial
+
+            cuerpo.innerHTML = filas.map(p => `
+                <tr>
+                    <td>${formatearMesIPC(p.mes)}</td>
+                    <td>${p.indice.toLocaleString('es-AR', { maximumFractionDigits: 2 })}</td>
+                    <td>${formatearPorcentajeIPC(p.variacionMensual)}</td>
+                    <td>${formatearPorcentajeIPC(p.variacionInteranual)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function obtenerFilasFiltradasIPC() {
+            const selectDesde = document.getElementById('ipcDesde');
+            const selectHasta = document.getElementById('ipcHasta');
+            if (!selectDesde || !selectHasta) return [];
+            const desde = selectDesde.value;
+            const hasta = selectHasta.value;
+            if (!desde || !hasta) return [];
+            return serieIPC.filter(p => p.mes >= desde && p.mes <= hasta); // orden cronol贸gico ascendente
+        }
+
+        // ==========================================
+        // CALCULADORA DE INFLACION ENTRE FECHAS (reusa serieIPC)
+        // ==========================================
+        function poblarSelectsCalcInflacion() {
+            const selectDesde = document.getElementById('calcInfDesde');
+            const selectHasta = document.getElementById('calcInfHasta');
+            if (!selectDesde || !selectHasta || serieIPC.length === 0) return;
+
+            const opciones = serieIPC
+                .map(p => `<option value="${p.mes}">${formatearMesIPC(p.mes)}</option>`)
+                .join('');
+
+            selectDesde.innerHTML = opciones;
+            selectHasta.innerHTML = opciones;
+
+            selectDesde.value = serieIPC[0].mes;
+            selectHasta.value = serieIPC[serieIPC.length - 1].mes;
+
+            calcularInflacionEntreFechasUI();
+        }
+
+        function calcularInflacionEntreFechas(mesDesde, mesHasta) {
+            // Usa el 铆ndice directamente (no encadena variaciones mensuales redondeadas),
+            // as铆 el resultado coincide exactamente con la serie oficial.
+            const puntoDesde = serieIPC.find(p => p.mes === mesDesde);
+            const puntoHasta = serieIPC.find(p => p.mes === mesHasta);
+            if (!puntoDesde || !puntoHasta) return null;
+            return (puntoHasta.indice / puntoDesde.indice - 1) * 100;
+        }
+
+        function calcularInflacionEntreFechasUI() {
+            const selectDesde = document.getElementById('calcInfDesde');
+            const selectHasta = document.getElementById('calcInfHasta');
+            const acumuladaDisplay = document.getElementById('calcInfAcumulada');
+            const meta = document.getElementById('calcInfMeta');
+            const montoInput = document.getElementById('calcInfMonto');
+            const montoRow = document.getElementById('calcInfMontoResultRow');
+            const montoResult = document.getElementById('calcInfMontoResult');
+            if (!selectDesde || !selectHasta || !acumuladaDisplay || !meta) return;
+
+            const desde = selectDesde.value;
+            const hasta = selectHasta.value;
+            if (!desde || !hasta || serieIPC.length === 0) return;
+
+            if (desde >= hasta) {
+                acumuladaDisplay.textContent = '鈥?;
+                meta.textContent = '鈿狅笍 El mes "Desde" debe ser anterior al mes "Hasta".';
+                if (montoRow) montoRow.style.display = 'none';
+                return;
+            }
+
+            const variacion = calcularInflacionEntreFechas(desde, hasta);
+            if (!Number.isFinite(variacion)) {
+                acumuladaDisplay.textContent = '鈥?;
+                meta.textContent = '鈿狅笍 No se pudo calcular con los meses seleccionados.';
+                if (montoRow) montoRow.style.display = 'none';
+                return;
+            }
+
+            acumuladaDisplay.textContent = formatearPorcentajeIPC(variacion);
+            meta.textContent = `Entre ${formatearMesIPC(desde)} y ${formatearMesIPC(hasta)} 路 Serie: IPC Nivel General Nacional (INDEC)`;
+
+            const monto = montoInput ? parseFloat(montoInput.value) : NaN;
+            if (montoRow && montoResult) {
+                if (Number.isFinite(monto) && monto > 0) {
+                    const equivalente = monto * (1 + variacion / 100);
+                    montoResult.textContent = formatCurrency(equivalente);
+                    montoRow.style.display = 'flex';
+                } else {
+                    montoRow.style.display = 'none';
+                }
+            }
+        }
+
+        let chartIPCInstance = null;
+
+        function renderGraficoIPC() {
+            const canvas = document.getElementById('chartIPC');
+            if (!canvas || typeof Chart === 'undefined') return;
+
+            const filas = obtenerFilasFiltradasIPC();
+            const modoSelect = document.getElementById('seriesIPC');
+            const modo = modoSelect ? modoSelect.value : 'ambas';
+
+            const labels = filas.map(p => formatearMesIPC(p.mes));
+            const datasets = [];
+
+            if (modo === 'ambas' || modo === 'mensual') {
+                datasets.push({
+                    type: 'bar',
+                    label: 'Variaci贸n mensual (%)',
+                    data: filas.map(p => p.variacionMensual),
+                    backgroundColor: 'rgba(102, 126, 234, 0.55)',
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'yMensual',
+                    order: 2
+                });
+            }
+
+            if (modo === 'ambas' || modo === 'interanual') {
+                datasets.push({
+                    type: 'line',
+                    label: 'Variaci贸n interanual (%)',
+                    data: filas.map(p => p.variacionInteranual),
+                    borderColor: 'rgba(231, 76, 60, 1)',
+                    backgroundColor: 'rgba(231, 76, 60, 0.15)',
+                    borderWidth: 2,
+                    tension: 0.25,
+                    pointRadius: 2,
+                    yAxisID: modo === 'ambas' ? 'yInteranual' : 'yMensual',
+                    order: 1
+                });
+            }
+
+            const scales = {
+                x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } }
+            };
+
+            if (modo === 'ambas') {
+                scales.yMensual = { type: 'linear', position: 'left', title: { display: true, text: 'Mensual (%)' } };
+                scales.yInteranual = { type: 'linear', position: 'right', title: { display: true, text: 'Interanual (%)' }, grid: { drawOnChartArea: false } };
+            } else {
+                scales.yMensual = { type: 'linear', position: 'left', title: { display: true, text: modo === 'mensual' ? 'Mensual (%)' : 'Interanual (%)' } };
+            }
+
+            if (chartIPCInstance) {
+                chartIPCInstance.destroy();
+            }
+
+            chartIPCInstance = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { display: true } },
+                    scales
+                }
+            });
+        }
+
+        function exportarGraficoIPC() {
+            if (!chartIPCInstance) return;
+            const selectDesde = document.getElementById('ipcDesde');
+            const selectHasta = document.getElementById('ipcHasta');
+            const desde = selectDesde ? selectDesde.value : '';
+            const hasta = selectHasta ? selectHasta.value : '';
+            const link = document.createElement('a');
+            link.href = chartIPCInstance.toBase64Image('image/png', 1);
+            link.download = `ipc-${desde}_a_${hasta}.png`;
+            link.click();
+        }
+
+        function actualizarVistaIPC() {
+            renderTablaIPC();
+            renderGraficoIPC();
+        }
+
+        function sumarMesesIPC(mesStr, delta) {
+            const [anio, mes] = mesStr.split('-').map(Number);
+            const fecha = new Date(anio, mes - 1 + delta, 1);
+            return `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        function aplicarFiltroRapidoIPC(tipo, boton) {
+            const selectDesde = document.getElementById('ipcDesde');
+            const selectHasta = document.getElementById('ipcHasta');
+            if (!selectDesde || !selectHasta || serieIPC.length === 0) return;
+
+            const ultimoMes = serieIPC[serieIPC.length - 1].mes;
+            const primerMes = serieIPC[0].mes;
+            let desdeCalculado;
+
+            if (tipo === 'anio') {
+                desdeCalculado = `${ultimoMes.slice(0, 4)}-01`;
+            } else if (tipo === '12m') {
+                desdeCalculado = sumarMesesIPC(ultimoMes, -11);
+            } else if (tipo === '6m') {
+                desdeCalculado = sumarMesesIPC(ultimoMes, -5);
+            } else {
+                return;
+            }
+
+            selectDesde.value = desdeCalculado >= primerMes ? desdeCalculado : primerMes;
+            selectHasta.value = ultimoMes;
+
+            document.querySelectorAll('.btn-quick-filter').forEach(btn => btn.classList.remove('active'));
+            if (boton) boton.classList.add('active');
+
+            actualizarVistaIPC();
+        }
+
+        async function cargarIPC() {
+            const box = document.getElementById('ipcResumenBox');
+            const mesDisplay = document.getElementById('ipcUltimoMes');
+            const mensualDisplay = document.getElementById('ipcUltimaMensual');
+            const interanualDisplay = document.getElementById('ipcUltimaInteranual');
+            const acumulada6mDisplay = document.getElementById('ipcAcumulada6m');
+            const meta = document.getElementById('ipcMeta');
+            const btnRefresh = document.getElementById('btnRefreshIPC');
+            const inflacionCard = document.getElementById('inflacionCard');
+            const inflacionCardValor = document.getElementById('inflacionCardValor');
+            const inflacionCardFecha = document.getElementById('inflacionCardFecha');
+            if (!mesDisplay || !mensualDisplay || !interanualDisplay || !meta) return;
+
+            if (btnRefresh) btnRefresh.disabled = true;
+            box.classList.remove('cotizacion-error');
+            mesDisplay.textContent = 'Cargando...';
+            mensualDisplay.textContent = 'Cargando...';
+            interanualDisplay.textContent = 'Cargando...';
+            if (acumulada6mDisplay) acumulada6mDisplay.textContent = 'Cargando...';
+            meta.textContent = 'Consultando serie oficial (INDEC / datos.gob.ar)...';
+            if (inflacionCardValor) inflacionCardValor.textContent = 'Cargando...';
+            if (inflacionCardFecha) inflacionCardFecha.textContent = '';
+
+            try {
+                const serieCruda = await obtenerIPCNivelGeneral();
+                serieIPC = calcularVariacionesIPC(serieCruda);
+
+                if (serieIPC.length === 0) throw new Error('Serie vac铆a');
+
+                const ultimo = serieIPC[serieIPC.length - 1];
+                mesDisplay.textContent = formatearMesIPC(ultimo.mes);
+                mensualDisplay.textContent = formatearPorcentajeIPC(ultimo.variacionMensual);
+                interanualDisplay.textContent = formatearPorcentajeIPC(ultimo.variacionInteranual);
+                if (acumulada6mDisplay) {
+                    acumulada6mDisplay.textContent = formatearPorcentajeIPC(calcularInflacionAcumuladaIPC(serieIPC, 6));
+                }
+                meta.textContent = 'Serie: IPC Nivel General Nacional (base dic-2016=100) 路 Fuente: INDEC v铆a API de Series de Tiempo';
+
+                // Mismo dato que la pesta帽a IPC, para que el sidebar y la pesta帽a nunca queden desincronizados
+                if (inflacionCardValor) inflacionCardValor.textContent = formatearPorcentajeIPC(ultimo.variacionMensual);
+                if (inflacionCardFecha) inflacionCardFecha.textContent = formatearMesIPC(ultimo.mes);
+                if (inflacionCard) inflacionCard.classList.remove('stat-error');
+
+                poblarSelectsIPC();
+                actualizarVistaIPC();
+                poblarSelectsCalcInflacion();
+            } catch (error) {
+                console.error('Error al obtener el IPC:', error);
+                box.classList.add('cotizacion-error');
+                mesDisplay.textContent = '鈥?;
+                mensualDisplay.textContent = '鈥?;
+                interanualDisplay.textContent = '鈥?;
+                if (acumulada6mDisplay) acumulada6mDisplay.textContent = '鈥?;
+                meta.textContent = '鈿狅笍 No se pudo obtener la serie del IPC. Reintent谩 con el bot贸n de abajo.';
+                if (inflacionCardValor) inflacionCardValor.textContent = '鈥?;
+                if (inflacionCardFecha) inflacionCardFecha.textContent = 'No disponible';
+                if (inflacionCard) inflacionCard.classList.add('stat-error');
+            } finally {
+                if (btnRefresh) btnRefresh.disabled = false;
+            }
+        }
+
+        cargarTasasPlazoFijo();
+        toggleFuenteTasaPlazoFijo();
+
+        document.getElementById('calculatorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const capital = parseFloat(document.getElementById('capital').value);
+            const tasaAnual = parseFloat(document.getElementById('tasa').value) / 100;
+            const plazo = parseInt(document.getElementById('plazo').value);
+            const capitalizacion = document.getElementById('capitalizacion').value;
+            
+            let capitalFinal;
+            let intereses;
+            
+            if (capitalizacion === 'simple') {
+                // Inter茅s simple: I = C * r * t
+                intereses = capital * tasaAnual * (plazo / 365);
+                capitalFinal = capital + intereses;
+            } else if (capitalizacion === 'compuesta') {
+                // Inter茅s compuesto diario: A = P(1 + r/n)^(n*t)
+                const tasaDiaria = tasaAnual / 365;
+                capitalFinal = capital * Math.pow(1 + tasaDiaria, plazo);
+                intereses = capitalFinal - capital;
+            } else if (capitalizacion === 'mensual') {
+                // Inter茅s compuesto mensual: A = P(1 + r/12)^(12*t)
+                const tasaMensual = tasaAnual / 12;
+                const meses = plazo / 30.44; // Promedio de d铆as por mes
+                capitalFinal = capital * Math.pow(1 + tasaMensual, meses);
+                intereses = capitalFinal - capital;
+            }
+            
+            const rendimientoTotal = ((capitalFinal - capital) / capital) * 100;
+            const meses = plazo / 30.44;
+            const rendimientoMensual = meses > 0 ? rendimientoTotal / meses : 0;
+            
+            // Mostrar resultados
+            document.getElementById('capitalInicial').textContent = formatCurrency(capital);
+            document.getElementById('intereses').textContent = formatCurrency(intereses);
+            document.getElementById('capitalFinal').textContent = formatCurrency(capitalFinal);
+            document.getElementById('rendimientoTotal').textContent = rendimientoTotal.toFixed(2) + '%';
+            document.getElementById('rendimientoMensual').textContent = rendimientoMensual.toFixed(2) + '%';
+            
+            document.getElementById('results').style.display = 'grid';
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Calculadora de Cauciones
+        document.getElementById('caucionesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const capital = parseFloat(document.getElementById('capitalCaucion').value);
+            const tnaAnual = parseFloat(document.getElementById('tasaCaucion').value) / 100;
+            const dias = getDiasCaucion();
+            if (!dias) {
+                alert('Ingres谩 una cantidad de d铆as v谩lida (entre 1 y 365).');
+                document.getElementById('diasCustomCaucion').focus();
+                return;
+            }
+            const tipoComision = document.getElementById('tipoComision').value;
+            
+            // Calcular inter茅s bruto (inter茅s simple)
+            const interesesBrutos = capital * tnaAnual * (dias / 365);
+            
+            let totalCostos = 0;
+            let costoArancel = 0;
+            let costoDerechoMercado = 0;
+            let costoIVA = 0;
+            
+            if (tipoComision === 'fija') {
+                const comisionPorcentaje = parseFloat(document.getElementById('comision').value) / 100;
+                totalCostos = interesesBrutos * comisionPorcentaje;
+                
+                // Ocultar desgloses de las otras opciones
+                document.getElementById('detallePersonalizado').style.display = 'none';
+                document.getElementById('detalleP2').style.display = 'none';
+                document.getElementById('detalleP3').style.display = 'none';
+                document.getElementById('detalleP4').style.display = 'none';
+            } else if (tipoComision === 'personalizada') {
+                // Comisi贸n personalizada
+                const arancelPorcentaje = parseFloat(document.getElementById('arancel').value) / 100;
+                const derechoMercadoPorcentaje = parseFloat(document.getElementById('derechoMercado').value) / 100;
+                
+                // Calcular cada componente sobre los intereses brutos
+                costoArancel = interesesBrutos * arancelPorcentaje;
+                costoDerechoMercado = interesesBrutos * derechoMercadoPorcentaje;
+                
+                // IVA del 21% sobre arancel + derecho de mercado
+                costoIVA = (costoArancel + costoDerechoMercado) * 0.21;
+                
+                totalCostos = costoArancel + costoDerechoMercado + costoIVA;
+                
+                // Mostrar desglose personalizado
+                document.getElementById('detallePersonalizado').style.display = 'block';
+                document.getElementById('detalleP2').style.display = 'none';
+                document.getElementById('detalleP3').style.display = 'none';
+                document.getElementById('detalleP4').style.display = 'none';
+                document.getElementById('costoArancel').textContent = formatCurrency(costoArancel);
+                document.getElementById('costoDerechoMercado').textContent = formatCurrency(costoDerechoMercado);
+                document.getElementById('costoIVA').textContent = formatCurrency(costoIVA);
+            } else if (tipoComision === 'personalizada2') {
+                // Personalizada 2: comisi贸n y derecho de mercado se calculan sobre el CAPITAL (no sobre los intereses),
+                // y el IVA (21%) se calcula por separado para cada uno de los dos conceptos.
+                const comisionP2Porcentaje = parseFloat(document.getElementById('comisionP2Pct').value) / 100;
+                const derechoP2Porcentaje = parseFloat(document.getElementById('derechoP2Pct').value) / 100;
+                
+                const costoComisionP2 = capital * comisionP2Porcentaje;
+                const costoIvaComisionP2 = costoComisionP2 * 0.21;
+                const costoDerechoP2 = capital * derechoP2Porcentaje;
+                const costoIvaDerechoP2 = costoDerechoP2 * 0.21;
+                
+                totalCostos = costoComisionP2 + costoIvaComisionP2 + costoDerechoP2 + costoIvaDerechoP2;
+                
+                // Mostrar desglose Personalizada 2
+                document.getElementById('detallePersonalizado').style.display = 'none';
+                document.getElementById('detalleP2').style.display = 'block';
+                document.getElementById('detalleP3').style.display = 'none';
+                document.getElementById('detalleP4').style.display = 'none';
+                document.getElementById('costoComisionP2').textContent = formatCurrency(costoComisionP2);
+                document.getElementById('costoIvaComisionP2').textContent = formatCurrency(costoIvaComisionP2);
+                document.getElementById('costoDerechoP2').textContent = formatCurrency(costoDerechoP2);
+                document.getElementById('costoIvaDerechoP2').textContent = formatCurrency(costoIvaDerechoP2);
+            } else if (tipoComision === 'personalizada3') {
+                const arancel = interesesBrutos * (parseFloat(document.getElementById('arancelP3').value) / 100);
+                const derecho = parseFloat(document.getElementById('derechoFijoP3').value);
+                const iva = (arancel + derecho) * 0.21;
+                totalCostos = arancel + derecho + iva;
+                
+                document.getElementById('detallePersonalizado').style.display = 'none';
+                document.getElementById('detalleP2').style.display = 'none';
+                document.getElementById('detalleP3').style.display = 'block';
+                document.getElementById('detalleP4').style.display = 'none';
+                document.getElementById('costoArancelP3').textContent = formatCurrency(arancel);
+                document.getElementById('costoDerechoP3').textContent = formatCurrency(derecho);
+                document.getElementById('costoIvaP3').textContent = formatCurrency(iva);
+            } else if (tipoComision === 'personalizada4') {
+                // Personalizada 4: Comisi贸n + Derechos variables por plazo, con IVA discriminado por separado
+                const tasaComision = parseFloat(document.getElementById('comisionP4Tasa').value);
+                const tasaDerechos = parseFloat(document.getElementById('derechoP4Tasa').value);
+                
+                const costoComisionP4 = (tasaComision / 30 * dias) * capital;
+                const derechosBase = (tasaDerechos / 90 * dias * capital);
+                const costoIvaComisionP4 = costoComisionP4 * 0.21;
+                const costoIvaDerechosP4 = derechosBase * 0.21;
+                const costoDerechosP4 = derechosBase;
+                
+                totalCostos = costoComisionP4 + costoDerechosP4 + costoIvaComisionP4 + costoIvaDerechosP4;
+                
+                document.getElementById('detallePersonalizado').style.display = 'none';
+                document.getElementById('detalleP2').style.display = 'none';
+                document.getElementById('detalleP3').style.display = 'none';
+                document.getElementById('detalleP4').style.display = 'block';
+                document.getElementById('costoComisionP4').textContent = formatCurrency(costoComisionP4);
+                document.getElementById('costoDerechosP4').textContent = formatCurrency(costoDerechosP4);
+                document.getElementById('costoIvaComisionP4').textContent = formatCurrency(costoIvaComisionP4);
+                document.getElementById('costoIvaDerechosP4').textContent = formatCurrency(costoIvaDerechosP4);
+            }
+            
+            // Intereses netos despu茅s de todos los costos
+            const interesesNetos = interesesBrutos - totalCostos;
+            
+            // Capital final
+            const capitalFinal = capital + interesesNetos;
+            
+            // Rendimiento neto
+            const rendimientoNeto = (interesesNetos / capital) * 100;
+            
+            // TNA efectiva (despu茅s de costos)
+            const tnaEfectiva = (interesesNetos / capital) * (365 / dias) * 100;
+            
+            // Ganancia diaria promedio
+            const gananciaDiaria = dias > 0 ? interesesNetos / dias : 0;
+            
+            // Mostrar resultados
+            document.getElementById('capitalInicialCaucion').textContent = formatCurrency(capital);
+            document.getElementById('interesesBrutos').textContent = formatCurrency(interesesBrutos);
+            document.getElementById('totalCostos').textContent = formatCurrency(totalCostos);
+            document.getElementById('interesesNetos').textContent = formatCurrency(interesesNetos);
+            document.getElementById('capitalFinalCaucion').textContent = formatCurrency(capitalFinal);
+            document.getElementById('rendimientoNetoCaucion').textContent = rendimientoNeto.toFixed(3) + '%';
+            document.getElementById('tnaEfectiva').textContent = tnaEfectiva.toFixed(2) + '%';
+            document.getElementById('gananciaDiaria').textContent = formatCurrency(gananciaDiaria);
+            
+            document.getElementById('resultsCaucion').style.display = 'grid';
+            document.getElementById('resultsCaucion').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Calculadora de Acciones
+        document.getElementById('accionesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const cantidadAcciones = parseInt(document.getElementById('cantidadAccionesCompra').value);
+            const precioAccion = parseFloat(document.getElementById('precioAccion').value);
+            const tipoComision = document.getElementById('tipoComisionAccion').value;
+            
+            // Valor bruto de las acciones (cantidad 脳 precio)
+            const valorBrutoAcciones = cantidadAcciones * precioAccion;
+            
+            let totalCostos = 0;
+            let costoArancel = 0;
+            let costoDerechoMercado = 0;
+            let costoIVA = 0;
+            
+            if (tipoComision === 'fija') {
+                const comisionPorcentaje = parseFloat(document.getElementById('comisionAccion').value) / 100;
+                totalCostos = valorBrutoAcciones * comisionPorcentaje;
+                
+                // Ocultar desglose personalizado
+                document.getElementById('detallePersonalizadoAcciones').style.display = 'none';
+            } else {
+                // Comisi贸n personalizada
+                const arancelPorcentaje = parseFloat(document.getElementById('arancelAccion').value) / 100;
+                const derechoMercadoPorcentaje = parseFloat(document.getElementById('derechoMercadoAccion').value) / 100;
+                
+                // Calcular cada componente sobre el valor bruto de las acciones
+                costoArancel = valorBrutoAcciones * arancelPorcentaje;
+                costoDerechoMercado = valorBrutoAcciones * derechoMercadoPorcentaje;
+                
+                // IVA del 21% sobre arancel + derecho de mercado
+                costoIVA = (costoArancel + costoDerechoMercado) * 0.21;
+                
+                totalCostos = costoArancel + costoDerechoMercado + costoIVA;
+                
+                // Mostrar desglose personalizado
+                document.getElementById('detallePersonalizadoAcciones').style.display = 'block';
+                document.getElementById('costoArancelAccion').textContent = formatCurrency(costoArancel);
+                document.getElementById('costoDerechoMercadoAccion').textContent = formatCurrency(costoDerechoMercado);
+                document.getElementById('costoIVAAccion').textContent = formatCurrency(costoIVA);
+            }
+            
+            // Costo total de la operaci贸n (valor de acciones + costos)
+            const costoTotalOperacion = valorBrutoAcciones + totalCostos;
+            
+            // Porcentaje de costos sobre el valor de las acciones
+            const porcentajeCostos = (totalCostos / valorBrutoAcciones) * 100;
+            
+            // Costo promedio por acci贸n incluyendo todos los gastos
+            const costoPromedioAccion = costoTotalOperacion / cantidadAcciones;
+            
+            // Mostrar resultados
+            document.getElementById('cantidadAccionesResult').textContent = cantidadAcciones.toLocaleString('es-AR');
+            document.getElementById('precioAccionResult').textContent = formatCurrency(precioAccion);
+            document.getElementById('valorBrutoAcciones').textContent = formatCurrency(valorBrutoAcciones);
+            document.getElementById('totalCostosAcciones').textContent = formatCurrency(totalCostos);
+            document.getElementById('costoTotalOperacion').textContent = formatCurrency(costoTotalOperacion);
+            document.getElementById('porcentajeCostos').textContent = porcentajeCostos.toFixed(3) + '%';
+            document.getElementById('costoPromedioAccion').textContent = formatCurrency(costoPromedioAccion);
+            
+            document.getElementById('resultsAcciones').style.display = 'grid';
+            document.getElementById('resultsAcciones').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Funci贸n para alternar campos de comisi贸n
+        function toggleComisionFields() {
+            const tipoComision = document.getElementById('tipoComision').value;
+            const comisionFija = document.getElementById('comisionFija');
+            const comisionPersonalizada = document.getElementById('comisionPersonalizada');
+            const comisionP2 = document.getElementById('comisionP2');
+            const comisionP3 = document.getElementById('comisionP3');
+            const comisionP4 = document.getElementById('comisionP4');
+
+            comisionFija.style.display = 'none';
+            comisionPersonalizada.style.display = 'none';
+            comisionP2.style.display = 'none';
+            comisionP3.style.display = 'none';
+            comisionP4.style.display = 'none';
+
+            if (tipoComision === 'fija') {
+                comisionFija.style.display = 'block';
+            } else if (tipoComision === 'personalizada') {
+                comisionPersonalizada.style.display = 'block';
+            } else if (tipoComision === 'personalizada2') {
+                comisionP2.style.display = 'block';
+            } else if (tipoComision === 'personalizada3') {
+                comisionP3.style.display = 'block';
+            } else if (tipoComision === 'personalizada4') {
+                comisionP4.style.display = 'block';
+            }
+        }
+
+        // Calculadora de D贸lares
+        document.getElementById('dolaresForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (!cotizacionActual) {
+                alert('Todav铆a no se carg贸 la cotizaci贸n. Esper谩 un momento o toc谩 "Actualizar cotizaci贸n".');
+                return;
+            }
+            
+            const operacionTipo = document.getElementById('operacionTipo').value;
+            
+            if (operacionTipo === 'comprar') {
+                // Comprar d贸lares: entrego pesos, recibo USD
+                const pesosDisponibles = parseFloat(document.getElementById('pesosAInvertir').value);
+                const cotizacionVenta = cotizacionActual.venta; // Uso cotizaci贸n de venta
+                const dolaresRecibidos = pesosDisponibles / cotizacionVenta;
+                
+                // Mostrar resultados de compra
+                document.getElementById('resultadoCompra').style.display = 'grid';
+                document.getElementById('resultadoCompraObjetivo').style.display = 'none';
+                document.getElementById('resultadoVenta').style.display = 'none';
+                
+                document.getElementById('pesosEntregados').textContent = formatCurrency(pesosDisponibles);
+                document.getElementById('cotizacionAplicada').textContent = formatCurrency(cotizacionVenta);
+                document.getElementById('dolaresRecibidos').textContent = 'US$ ' + dolaresRecibidos.toFixed(2);
+                document.getElementById('tipoOperacionResult').textContent = 'Compra de D贸lares';
+
+            } else if (operacionTipo === 'comprar-objetivo') {
+                // Comprar una cantidad espec铆fica de USD: 驴cu谩ntos pesos necesito?
+                const dolaresObjetivo = parseFloat(document.getElementById('dolaresObjetivo').value);
+                const cotizacionVenta = cotizacionActual.venta; // Uso cotizaci贸n de venta
+                const pesosNecesarios = dolaresObjetivo * cotizacionVenta;
+
+                // Mostrar resultados de compra por objetivo
+                document.getElementById('resultadoCompra').style.display = 'none';
+                document.getElementById('resultadoCompraObjetivo').style.display = 'grid';
+                document.getElementById('resultadoVenta').style.display = 'none';
+
+                document.getElementById('dolaresObjetivoResult').textContent = 'US$ ' + dolaresObjetivo.toFixed(2);
+                document.getElementById('cotizacionAplicadaObjetivo').textContent = formatCurrency(cotizacionVenta);
+                document.getElementById('pesosNecesarios').textContent = formatCurrency(pesosNecesarios);
+                document.getElementById('tipoOperacionResult').textContent = 'Compra de D贸lares (monto objetivo)';
+
+            } else {
+                // Vender d贸lares: entrego USD, recibo pesos
+                const dolaresAVender = parseFloat(document.getElementById('dolaresAVender').value);
+                const cotizacionCompra = cotizacionActual.compra; // Uso cotizaci贸n de compra
+                const pesosRecibidos = dolaresAVender * cotizacionCompra;
+                
+                // Mostrar resultados de venta
+                document.getElementById('resultadoCompra').style.display = 'none';
+                document.getElementById('resultadoCompraObjetivo').style.display = 'none';
+                document.getElementById('resultadoVenta').style.display = 'grid';
+                
+                document.getElementById('dolaresEntregados').textContent = 'US$ ' + dolaresAVender.toFixed(2);
+                document.getElementById('cotizacionAplicadaVenta').textContent = formatCurrency(cotizacionCompra);
+                document.getElementById('pesosRecibidos').textContent = formatCurrency(pesosRecibidos);
+                document.getElementById('tipoOperacionResult').textContent = 'Venta de D贸lares';
+            }
+            
+            // Calcular spread bancario
+            const spread = cotizacionActual.venta - cotizacionActual.compra;
+            const spreadPorcentaje = (spread / cotizacionActual.compra) * 100;
+            document.getElementById('spreadBancario').textContent = `${formatCurrency(spread)} (${spreadPorcentaje.toFixed(2)}%)`;
+            
+            document.getElementById('resultsDolares').style.display = 'grid';
+            document.getElementById('resultsDolares').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Funci贸n para alternar campos de comisi贸n en acciones
+        function toggleComisionFieldsAcciones() {
+            const tipoComision = document.getElementById('tipoComisionAccion').value;
+            const comisionFija = document.getElementById('comisionFijaAccion');
+            const comisionPersonalizada = document.getElementById('comisionPersonalizadaAccion');
+            
+            if (tipoComision === 'fija') {
+                comisionFija.style.display = 'block';
+                comisionPersonalizada.style.display = 'none';
+            } else {
+                comisionFija.style.display = 'none';
+                comisionPersonalizada.style.display = 'block';
+            }
+        }
+
+        // Funci贸n para alternar campos seg煤n tipo de operaci贸n
+        function toggleOperacionFields() {
+            const operacionTipo = document.getElementById('operacionTipo').value;
+            const comprarSection = document.getElementById('comprarDolares');
+            const comprarObjetivoSection = document.getElementById('comprarObjetivoDolares');
+            const venderSection = document.getElementById('venderDolares');
+
+            comprarSection.style.display = 'none';
+            comprarObjetivoSection.style.display = 'none';
+            venderSection.style.display = 'none';
+
+            document.getElementById('pesosAInvertir').value = '';
+            document.getElementById('dolaresObjetivo').value = '';
+            document.getElementById('dolaresAVender').value = '';
+
+            if (operacionTipo === 'comprar') {
+                comprarSection.style.display = 'block';
+            } else if (operacionTipo === 'comprar-objetivo') {
+                comprarObjetivoSection.style.display = 'block';
+            } else {
+                venderSection.style.display = 'block';
+            }
+        }
+
+        // Funci贸n para alternar campos seg煤n el m茅todo elegido en TNA
+        function toggleMetodoTNA() {
+            const metodo = document.getElementById('metodoTNA').value;
+            const campoSaldoFinal = document.getElementById('campoSaldoFinalTNA');
+            const campoRendimiento = document.getElementById('campoRendimientoTNA');
+
+            if (metodo === 'saldos') {
+                campoSaldoFinal.style.display = 'block';
+                campoRendimiento.style.display = 'none';
+                document.getElementById('saldoFinalTNA').required = true;
+                document.getElementById('rendimientoTNA').required = false;
+            } else {
+                campoSaldoFinal.style.display = 'none';
+                campoRendimiento.style.display = 'block';
+                document.getElementById('saldoFinalTNA').required = false;
+                document.getElementById('rendimientoTNA').required = true;
+            }
+        }
+
+        // Calculadora de Tasa Nominal (TNA)
+        document.getElementById('tnaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const metodo = document.getElementById('metodoTNA').value;
+            const saldoInicial = parseFloat(document.getElementById('saldoInicialTNA').value);
+            const dias = parseInt(document.getElementById('diasTNA').value);
+
+            let saldoFinal;
+            let intereses;
+
+            if (metodo === 'saldos') {
+                saldoFinal = parseFloat(document.getElementById('saldoFinalTNA').value);
+                intereses = saldoFinal - saldoInicial;
+            } else {
+                intereses = parseFloat(document.getElementById('rendimientoTNA').value);
+                saldoFinal = saldoInicial + intereses;
+            }
+
+            // Rendimiento del per铆odo (inter茅s simple sobre el per铆odo)
+            const rendimientoPeriodo = (intereses / saldoInicial) * 100;
+
+            // TNA: se anualiza linealmente (inter茅s simple) seg煤n los d铆as transcurridos
+            const tna = rendimientoPeriodo * (365 / dias);
+
+            // TEA: tasa efectiva anual, asumiendo reinversi贸n del mismo rendimiento peri贸dico
+            const periodosPorAnio = 365 / dias;
+            const tea = (Math.pow(1 + (rendimientoPeriodo / 100), periodosPorAnio) - 1) * 100;
+
+            // Mostrar resultados
+            document.getElementById('saldoInicialResultTNA').textContent = formatCurrency(saldoInicial);
+            document.getElementById('saldoFinalResultTNA').textContent = formatCurrency(saldoFinal);
+            document.getElementById('interesesResultTNA').textContent = formatCurrency(intereses);
+            document.getElementById('rendimientoPeriodoTNA').textContent = rendimientoPeriodo.toFixed(3) + '%';
+            document.getElementById('tnaResult').textContent = tna.toFixed(2) + '%';
+            document.getElementById('teaResult').textContent = tea.toFixed(2) + '%';
+
+            document.getElementById('resultsTNA').style.display = 'grid';
+            document.getElementById('resultsTNA').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // ==========================================
+        // COMPARADOR DE INVERSIONES
+        // ==========================================
+        let filaComparadorContador = 0;
+
+        function agregarFilaComparador(tipoInicial = 'caucion') {
+            filaComparadorContador++;
+            const id = filaComparadorContador;
+            const nombresPorTipo = { plazoFijo: 'Plazo Fijo', caucion: 'Cauci贸n', personalizada: 'Otra opci贸n' };
+            const tnaPorTipo = { plazoFijo: 35, caucion: 32, personalizada: 30 };
+
+            const fila = document.createElement('div');
+            fila.className = 'fila-opcion';
+            fila.id = `filaComparador${id}`;
+            fila.innerHTML = `
+                <div class="fila-opcion-header">
+                    <strong>Opci贸n #${id}</strong>
+                    <button type="button" class="btn-quitar-fila" onclick="quitarFilaComparador(${id})">鉁?Quitar</button>
+                </div>
+                <div class="form-group">
+                    <label>馃彿锔?Nombre de la opci贸n</label>
+                    <input type="text" id="nombreComp${id}" value="${nombresPorTipo[tipoInicial]}" required>
+                </div>
+                <div class="form-group">
+                    <label>馃攢 Tipo de instrumento</label>
+                    <select id="tipoInstrumentoComp${id}" onchange="renderCamposEspecificosComp(${id})">
+                        <option value="plazoFijo" ${tipoInicial === 'plazoFijo' ? 'selected' : ''}>馃挵 Plazo Fijo</option>
+                        <option value="caucion" ${tipoInicial === 'caucion' ? 'selected' : ''}>馃搳 Cauci贸n Burs谩til</option>
+                        <option value="personalizada" ${tipoInicial === 'personalizada' ? 'selected' : ''}>馃幆 Otra (TNA + comisi贸n simple)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>馃搱 TNA - Tasa Nominal Anual (%)</label>
+                    <input type="number" id="tnaComp${id}" min="0" step="0.01" value="${tnaPorTipo[tipoInicial]}" required>
+                </div>
+                <div id="camposEspecificosComp${id}"></div>
+            `;
+            document.getElementById('filasComparador').appendChild(fila);
+            renderCamposEspecificosComp(id);
+        }
+
+        function quitarFilaComparador(id) {
+            const fila = document.getElementById(`filaComparador${id}`);
+            if (fila) fila.remove();
+        }
+
+        // Renderiza los campos propios de cada tipo de instrumento (misma l贸gica que sus pesta帽as)
+        function renderCamposEspecificosComp(id) {
+            const tipo = document.getElementById(`tipoInstrumentoComp${id}`).value;
+            const contenedor = document.getElementById(`camposEspecificosComp${id}`);
+
+            if (tipo === 'plazoFijo') {
+                contenedor.innerHTML = `
+                    <div class="form-group">
+                        <label>馃攧 Tipo de capitalizaci贸n</label>
+                        <select id="capitalizacionComp${id}">
+                            <option value="simple">Inter茅s Simple</option>
+                            <option value="compuesta">Inter茅s Compuesto (diario)</option>
+                            <option value="mensual">Inter茅s Compuesto (mensual)</option>
+                        </select>
+                    </div>
+                `;
+            } else if (tipo === 'caucion') {
+                contenedor.innerHTML = `
+                    <div class="form-group">
+                        <label>馃挸 Tipo de comisi贸n</label>
+                        <select id="tipoComisionComp${id}" onchange="renderComisionCaucionComp(${id})">
+                            <option value="fija">Comisi贸n Fija (%)</option>
+                            <option value="personalizada">Personalizada (Arancel + Derecho + IVA)</option>
+                            <option value="personalizada2">Personalizada 2 (Comisi贸n + Derecho, IVA discriminado)</option>
+                            <option value="personalizada3">Personalizada 3 (IOL: Arancel sobre inter茅s + Derecho fijo + IVA)</option>
+                            <option value="personalizada4">Personalizada 4 (Comisi贸n + Derechos variables por plazo)</option>
+                        </select>
+                    </div>
+                    <div id="camposComisionCaucionComp${id}"></div>
+                `;
+                renderComisionCaucionComp(id);
+            } else {
+                contenedor.innerHTML = `
+                    <div class="form-group">
+                        <label>馃挸 Comisi贸n sobre el inter茅s (%)</label>
+                        <input type="number" id="comisionSimpleComp${id}" min="0" step="0.01" value="0">
+                    </div>
+                `;
+            }
+        }
+
+        // Renderiza los sub-campos de comisi贸n de Cauci贸n, iguales a los de la pesta帽a Cauciones
+        function renderComisionCaucionComp(id) {
+            const tipoComision = document.getElementById(`tipoComisionComp${id}`).value;
+            const contenedor = document.getElementById(`camposComisionCaucionComp${id}`);
+
+            if (tipoComision === 'fija') {
+                contenedor.innerHTML = `
+                    <div class="form-group">
+                        <label>馃搳 Comisi贸n del broker (%)</label>
+                        <input type="number" id="comisionFijaComp${id}" min="0" max="10" step="0.01" value="0">
+                    </div>
+                `;
+            } else if (tipoComision === 'personalizada') {
+                contenedor.innerHTML = `
+                    <div class="comision-personalizada">
+                        <div class="form-group">
+                            <label>馃彌锔?Arancel (%)</label>
+                            <input type="number" id="arancelComp${id}" min="0" max="5" step="0.001" value="2.705">
+                        </div>
+                        <div class="form-group">
+                            <label>馃彚 Derecho de Mercado (%)</label>
+                            <input type="number" id="derechoMercadoComp${id}" min="0" max="5" step="0.001" value="0.501">
+                        </div>
+                        <div class="info-iva"><strong>鈩癸笍 IVA:</strong> 21% sobre (Arancel + Derecho de Mercado)</div>
+                    </div>
+                `;
+            } else if (tipoComision === 'personalizada2') {
+                contenedor.innerHTML = `
+                    <div class="comision-personalizada">
+                        <div class="form-group">
+                            <label>馃挸 Comisi贸n de compra (%, sobre el capital)</label>
+                            <input type="number" id="comisionP2PctComp${id}" min="0" max="5" step="0.00001" value="0.00493">
+                        </div>
+                        <div class="form-group">
+                            <label>馃彚 Derechos de Mercado (%, sobre el capital)</label>
+                            <input type="number" id="derechoP2PctComp${id}" min="0" max="5" step="0.00001" value="0.0005">
+                        </div>
+                        <div class="info-iva"><strong>鈩癸笍 IVA discriminado:</strong> 21% por separado sobre Comisi贸n y sobre Derecho de Mercado, ambos calculados sobre el capital.</div>
+                    </div>
+                `;
+            } else if (tipoComision === 'personalizada3') {
+                contenedor.innerHTML = `
+                    <div class="comision-personalizada">
+                        <div class="form-group">
+                            <label>馃彌锔?Arancel (% sobre intereses)</label>
+                            <input type="number" id="arancelP3Comp${id}" step="0.01" value="9.73">
+                        </div>
+                        <div class="form-group">
+                            <label>馃彚 Derecho fijo ($)</label>
+                            <input type="number" id="derechoFijoP3Comp${id}" step="0.01" value="75">
+                        </div>
+                    </div>
+                `;
+            } else if (tipoComision === 'personalizada4') {
+                contenedor.innerHTML = `
+                    <div class="comision-personalizada">
+                        <div class="form-group">
+                            <label>馃挸 Tasa de comisi贸n diaria (% / 30 d铆as)</label>
+                            <input type="number" id="comisionP4TasaComp${id}" value="0.00148" step="0.00001">
+                        </div>
+                        <div class="form-group">
+                            <label>馃彚 Tasa de derechos diaria (% / 90 d铆as)</label>
+                            <input type="number" id="derechoP4TasaComp${id}" value="0.00045" step="0.00001">
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Precargar el comparador con Plazo Fijo vs Cauci贸n al entrar por primera vez
+        let comparadorInicializado = false;
+        function inicializarComparadorSiHaceFalta() {
+            if (comparadorInicializado) return;
+            comparadorInicializado = true;
+            agregarFilaComparador('plazoFijo');
+            agregarFilaComparador('caucion');
+        }
+
+        // Calcula el inter茅s neto de una fila de Cauci贸n con la misma f贸rmula exacta de la pesta帽a Cauciones
+        function calcularNetoCaucionComp(id, capital, interesBruto) {
+            const tipoComision = document.getElementById(`tipoComisionComp${id}`).value;
+            let totalCostos = 0;
+
+            if (tipoComision === 'fija') {
+                const comisionPorcentaje = parseFloat(document.getElementById(`comisionFijaComp${id}`).value) / 100;
+                totalCostos = interesBruto * comisionPorcentaje;
+            } else if (tipoComision === 'personalizada') {
+                const arancelPorcentaje = parseFloat(document.getElementById(`arancelComp${id}`).value) / 100;
+                const derechoMercadoPorcentaje = parseFloat(document.getElementById(`derechoMercadoComp${id}`).value) / 100;
+                const costoArancel = interesBruto * arancelPorcentaje;
+                const costoDerechoMercado = interesBruto * derechoMercadoPorcentaje;
+                const costoIVA = (costoArancel + costoDerechoMercado) * 0.21;
+                totalCostos = costoArancel + costoDerechoMercado + costoIVA;
+            } else if (tipoComision === 'personalizada2') {
+                const comisionP2Porcentaje = parseFloat(document.getElementById(`comisionP2PctComp${id}`).value) / 100;
+                const derechoP2Porcentaje = parseFloat(document.getElementById(`derechoP2PctComp${id}`).value) / 100;
+                const costoComisionP2 = capital * comisionP2Porcentaje;
+                const costoIvaComisionP2 = costoComisionP2 * 0.21;
+                const costoDerechoP2 = capital * derechoP2Porcentaje;
+                const costoIvaDerechoP2 = costoDerechoP2 * 0.21;
+                totalCostos = costoComisionP2 + costoIvaComisionP2 + costoDerechoP2 + costoIvaDerechoP2;
+            } else if (tipoComision === 'personalizada3') {
+                const arancel = interesBruto * (parseFloat(document.getElementById(`arancelP3Comp${id}`).value) / 100);
+                const derecho = parseFloat(document.getElementById(`derechoFijoP3Comp${id}`).value);
+                const iva = (arancel + derecho) * 0.21;
+                totalCostos = arancel + derecho + iva;
+            } else if (tipoComision === 'personalizada4') {
+                const dias = parseInt(document.querySelector('#diasComparador').value);
+                const tasaComision = parseFloat(document.getElementById(`comisionP4TasaComp${id}`).value);
+                const tasaDerechos = parseFloat(document.getElementById(`derechoP4TasaComp${id}`).value);
+                
+                const costoComisionP4 = (tasaComision / 30 * dias) * capital;
+                const derechosBase = (tasaDerechos / 90 * dias * capital);
+                const costoIvaComisionP4 = costoComisionP4 * 0.21;
+                const costoIvaDerechosP4 = derechosBase * 0.21;
+                const costoDerechosP4 = derechosBase;
+                
+                totalCostos = costoComisionP4 + costoDerechosP4 + costoIvaComisionP4 + costoIvaDerechosP4;
+            }
+
+            return interesBruto - totalCostos;
+        }
+
+        document.getElementById('comparadorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const capital = parseFloat(document.getElementById('capitalComparador').value);
+            const dias = parseInt(document.getElementById('diasComparador').value);
+
+            const filas = document.querySelectorAll('#filasComparador .fila-opcion');
+            if (filas.length === 0) {
+                alert('Agreg谩 al menos una opci贸n para comparar.');
+                return;
+            }
+
+            const resultados = [];
+
+            filas.forEach(fila => {
+                const id = fila.id.replace('filaComparador', '');
+                const nombre = document.getElementById(`nombreComp${id}`).value || `Opci贸n ${id}`;
+                const tipoInstrumento = document.getElementById(`tipoInstrumentoComp${id}`).value;
+                const tna = parseFloat(document.getElementById(`tnaComp${id}`).value) / 100;
+
+                let interesNeto;
+
+                if (tipoInstrumento === 'plazoFijo') {
+                    const capitalizacion = document.getElementById(`capitalizacionComp${id}`).value;
+                    if (capitalizacion === 'simple') {
+                        interesNeto = capital * tna * (dias / 365);
+                    } else if (capitalizacion === 'compuesta') {
+                        const tasaDiaria = tna / 365;
+                        interesNeto = capital * Math.pow(1 + tasaDiaria, dias) - capital;
+                    } else {
+                        const tasaMensual = tna / 12;
+                        const meses = dias / 30.44;
+                        interesNeto = capital * Math.pow(1 + tasaMensual, meses) - capital;
+                    }
+                } else if (tipoInstrumento === 'caucion') {
+                    const interesBruto = capital * tna * (dias / 365);
+                    interesNeto = calcularNetoCaucionComp(id, capital, interesBruto);
+                } else {
+                    const interesBruto = capital * tna * (dias / 365);
+                    const comisionPct = parseFloat(document.getElementById(`comisionSimpleComp${id}`).value) / 100;
+                    interesNeto = interesBruto * (1 - comisionPct);
+                }
+
+                const rendimiento = (interesNeto / capital) * 100;
+                const tnaEfectiva = (interesNeto / capital) * (365 / dias) * 100;
+
+                resultados.push({ nombre, interesNeto, rendimiento, tnaEfectiva });
+            });
+
+            // Ordenar de mayor a menor inter茅s neto
+            resultados.sort((a, b) => b.interesNeto - a.interesNeto);
+
+            const cuerpo = document.getElementById('cuerpoTablaComparacion');
+            cuerpo.innerHTML = '';
+
+            resultados.forEach((r, index) => {
+                const tr = document.createElement('tr');
+                if (index === 0) tr.classList.add('fila-ganadora');
+                tr.innerHTML = `
+                    <td>${r.nombre}${index === 0 ? '<span class="badge-ganador">馃弳 Mejor opci贸n</span>' : ''}</td>
+                    <td>${formatCurrency(r.interesNeto)}</td>
+                    <td>${r.rendimiento.toFixed(3)}%</td>
+                    <td>${r.tnaEfectiva.toFixed(2)}%</td>
+                `;
+                cuerpo.appendChild(tr);
+            });
+
+            document.getElementById('resultsComparador').style.display = 'grid';
+            document.getElementById('resultsComparador').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Funci贸n para cambiar tabs
+        function switchTab(tabName) {
+            // Ocultar todos los contenidos
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remover clase active de todos los botones
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Mostrar contenido seleccionado
+            const contenido = document.getElementById(tabName);
+            if (contenido) {
+                contenido.classList.add('active');
+            }
+            
+            // Activar bot贸n correspondiente (por tabName, sin depender del event global impl铆cito,
+            // que romp铆a la carga autom谩tica al iniciar la p谩gina)
+            const boton = document.querySelector(`button[onclick="switchTab('${tabName}')"]`);
+            if (boton) {
+                boton.classList.add('active');
+            }
+            
+            // Ocultar resultados cuando se cambia de tab
+            const resultados = document.getElementById('results');
+            if (resultados) resultados.style.display = 'none';
+            const resultadosCaucion = document.getElementById('resultsCaucion');
+            if (resultadosCaucion) resultadosCaucion.style.display = 'none';
+            const resultadosAcciones = document.getElementById('resultsAcciones');
+            if (resultadosAcciones) resultadosAcciones.style.display = 'none';
+            const resultadosDolares = document.getElementById('resultsDolares');
+            if (resultadosDolares) resultadosDolares.style.display = 'none';
+            const resultadosTNA = document.getElementById('resultsTNA');
+            if (resultadosTNA) resultadosTNA.style.display = 'none';
+            const resultadosComparador = document.getElementById('resultsComparador');
+            if (resultadosComparador) resultadosComparador.style.display = 'none';
+
+            if (tabName === 'comparador') {
+                inicializarComparadorSiHaceFalta();
+            }
+            
+            // Actualizar URL con hash
+            if (history.pushState) {
+                history.pushState(null, null, '#' + tabName);
+            } else {
+                window.location.hash = tabName;
+            }
+        }
+        
+        // Manejar cambios de hash y cargar la secci贸n correcta al iniciar o actualizar
+        function handleHashChange() {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                switchTab(hash);
+            } else {
+                // Si no hay hash, cargar la primera secci贸n por defecto
+                switchTab('plazo-fijo');
+            }
+        }
+        
+        // Escuchar cambios de hash
+        window.addEventListener('hashchange', handleHashChange);
+        
+        // Cargar la secci贸n correcta cuando la p谩gina se carga
+        document.addEventListener('DOMContentLoaded', function() {
+            handleHashChange();
+            cargarCotizacion();
+            cargarBandaCambiaria();
+            cargarIPC();
+            cargarRiesgoPais();
+            cargarRiesgoPaisHistorial();
+            cargarDolarOficialCard();
+            cargarIndicadorDolar();
+            initTasaCaucionDefault();
+        });
+        
+        // ==========================================
+        // CAUCI脫N - TNA por defecto (MAE Market Data, v铆a Netlify Function)
+        // ==========================================
+        // La API key vive en la variable de entorno MAE_API_KEY de Netlify; el front solo
+        // llama a la funci贸n proxy (netlify/functions/caucion.js).
+        let tasasCaucion = null; // { "001": { tna, fecha }, "007": {...} }
+
+        async function cargarTasaCaucionDefault() {
+            const meta = document.getElementById('tasaCaucionMeta');
+            try {
+                const r = await fetch('/.netlify/functions/caucion');
+                if (!r.ok) throw new Error('Respuesta no OK: ' + r.status);
+                const data = await r.json();
+                tasasCaucion = data.porPlazo || {};
+                aplicarTasaCaucionDefault();
+            } catch (e) {
+                console.error('No se pudo cargar la tasa de cauci贸n:', e);
+                tasasCaucion = null;
+                meta.textContent = '鈿狅笍 No se pudo obtener la 煤ltima tasa de cauci贸n. Cargala a mano.';
+            }
+        }
+
+        function aplicarTasaCaucionDefault() {
+            if (!tasasCaucion) return;
+            const input = document.getElementById('tasaCaucion');
+            const meta = document.getElementById('tasaCaucionMeta');
+            const dias = getDiasCaucion();
+            if (!dias) return;
+            const plazo = String(dias).padStart(3, '0');
+            const d = tasasCaucion[plazo];
+
+            if (!d) {
+                meta.textContent = `Sin datos de MAE para el plazo de ${Number(plazo)} d铆a(s).`;
+                return;
+            }
+            // No pisar lo que el usuario escribi贸 a mano
+            if (!input.dataset.manual) input.value = d.tna.toFixed(2);
+            const dia = d.fecha ? d.fecha.slice(0, 10) : '';
+            meta.textContent = `脷ltima tasa MAE a ${Number(plazo)} d铆a(s): ${d.tna.toFixed(2)}% TNA 路 ${dia} 路 Fuente: A3 Mercados`;
+        }
+
+        // Devuelve la cantidad de d铆as del plazo de cauci贸n: la opci贸n elegida en el
+        // select, o el valor ingresado a mano si se eligi贸 "Personalizado".
+        // Devuelve null si el valor personalizado no es un entero v谩lido entre 1 y 365.
+        function getDiasCaucion() {
+            const sel = document.getElementById('plazoCaucion').value;
+            if (sel !== 'custom') return parseInt(sel);
+            const dias = parseInt(document.getElementById('diasCustomCaucion').value);
+            return Number.isInteger(dias) && dias >= 1 && dias <= 365 ? dias : null;
+        }
+
+        function toggleDiasCustomCaucion() {
+            const esCustom = document.getElementById('plazoCaucion').value === 'custom';
+            const grupo = document.getElementById('diasCustomCaucionGroup');
+            const input = document.getElementById('diasCustomCaucion');
+            grupo.style.display = esCustom ? 'block' : 'none';
+            input.required = esCustom;
+            if (esCustom) input.focus();
+        }
+
+        function initTasaCaucionDefault() {
+            document.getElementById('tasaCaucion').addEventListener('input', function(e) {
+                e.target.dataset.manual = '1';
+            });
+            document.getElementById('plazoCaucion').addEventListener('change', function() {
+                toggleDiasCustomCaucion();
+                aplicarTasaCaucionDefault();
+            });
+            document.getElementById('diasCustomCaucion').addEventListener('input', aplicarTasaCaucionDefault);
+            cargarTasaCaucionDefault();
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-AR', {
+                style: 'currency',
+                currency: 'ARS',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
+        
+        // Agregar efectos de hover a los inputs
+        document.querySelectorAll('input, select').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+                this.parentElement.style.transition = 'transform 0.2s ease';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
