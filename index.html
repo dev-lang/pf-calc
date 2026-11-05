@@ -1108,11 +1108,31 @@
         // Cálculo estimado a partir de parámetros públicos del BCRA + IPC de ArgentinaDatos/INDEC.
         // Puede diferir levemente del valor que el BCRA publica oficialmente.
 
+        // Lee un JSON generado por los workflows diarios (.github/workflows/) dentro de data/.
+        // Devuelve el objeto si trae una serie no vacía; si no existe o falla, null (y se usa la API en vivo).
+        async function leerDatosLocales(ruta) {
+            try {
+                const r = await fetch(ruta, { cache: 'no-cache' });
+                if (!r.ok) return null;
+                const json = await r.json();
+                return Array.isArray(json.serie) && json.serie.length ? json : null;
+            } catch (e) {
+                console.warn('No se pudo leer ' + ruta + ', se usa la API en vivo:', e);
+                return null;
+            }
+        }
+
         async function obtenerInflacionMensualMap() {
             try {
-                const response = await fetch('https://api.argentinadatos.com/v1/finanzas/indices/inflacion');
-                if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
-                const data = await response.json();
+                const local = await leerDatosLocales('/data/inflacion.json');
+                let data;
+                if (local) {
+                    data = local.serie;
+                } else {
+                    const response = await fetch('https://api.argentinadatos.com/v1/finanzas/indices/inflacion');
+                    if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
+                    data = await response.json();
+                }
                 const lista = Array.isArray(data)
                     ? data
                     : Array.isArray(data?.value)
@@ -1409,11 +1429,20 @@
             if (!valorDisplay || !fechaDisplay) return;
 
             try {
-                const response = await fetch('https://api.argentinadatos.com/v1/finanzas/indices/riesgo-pais/ultimo');
-                if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
-                const data = await response.json();
+                // Se piden las dos fuentes a la vez y se muestra la más reciente:
+                // el JSON del workflow (siempre disponible) y la API en vivo (puede tener el dato del día antes de las 18 h)
+                const [local, vivo] = await Promise.all([
+                    leerDatosLocales('/data/riesgo-pais.json').then(j => j ? j.serie[j.serie.length - 1] : null),
+                    fetch('https://api.argentinadatos.com/v1/finanzas/indices/riesgo-pais/ultimo')
+                        .then(r => (r.ok ? r.json() : null))
+                        .catch(() => null)
+                ]);
+                const candidatos = [local, vivo]
+                    .filter(d => d && Number.isFinite(Number(d.valor)))
+                    .sort((a, b) => String(b.fecha || '').localeCompare(String(a.fecha || '')));
+                if (!candidatos.length) throw new Error('Sin datos de riesgo país');
+                const data = candidatos[0];
                 const valor = Number(data.valor);
-                if (!Number.isFinite(valor)) throw new Error('Valor inválido');
 
                 valorDisplay.textContent = `${valor.toLocaleString('es-AR')} pb`;
                 fechaDisplay.textContent = data.fecha ? `Al ${formatearFechaCorta(data.fecha)}` : '';
@@ -1530,9 +1559,15 @@
         let serieRiesgoPais = []; // [{ fecha, valor, variacionAbs, variacionPct }]
 
         async function obtenerRiesgoPaisHistorial() {
-            const response = await fetch('https://api.argentinadatos.com/v1/finanzas/indices/riesgo-pais');
-            if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
-            const data = await response.json();
+            const local = await leerDatosLocales('/data/riesgo-pais.json');
+            let data;
+            if (local) {
+                data = local.serie;
+            } else {
+                const response = await fetch('https://api.argentinadatos.com/v1/finanzas/indices/riesgo-pais');
+                if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);
+                data = await response.json();
+            }
             if (!Array.isArray(data)) throw new Error('Formato de respuesta inesperado');
 
             return data
@@ -1811,6 +1846,13 @@
         let serieIPC = []; // [{ mes, indice, variacionMensual, variacionInteranual }]
 
         async function obtenerIPCNivelGeneral() {
+            const local = await leerDatosLocales('/data/ipc.json');
+            if (local) {
+                return local.serie
+                    .map(p => ({ mes: String(p.mes).slice(0, 7), indice: Number(p.indice) }))
+                    .filter(p => Number.isFinite(p.indice))
+                    .sort((a, b) => a.mes.localeCompare(b.mes));
+            }
             const url = `https://apis.datos.gob.ar/series/api/series/?ids=${IPC_SERIES_ID}&start_date=2016-12&format=json&limit=1000`;
             const response = await fetch(url);
             if (!response.ok) throw new Error('Respuesta no OK: ' + response.status);

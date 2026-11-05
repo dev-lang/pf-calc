@@ -1,0 +1,44 @@
+name: Actualizar riesgo país
+
+on:
+  schedule:
+    # Lunes a viernes 21:23 UTC = 18:23 Argentina (desfasado del de cauciones para no pushear a la vez)
+    - cron: '23 21 * * 1-5'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: riesgo-pais
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Descargar riesgo país de ArgentinaDatos -> data/riesgo-pais.json
+        run: node scripts/update-riesgo-pais.mjs
+
+      - name: Commitear si hubo cambios
+        run: |
+          if [ -z "$(git status --porcelain -- data/riesgo-pais.json)" ]; then
+            echo "Sin cambios en los datos."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/riesgo-pais.json
+          git commit -m "data: riesgo país al $(node -p "require('./data/riesgo-pais.json').actualizado")"
+          # Reintenta por si otro workflow pusheó justo antes
+          for i in 1 2 3; do
+            git pull --rebase -q && git push && exit 0
+            sleep 10
+          done
+          exit 1

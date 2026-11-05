@@ -1,0 +1,53 @@
+name: Actualizar IPC
+
+on:
+  schedule:
+    # Lunes a viernes 19:47 UTC = 16:47 Argentina (el INDEC publica el IPC a las 16 h)
+    - cron: '47 19 * * 1-5'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ipc
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      # Si falla una de las dos fuentes, la otra igual se guarda y se commitea
+      - name: Descargar IPC (datos.gob.ar) e inflación mensual (ArgentinaDatos)
+        id: ipc
+        continue-on-error: true
+        run: node scripts/update-ipc.mjs
+
+      - name: Commitear si hubo cambios
+        run: |
+          if [ -z "$(git status --porcelain -- data/ipc.json data/inflacion.json)" ]; then
+            echo "Sin cambios en los datos."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data
+          git commit -m "data: IPC al $(node -p "try{require('./data/ipc.json').actualizado}catch(e){'?'}")"
+          # Reintenta por si otro workflow pusheó justo antes
+          for i in 1 2 3; do
+            git pull --rebase -q && git push && exit 0
+            sleep 10
+          done
+          exit 1
+
+      - name: Avisar si falló alguna fuente
+        if: steps.ipc.outcome == 'failure'
+        run: |
+          echo "Una de las fuentes del IPC falló; revisá el paso de descarga."
+          exit 1
