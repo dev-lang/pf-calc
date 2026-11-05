@@ -62,6 +62,7 @@
                 <div class="tab-group">
                     <span class="tab-group-label">Dólar</span>
                     <button class="tab-btn" onclick="switchTab('dolares')" aria-controls="dolares"><span class="tab-icon" aria-hidden="true">💵</span> <span class="tab-label">Compra/Venta USD</span><span class="tab-short">Dólar</span></button>
+                    <button class="tab-btn" onclick="switchTab('dolar-vs-ipc')" aria-controls="dolar-vs-ipc"><span class="tab-icon" aria-hidden="true">⚖️</span> <span class="tab-label">Dólar vs Inflación</span><span class="tab-short">USD vs IPC</span></button>
                 </div>
                 <div class="tab-group">
                     <span class="tab-group-label">Indicadores</span>
@@ -740,6 +741,84 @@
                         <tbody id="cuerpoTablaComparacion"></tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+
+        <!-- DOLAR VS INFLACION SECTION -->
+        <div id="dolar-vs-ipc" class="tab-content">
+            <h1>Dólar vs Inflación</h1>
+
+            <div class="info">
+                <strong>Info:</strong> Compará mes a mes cuánto subió cada tipo de dólar contra la inflación (IPC Nivel General, INDEC). La <strong>variación real</strong> es (1 + suba del dólar) ÷ (1 + inflación) − 1: si es positiva, el dólar subió más que los precios; si es negativa, subió menos (el dólar se "abarató" en términos reales). Cotizaciones de venta tomadas del histórico diario de ArgentinaDatos; el mes en curso no se incluye hasta que cierra.
+            </div>
+
+            <div class="cotizaciones-box ipc-box" id="dvsiResumenBox">
+                <h3>Acumulado del período</h3>
+                <div id="dvsiResumenItems">
+                    <div class="cotizacion-item"><span>Inflación (IPC):</span><span class="precio-dolar">Cargando...</span></div>
+                </div>
+                <div class="cotizacion-meta" id="dvsiMeta">Consultando datos...</div>
+                <button type="button" class="btn-refresh" id="btnRefreshDvsi" onclick="initDolarVsIPC(true)">Actualizar</button>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="dvsiDesde">Desde</label>
+                    <select id="dvsiDesde" onchange="dvsiActualizar()">
+                        <option value="">Cargando...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="dvsiHasta">Hasta</label>
+                    <select id="dvsiHasta" onchange="dvsiActualizar()">
+                        <option value="">Cargando...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="quick-filters" id="dvsiFiltros">
+                <button type="button" class="btn-quick-filter" onclick="dvsiAplicarFiltroRapido('anio', this)">Último año (desde Ene)</button>
+                <button type="button" class="btn-quick-filter active" onclick="dvsiAplicarFiltroRapido('12m', this)">Últimos 12 meses</button>
+                <button type="button" class="btn-quick-filter" onclick="dvsiAplicarFiltroRapido('24m', this)">Últimos 24 meses</button>
+                <button type="button" class="btn-quick-filter" onclick="dvsiAplicarFiltroRapido('6m', this)">Últimos 6 meses</button>
+            </div>
+
+            <fieldset class="dvsi-casas" id="dvsiCasas">
+                <legend>Dólares a comparar</legend>
+                <label class="checkbox-inline"><input type="checkbox" value="mayorista" checked onchange="dvsiCambioCasas()"> Mayorista</label>
+                <label class="checkbox-inline"><input type="checkbox" value="oficial" onchange="dvsiCambioCasas()"> Oficial</label>
+                <label class="checkbox-inline"><input type="checkbox" value="bolsa" onchange="dvsiCambioCasas()"> MEP</label>
+                <label class="checkbox-inline"><input type="checkbox" value="contadoconliqui" onchange="dvsiCambioCasas()"> CCL</label>
+                <label class="checkbox-inline"><input type="checkbox" value="blue" onchange="dvsiCambioCasas()"> Blue</label>
+                <label class="checkbox-inline"><input type="checkbox" value="cripto" onchange="dvsiCambioCasas()"> Cripto</label>
+            </fieldset>
+
+            <div class="chart-card">
+                <div class="chart-toolbar">
+                    <label for="dvsiVista" style="margin: 0; font-size: 13px;">Ver:</label>
+                    <select id="dvsiVista" onchange="dvsiCambioOpciones()">
+                        <option value="mensual">Variación mensual (%)</option>
+                        <option value="acumulado">Evolución acumulada (base 100)</option>
+                        <option value="real">Variación real vs IPC (%)</option>
+                    </select>
+                    <label for="dvsiPrecio" style="margin: 0; font-size: 13px;">Precio del mes:</label>
+                    <select id="dvsiPrecio" onchange="dvsiCambioOpciones()">
+                        <option value="cierre">Cierre (último dato del mes)</option>
+                        <option value="promedio">Promedio mensual</option>
+                    </select>
+                    <button type="button" class="btn-refresh" onclick="exportarGraficoDolarIPC()">Exportar gráfico (PNG)</button>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="chartDolarIPC"></canvas>
+                </div>
+                <div class="cotizacion-meta" id="dvsiAviso" style="margin-top: 4px;"></div>
+            </div>
+
+            <div class="highlight dvsi-tabla-wrap" style="margin-top: 0;">
+                <table class="tabla-comparacion" id="tablaDolarIPC">
+                    <thead id="dvsiThead"></thead>
+                    <tbody id="dvsiTbody"></tbody>
+                </table>
             </div>
         </div>
 
@@ -2022,7 +2101,7 @@
             selectDesde.value = desdeCalculado >= primerMes ? desdeCalculado : primerMes;
             selectHasta.value = ultimoMes;
 
-            document.querySelectorAll('.btn-quick-filter').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('#ipc .btn-quick-filter').forEach(btn => btn.classList.remove('active'));
             if (boton) boton.classList.add('active');
 
             actualizarVistaIPC();
@@ -2841,6 +2920,10 @@
             if (tabName === 'comparador') {
                 inicializarComparadorSiHaceFalta();
             }
+
+            if (tabName === 'dolar-vs-ipc' && typeof initDolarVsIPC === 'function') {
+                initDolarVsIPC();
+            }
             
             // Actualizar URL con hash
             if (history.pushState) {
@@ -2978,6 +3061,7 @@
             }).format(amount);
         }
     </script>
+    <script src="dolar-ipc.js"></script>
     <script src="ux.js"></script>
 </body>
 </html>
