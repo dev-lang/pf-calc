@@ -1,0 +1,39 @@
+name: Actualizar caución 1D
+
+on:
+  schedule:
+    # Lunes a viernes 21:17 UTC = 18:17 Argentina (después del cierre del mercado)
+    - cron: '17 21 * * 1-5'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: caucion-1d
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Descargar CSV de Rava y fusionar en data/caucion-1d.json
+        run: node scripts/update-caucion.mjs
+
+      - name: Commitear si hubo cambios
+        run: |
+          if git diff --quiet -- data/caucion-1d.json; then
+            echo "Sin cambios en los datos."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/caucion-1d.json
+          git commit -m "data: caución 1D al $(node -p "require('./data/caucion-1d.json').actualizado")"
+          git push
