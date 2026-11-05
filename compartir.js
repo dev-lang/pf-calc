@@ -9,11 +9,18 @@
 // La opción "Ocultar montos" saca los pesos de la tarjeta, el texto y el link (quedan % y plazos).
 //
 // Para sumar una calculadora: agregar su entrada en COMPARTIBLES con una función que devuelva
-// { archivo, tarjeta: {...}, texto } a partir de lo que hay en pantalla.
+// { archivo, tarjeta: {...}, texto, link? } a partir de lo que hay en pantalla.
+// - Formularios (calculatorForm, caucionesForm, dolaresForm): ux.js crea el botón y arma el link.
+// - Pestañas sin formulario (riesgopais, ipc, dolar-vs-ipc, calc-inflacion): este archivo crea el
+//   botón (ver BOTONES_PESTANAS) y el link sale de los campos que liste cada una.
+// - tarjeta.grafico puede ser una función async que devuelve la imagen del gráfico en pantalla,
+//   redibujado con el tamaño y los colores de la tarjeta (ver graficoParaTarjeta).
 
 (function () {
     'use strict';
-    /* global getDiasCaucion */
+    /* global getDiasCaucion, Chart, serieIPC, serieRiesgoPais, obtenerFilasFiltradasRiesgoPais, obtenerFilasFiltradasIPC,
+       chartRiesgoPaisInstance, chartIPCInstance, chartDolarIPCInstance, formatearMesIPC, DVSI_CASAS,
+       dvsiRango, dvsiCasasSeleccionadas, dvsiAcumulados, dvsiIPC */
 
     // ------------------------------------------
     // Utilidades
@@ -41,6 +48,31 @@
     }
 
     const tactil = () => window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+
+    // "2026-11-04" -> "04/11/2026"
+    const fechaLarga = iso => String(iso || '').slice(0, 10).split('-').reverse().join('/');
+    const mesTexto = mes => (typeof formatearMesIPC === 'function' ? formatearMesIPC(mes) : mes);
+    const mesCorto = mes => mesTexto(mes).replace(/ 20(\d\d)$/, ' $1'); // "Ago 2026" -> "Ago 26"
+    const global = nombre => {
+        // Variables "let" de otros <script> clásicos: se leen por nombre, sin window
+        try { return Function(`return typeof ${nombre} !== 'undefined' ? ${nombre} : undefined`)(); } catch (e) { return undefined; }
+    };
+
+    // Link para pestañas sin formulario: #pestaña?campo=valor...
+    function linkDeCampos(tab, campos, extra = {}) {
+        const params = new URLSearchParams();
+        campos.forEach(({ id, dinero }) => {
+            const el = $(id);
+            if (!el || el.value === '') return;
+            params.set(id, el.dataset && el.dataset.fmt ? String(leer(id, el.dataset.fmt)) : el.value);
+            if (dinero && !Number.isFinite(leer(id, 'money'))) params.delete(id);
+        });
+        Object.entries(extra).forEach(([k, v]) => { if (v !== undefined && v !== '') params.set(k, v); });
+        const q = params.toString();
+        return `${location.origin}${location.pathname}#${tab}${q ? `?${q}` : ''}`;
+    }
+
+    class SinDatos extends Error {}
 
     // ------------------------------------------
     // Tarjeta (Canvas 1080x1080)
@@ -171,6 +203,7 @@
                 const w1 = ctx.measureText(etiqueta).width;
                 ctx.font = `700 24px ${FUENTE}`;
                 const w = w1 + ctx.measureText(d.valor).width + 36;
+                if (x + w > x0 + ancho) return; // no entra: se omite
                 ctx.fillStyle = t.chip;
                 redondeado(ctx, x, y, w, 50, 25);
                 ctx.fill();
@@ -339,12 +372,294 @@
         }
     };
 
+    // ------------------------------------------
+    // Gráficos: se redibuja el Chart.js de la pestaña con el tamaño y colores de la tarjeta
+    // ------------------------------------------
+
+    const ANCHO_GRAFICO = 920, ALTO_GRAFICO = 416; // área que deja dibujarTarjeta para el gráfico
+
+    function graficoParaTarjeta(nombreInstancia, tema) {
+        return () => new Promise((resolve, reject) => {
+            const original = global(nombreInstancia);
+            if (!original || typeof Chart === 'undefined') return reject(new SinDatos());
+            const oscuro = tema === 'oscuro';
+            const texto = oscuro ? '#8b91a5' : '#8a90a2';
+            const grilla = oscuro ? '#2c3040' : '#eceef5';
+            const cfg = original.config;
+            const puntos = (cfg.data.labels || []).length;
+
+            const datasets = cfg.data.datasets.map(d => {
+                const copia = { ...d, data: [...d.data], datalabels: { display: false } };
+                const tipo = d.type || cfg.type;
+                if (tipo === 'line') {
+                    copia.borderWidth = (d.borderWidth || 2) * 2;
+                    copia.pointRadius = puntos > 40 ? 0 : 4;
+                    copia.pointHoverRadius = 0;
+                }
+                if (tipo === 'bar') copia.borderRadius = 6;
+                return copia;
+            });
+
+            const escalas = {};
+            Object.entries(cfg.options.scales || {}).forEach(([id, e]) => {
+                escalas[id] = {
+                    ...e,
+                    title: e.title && e.title.display ? { ...e.title, color: texto, font: { size: 18, weight: '600' } } : { display: false },
+                    ticks: { ...(e.ticks || {}), color: texto, font: { size: 20 }, maxRotation: 0, autoSkip: true, maxTicksLimit: id === 'x' ? 7 : 6 },
+                    grid: { ...(e.grid || {}), color: grilla, display: id !== 'x' && !(e.grid && e.grid.drawOnChartArea === false) },
+                    border: { display: false }
+                };
+            });
+
+            const lienzo = document.createElement('canvas');
+            lienzo.width = ANCHO_GRAFICO;
+            lienzo.height = ALTO_GRAFICO;
+            const chart = new Chart(lienzo, {
+                type: cfg.type,
+                data: { labels: [...cfg.data.labels], datasets },
+                options: {
+                    responsive: false,
+                    animation: false,
+                    devicePixelRatio: 1,
+                    events: [],
+                    plugins: {
+                        legend: {
+                            display: datasets.length > 1,
+                            labels: { color: texto, font: { size: 20 }, boxWidth: 22, padding: 18 }
+                        },
+                        tooltip: { enabled: false },
+                        datalabels: false
+                    },
+                    scales: escalas
+                }
+            });
+            const img = new Image();
+            img.onload = () => { chart.destroy(); resolve(img); };
+            img.onerror = reject;
+            img.src = lienzo.toDataURL('image/png');
+        });
+    }
+
+    // ------------------------------------------
+    // Pestañas sin formulario + Compra/Venta USD
+    // ------------------------------------------
+
+    const NOMBRE_DOLAR = {
+        oficial: 'oficial', blue: 'blue', bolsa: 'MEP', contadoconliqui: 'CCL',
+        mayorista: 'mayorista', tarjeta: 'tarjeta', cripto: 'cripto'
+    };
+
+    Object.assign(COMPARTIBLES, {
+        dolaresForm(sinMontos) {
+            const op = valorCampo('operacionTipo');
+            const tipo = valorCampo('tipoDolar');
+            const nombre = `Dólar ${NOMBRE_DOLAR[tipo] || tipo}`;
+            const config = {
+                comprar: { cotizacion: 'cotizacionAplicada', entrega: ['Entregás', 'pesosEntregados'], recibe: ['Recibís', 'dolaresRecibidos'], verbo: 'Comprar' },
+                'comprar-objetivo': { cotizacion: 'cotizacionAplicadaObjetivo', entrega: ['Querés', 'dolaresObjetivoResult'], recibe: ['Necesitás', 'pesosNecesarios'], verbo: 'Comprar' },
+                vender: { cotizacion: 'cotizacionAplicadaVenta', entrega: ['Entregás', 'dolaresEntregados'], recibe: ['Recibís', 'pesosRecibidos'], verbo: 'Vender' }
+            }[op] || null;
+            if (!config) throw new SinDatos();
+            const cotizacion = texto(config.cotizacion);
+            // "$ 1.390,00 (54%, dentro de la banda)" -> "Dentro (54%)"
+            const bandaTxt = texto('bandaPosicionDisplay');
+            const m = bandaTxt.match(/\(([\d.,]+%),\s*([^)]+)\)/);
+            const banda = m ? `${m[2].replace(/ de la banda$/i, '').replace(/^./, c => c.toUpperCase())} (${m[1]})` : '';
+            const bandaOk = !!banda;
+            const spread = texto('spreadBancario');
+
+            const tarjeta = sinMontos
+                ? {
+                    principal: { etiqueta: `${config.verbo} · ${nombre}`, valor: cotizacion, sub: 'Cotización aplicada por dólar' },
+                    datos: [
+                        { etiqueta: 'Tipo de dólar', valor: nombre.replace('Dólar ', '').replace(/^./, c => c.toUpperCase()) },
+                        { etiqueta: 'Operación', valor: config.verbo },
+                        { etiqueta: 'Spread', valor: spread.replace(/^.*\((.*)\).*$/, '$1') || '—' },
+                        { etiqueta: 'Mayorista vs. banda', valor: bandaOk ? banda : '—' }
+                    ]
+                }
+                : {
+                    principal: { etiqueta: `${config.recibe[0]} · ${nombre}`, valor: texto(config.recibe[1]), sub: `A ${cotizacion} por dólar` },
+                    datos: [
+                        { etiqueta: 'Tipo de dólar', valor: nombre.replace('Dólar ', '').replace(/^./, c => c.toUpperCase()) },
+                        { etiqueta: 'Cotización', valor: cotizacion },
+                        { etiqueta: 'Spread', valor: spread || '—' },
+                        { etiqueta: 'Mayorista vs. banda', valor: bandaOk ? banda : '—' }
+                    ],
+                    destacado: { etiqueta: config.entrega[0], valor: texto(config.entrega[1]) }
+                };
+
+            const textos = {
+                comprar: `Con ${texto('pesosEntregados')} comprás ${texto('dolaresRecibidos')} al ${nombre.toLowerCase()} (${cotizacion} por dólar).`,
+                'comprar-objetivo': `Para comprar ${texto('dolaresObjetivoResult')} al ${nombre.toLowerCase()} necesitás ${texto('pesosNecesarios')} (${cotizacion} por dólar).`,
+                vender: `Vendiendo ${texto('dolaresEntregados')} al ${nombre.toLowerCase()} recibís ${texto('pesosRecibidos')} (${cotizacion} por dólar).`
+            };
+            return {
+                archivo: `dolar-${tipo}`,
+                tarjeta: { ...tarjeta, seccion: 'Compra/Venta USD', acento: { claro: '#1e9e6a', oscuro: '#3fd19a' }, fuente: 'Cotización: DolarApi' },
+                texto: sinMontos ? `${nombre}: ${cotizacion} por dólar para ${config.verbo.toLowerCase()}.` : textos[op]
+            };
+        },
+
+        riesgopais() {
+            const filas = typeof obtenerFilasFiltradasRiesgoPais === 'function' ? obtenerFilasFiltradasRiesgoPais() : [];
+            if (filas.length < 1) throw new SinDatos();
+            const ini = filas[0], fin = filas[filas.length - 1];
+            const valores = filas.map(p => p.valor);
+            const delta = fin.valor - ini.valor;
+            const deltaPct = ini.valor ? (fin.valor / ini.valor - 1) * 100 : 0;
+            const dias = Math.round((new Date(fin.fecha) - new Date(ini.fecha)) / 86400000);
+            const pb = v => `${Math.round(v).toLocaleString('es-AR')} pb`;
+            const tema = temaActual();
+            return {
+                archivo: 'riesgo-pais',
+                tarjeta: {
+                    seccion: 'Riesgo País',
+                    acento: { claro: '#e74c3c', oscuro: '#ff6b5e' },
+                    fuente: 'Fuente: Ámbito vía ArgentinaDatos',
+                    principal: { etiqueta: `Riesgo país al ${fechaLarga(fin.fecha)}`, valor: pb(fin.valor), sub: `${delta > 0 ? '+' : ''}${pb(delta)} (${fmtPctSigno(deltaPct, 1)}) desde el ${fechaLarga(ini.fecha)}` },
+                    datos: [
+                        { etiqueta: 'Mín.', valor: pb(Math.min(...valores)) },
+                        { etiqueta: 'Máx.', valor: pb(Math.max(...valores)) },
+                        { etiqueta: 'Período', valor: `${dias} días` }
+                    ],
+                    grafico: graficoParaTarjeta('chartRiesgoPaisInstance', tema)
+                },
+                texto: `Riesgo país: ${pb(fin.valor)} al ${fechaLarga(fin.fecha)} (${delta > 0 ? '+' : ''}${pb(delta)} desde el ${fechaLarga(ini.fecha)}). Mín. ${pb(Math.min(...valores))} · Máx. ${pb(Math.max(...valores))}.`,
+                link: linkDeCampos('riesgopais', [{ id: 'riesgoPaisDesde' }, { id: 'riesgoPaisHasta' }])
+            };
+        },
+
+        ipc() {
+            const filas = typeof obtenerFilasFiltradasIPC === 'function' ? obtenerFilasFiltradasIPC() : [];
+            if (filas.length < 1) throw new SinDatos();
+            const ini = filas[0], fin = filas[filas.length - 1];
+            const serie = global('serieIPC') || [];
+            const iBase = serie.findIndex(p => p.mes === ini.mes) - 1;
+            const acumulada = iBase >= 0 ? (fin.indice / serie[iBase].indice - 1) * 100 : null;
+            const tema = temaActual();
+            const datos = [
+                { etiqueta: 'Interanual', valor: Number.isFinite(fin.variacionInteranual) ? fmtPctSigno(fin.variacionInteranual, 1) : '—' },
+                { etiqueta: `Acum. ${mesCorto(ini.mes)}–${mesCorto(fin.mes)}`, valor: Number.isFinite(acumulada) ? fmtPctSigno(acumulada, 1) : '—' },
+                { etiqueta: 'Meses', valor: String(filas.length) }
+            ];
+            return {
+                archivo: 'inflacion',
+                tarjeta: {
+                    seccion: 'Inflación (IPC)',
+                    acento: { claro: '#16a085', oscuro: '#2ecc9a' },
+                    fuente: 'Fuente: INDEC',
+                    principal: { etiqueta: `Inflación de ${mesTexto(fin.mes)}`, valor: fmtPctSigno(fin.variacionMensual, 1), sub: 'Mensual · IPC Nivel General Nacional' },
+                    datos,
+                    grafico: graficoParaTarjeta('chartIPCInstance', tema)
+                },
+                texto: `Inflación de ${mesTexto(fin.mes)}: ${fmtPctSigno(fin.variacionMensual, 1)} mensual${Number.isFinite(fin.variacionInteranual) ? `, ${fmtPctSigno(fin.variacionInteranual, 1)} interanual` : ''}.`
+                    + (Number.isFinite(acumulada) ? ` Acumulada ${mesTexto(ini.mes)}–${mesTexto(fin.mes)}: ${fmtPctSigno(acumulada, 1)}.` : ''),
+                link: linkDeCampos('ipc', [{ id: 'ipcDesde' }, { id: 'ipcHasta' }, { id: 'seriesIPC' }])
+            };
+        },
+
+        'dolar-vs-ipc'() {
+            const rango = typeof dvsiRango === 'function' ? dvsiRango() : null;
+            const ipcCargado = (global('dvsiIPC') || []).length > 0;
+            if (!rango || !ipcCargado || !global('chartDolarIPCInstance')) throw new SinDatos();
+            const casas = dvsiCasasSeleccionadas().filter(c => DVSI_CASAS[c]);
+            if (!casas.length) throw new SinDatos();
+            const acum = dvsiAcumulados(rango, casas);
+            const principal = casas[0];
+            const dP = acum.dolares[principal];
+            const nombreCasa = c => `Dólar ${DVSI_CASAS[c].nombre}`;
+            const periodo = `${mesCorto(rango.desde)} – ${mesCorto(rango.hasta)}`;
+            const tema = temaActual();
+            const conReal = Number.isFinite(dP.real);
+            const casasTexto = casas.map(c => {
+                const d = acum.dolares[c];
+                if (!Number.isFinite(d.variacion)) return null;
+                return `${nombreCasa(c).toLowerCase()} ${fmtPctSigno(d.variacion, 1)}${Number.isFinite(d.real) ? ` (real ${fmtPctSigno(d.real, 1)})` : ''}`;
+            }).filter(Boolean).join('; ');
+            return {
+                archivo: 'dolar-vs-inflacion',
+                tarjeta: {
+                    seccion: 'Dólar vs Inflación',
+                    acento: { claro: '#5a67d8', oscuro: '#8c9cf5' },
+                    fuente: 'Fuentes: ArgentinaDatos e INDEC',
+                    principal: conReal
+                        ? { etiqueta: `${nombreCasa(principal)} vs inflación · ${periodo}`, valor: `${fmtPctSigno(dP.real, 1)} real`, sub: `Dólar ${fmtPctSigno(dP.variacion, 1)} vs IPC ${fmtPctSigno(acum.ipc, 1)}${acum.ipcCompleto ? '' : ` (IPC hasta ${mesCorto(acum.hastaIPC)})`}` }
+                        : { etiqueta: `${nombreCasa(principal)} · ${periodo}`, valor: Number.isFinite(dP.variacion) ? fmtPctSigno(dP.variacion, 1) : '—', sub: 'Variación acumulada del dólar' },
+                    datos: [
+                        { etiqueta: 'IPC', valor: Number.isFinite(acum.ipc) ? fmtPctSigno(acum.ipc, 1) : '—' },
+                        ...casas.slice(0, 2).map(c => ({ etiqueta: DVSI_CASAS[c].nombre, valor: Number.isFinite(acum.dolares[c].variacion) ? fmtPctSigno(acum.dolares[c].variacion, 1) : '—' }))
+                    ],
+                    grafico: graficoParaTarjeta('chartDolarIPCInstance', tema)
+                },
+                texto: `${mesTexto(rango.desde)} – ${mesTexto(rango.hasta)}: inflación ${Number.isFinite(acum.ipc) ? fmtPctSigno(acum.ipc, 1) : '—'}${acum.ipcCompleto ? '' : ` (hasta ${mesTexto(acum.hastaIPC)})`}; ${casasTexto}.`,
+                link: linkDeCampos('dolar-vs-ipc', [{ id: 'dvsiDesde' }, { id: 'dvsiHasta' }, { id: 'dvsiVista' }, { id: 'dvsiPrecio' }], { dvsiCasas: casas.join(',') })
+            };
+        },
+
+        'calc-inflacion'(sinMontos) {
+            const desde = valorCampo('calcInfDesde'), hasta = valorCampo('calcInfHasta');
+            const acumulada = numero(texto('calcInfAcumulada'), 'pct');
+            if (!desde || !hasta || !Number.isFinite(acumulada)) throw new SinDatos();
+            const [a1, m1] = desde.split('-').map(Number), [a2, m2] = hasta.split('-').map(Number);
+            const meses = (a2 - a1) * 12 + (m2 - m1);
+            const promedio = meses > 0 ? (Math.pow(1 + acumulada / 100, 1 / meses) - 1) * 100 : null;
+            const monto = leer('calcInfMonto', 'money');
+            const conMonto = !sinMontos && Number.isFinite(monto) && monto > 0;
+            return {
+                archivo: 'inflacion-entre-fechas',
+                tarjeta: {
+                    seccion: 'Inflación entre fechas',
+                    acento: { claro: '#16a085', oscuro: '#2ecc9a' },
+                    fuente: 'Fuente: INDEC (IPC Nivel General)',
+                    principal: { etiqueta: `Inflación entre ${mesTexto(desde)} y ${mesTexto(hasta)}`, valor: fmtPctSigno(acumulada, 1), sub: `Acumulada en ${meses} ${meses === 1 ? 'mes' : 'meses'}` },
+                    datos: [
+                        { etiqueta: 'Desde', valor: mesTexto(desde) },
+                        { etiqueta: 'Hasta', valor: mesTexto(hasta) },
+                        { etiqueta: 'Promedio mensual', valor: Number.isFinite(promedio) ? fmtPct(promedio) : '—' },
+                        conMonto ? { etiqueta: 'Monto inicial', valor: fmtPesos(monto) } : { etiqueta: 'Meses', valor: String(meses) }
+                    ],
+                    destacado: conMonto
+                        ? { etiqueta: `Equivale en ${mesTexto(hasta)} a`, valor: texto('calcInfMontoResult') }
+                        : { etiqueta: `$100 de ${mesTexto(desde)} equivalen a`, valor: fmtPesos(100 + acumulada) }
+                },
+                texto: `Inflación entre ${mesTexto(desde)} y ${mesTexto(hasta)}: ${fmtPctSigno(acumulada, 1)} (${meses} meses).`
+                    + (conMonto ? ` ${fmtPesos(monto)} de ${mesTexto(desde)} equivalen a ${texto('calcInfMontoResult')} en ${mesTexto(hasta)}.` : ''),
+                link: linkDeCampos('calc-inflacion', [{ id: 'calcInfDesde' }, { id: 'calcInfHasta' }, ...(sinMontos ? [] : [{ id: 'calcInfMonto', dinero: true }])])
+            };
+        }
+    });
+
+    // Sin pesos que ocultar: el menú no muestra "Ocultar montos"
+    const TIENE_MONTOS = {
+        riesgopais: () => false,
+        ipc: () => false,
+        'dolar-vs-ipc': () => false,
+        'calc-inflacion': () => Number.isFinite(leer('calcInfMonto', 'money')) && leer('calcInfMonto', 'money') > 0
+    };
+    const tieneMontos = id => (TIENE_MONTOS[id] ? TIENE_MONTOS[id]() : true);
+
     function armar(formId, sinMontos) {
-        const datos = COMPARTIBLES[formId](sinMontos);
+        const datos = COMPARTIBLES[formId](sinMontos && tieneMontos(formId));
         datos.tarjeta.tema = temaActual();
         datos.tarjeta.fecha = hoy();
-        datos.link = window.pfUx ? window.pfUx.construirLink(formId, { sinMontos }) : location.href;
+        if (!datos.link) datos.link = window.pfUx ? window.pfUx.construirLink(formId, { sinMontos }) : location.href;
         return datos;
+    }
+
+    // Si todavía no cargaron los datos de la pestaña, se avisa en vez de fallar
+    function conDatos(accion) {
+        return async (formId, sinMontos) => {
+            try {
+                await accion(formId, sinMontos);
+            } catch (e) {
+                if (e instanceof SinDatos) avisar('Todavía no hay datos para compartir');
+                else {
+                    console.error('Error al compartir:', e);
+                    avisar('No se pudo generar lo que querés compartir');
+                }
+            }
+        };
     }
 
     // ------------------------------------------
@@ -406,6 +721,7 @@
 
     async function compartirImagen(formId, sinMontos) {
         const d = armar(formId, sinMontos);
+        if (typeof d.tarjeta.grafico === 'function') d.tarjeta.grafico = await d.tarjeta.grafico();
         const canvas = dibujarTarjeta(d.tarjeta);
         const blob = await aBlob(canvas);
         const nombre = `financear-${d.archivo}-${new Date().toISOString().slice(0, 10)}.png`;
@@ -550,9 +866,8 @@
             if (!item) return;
             const formId = menu.dataset.form;
             cerrarMenu();
-            if (item.dataset.accion === 'imagen') compartirImagen(formId, sinMontos);
-            else if (item.dataset.accion === 'link') compartirLink(formId, sinMontos);
-            else compartirTexto(formId, sinMontos);
+            const accion = { imagen: compartirImagen, link: compartirLink, texto: compartirTexto }[item.dataset.accion];
+            conDatos(accion)(formId, sinMontos);
         });
         document.body.appendChild(menu);
     }
@@ -566,6 +881,7 @@
         cerrarMenu();
         botonActivo = boton;
         menu.dataset.form = formId;
+        menu.querySelector('.compartir-ocultar').hidden = !tieneMontos(formId);
         menu.hidden = false;
         boton.setAttribute('aria-expanded', 'true');
 
@@ -583,6 +899,36 @@
         const primero = menu.querySelector('[role="menuitem"]');
         if (primero) primero.focus();
     }
+
+    // ------------------------------------------
+    // Botones en las pestañas sin formulario
+    // ------------------------------------------
+
+    // Pestaña -> dónde va el botón (junto a "Exportar gráfico" o al pie del resultado)
+    const BOTONES_PESTANAS = {
+        riesgopais: '#riesgopais .chart-toolbar',
+        ipc: '#ipc .chart-toolbar',
+        'dolar-vs-ipc': '#dolar-vs-ipc .chart-toolbar',
+        'calc-inflacion': '#calcInfResumenBox'
+    };
+
+    function crearBotonesPestanas() {
+        Object.entries(BOTONES_PESTANAS).forEach(([id, selector]) => {
+            const destino = document.querySelector(selector);
+            if (!destino || destino.querySelector('.btn-compartir')) return;
+            const boton = document.createElement('button');
+            boton.type = 'button';
+            boton.className = 'btn-refresh btn-compartir';
+            boton.setAttribute('aria-haspopup', 'menu');
+            boton.setAttribute('aria-expanded', 'false');
+            boton.textContent = 'Compartir';
+            boton.addEventListener('click', () => abrir(id, boton));
+            destino.appendChild(boton);
+        });
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', crearBotonesPestanas);
+    else crearBotonesPestanas();
 
     window.pfCompartir = {
         soporta: formId => Object.prototype.hasOwnProperty.call(COMPARTIBLES, formId),

@@ -1593,6 +1593,13 @@
             return `${signo}${Math.round(valor)} pb`;
         }
 
+        // Valor de un parámetro del link compartido (#pestaña?campo=valor), o null
+        function parametroCompartido(nombre) {
+            const hash = window.location.hash.substring(1);
+            const i = hash.indexOf('?');
+            return i < 0 ? null : new URLSearchParams(hash.slice(i + 1)).get(nombre);
+        }
+
         function poblarFechasRiesgoPais() {
             const inputDesde = document.getElementById('riesgoPaisDesde');
             const inputHasta = document.getElementById('riesgoPaisHasta');
@@ -1614,6 +1621,13 @@
 
             inputDesde.value = desdeDefault > primeraFecha ? desdeDefault : primeraFecha;
             inputHasta.value = ultimaFecha;
+
+            // Rango de un link compartido, si cae dentro de la serie
+            const enRango = f => /^\d{4}-\d{2}-\d{2}$/.test(f || '') && f >= primeraFecha && f <= ultimaFecha;
+            const desdeLink = parametroCompartido('riesgoPaisDesde');
+            const hastaLink = parametroCompartido('riesgoPaisHasta');
+            if (enRango(desdeLink)) inputDesde.value = desdeLink;
+            if (enRango(hastaLink)) inputHasta.value = hastaLink;
         }
 
         function renderTablaRiesgoPais() {

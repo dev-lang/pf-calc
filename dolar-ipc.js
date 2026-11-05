@@ -9,7 +9,7 @@
 //   > 0  → el dólar subió más que los precios (el peso se depreció en términos reales)
 //   < 0  → el dólar subió menos que los precios (atraso / apreciación real del peso)
 
-/* global serieIPC, obtenerIPCNivelGeneral, calcularVariacionesIPC, formatearMesIPC, formatearPorcentajeIPC, Chart */
+/* global serieIPC, obtenerIPCNivelGeneral, calcularVariacionesIPC, formatearMesIPC, formatearPorcentajeIPC, Chart, parametroCompartido */
 
 const DVSI_CASAS = {
     mayorista:       { nombre: 'Mayorista',  color: '#667eea' },
@@ -173,6 +173,11 @@ function dvsiPoblarMeses() {
     // Por defecto: últimos 12 meses con IPC publicado
     desdeSel.value = meses.includes(desdePrevio) ? desdePrevio : dvsiSumarMeses(ultimoIPC, -11);
     hastaSel.value = meses.includes(hastaPrevio) ? hastaPrevio : ultimoIPC;
+
+    // Rango de un link compartido
+    const link = typeof parametroCompartido === 'function' ? parametroCompartido : () => null;
+    if (meses.includes(link('dvsiDesde'))) desdeSel.value = link('dvsiDesde');
+    if (meses.includes(link('dvsiHasta'))) hastaSel.value = link('dvsiHasta');
 }
 
 function dvsiAplicarFiltroRapido(tipo, boton) {
@@ -487,8 +492,12 @@ async function initDolarVsIPC(forzar = false) {
         Object.keys(dvsiMensualPorCasa).forEach(k => delete dvsiMensualPorCasa[k]);
         Object.keys(dvsiPromesasCasa).forEach(k => delete dvsiPromesasCasa[k]);
     } else {
-        // Restaurar preferencias guardadas
+        // Restaurar preferencias guardadas; un link compartido tiene prioridad
         const prefs = dvsiLeerPrefs();
+        const link = typeof parametroCompartido === 'function' ? parametroCompartido : () => null;
+        if (link('dvsiCasas')) prefs.casas = link('dvsiCasas').split(',').filter(c => DVSI_CASAS[c]);
+        if (link('dvsiPrecio')) prefs.precio = link('dvsiPrecio');
+        if (link('dvsiVista')) prefs.vista = link('dvsiVista');
         if (Array.isArray(prefs.casas) && prefs.casas.length) {
             document.querySelectorAll('#dvsiCasas input[type="checkbox"]').forEach(cb => {
                 cb.checked = prefs.casas.includes(cb.value);
