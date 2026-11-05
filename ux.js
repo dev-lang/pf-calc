@@ -399,7 +399,17 @@
         const acciones = document.createElement('div');
         acciones.className = 'results-actions';
         acciones.hidden = true;
-        if (formId !== 'comparadorForm') {
+        if (window.pfCompartir && window.pfCompartir.soporta(formId)) {
+            // Menú Compartir (imagen, link y texto) de compartir.js
+            const compartir = document.createElement('button');
+            compartir.type = 'button';
+            compartir.className = 'btn-refresh btn-compartir';
+            compartir.setAttribute('aria-haspopup', 'menu');
+            compartir.setAttribute('aria-expanded', 'false');
+            compartir.textContent = 'Compartir';
+            compartir.addEventListener('click', () => window.pfCompartir.abrir(formId, compartir));
+            acciones.appendChild(compartir);
+        } else if (formId !== 'comparadorForm') {
             const compartir = document.createElement('button');
             compartir.type = 'button';
             compartir.className = 'btn-refresh';
@@ -544,15 +554,22 @@
         return { tab: hash.slice(0, i), params: new URLSearchParams(hash.slice(i + 1)) };
     }
 
-    function copiarLink(formId, boton) {
+    // Link que reproduce el cálculo actual. Con sinMontos se omiten los campos de dinero
+    // (quien lo abre ve las tasas y plazos, y completa su propio capital).
+    function construirLink(formId, { sinMontos = false } = {}) {
         const form = document.getElementById(formId);
         const tab = form.closest('.tab-content').id;
         const params = new URLSearchParams();
         form.querySelectorAll('input[id], select[id]').forEach(el => {
             if (estaOculto(el, form) || el.value === '' || el.disabled) return;
+            if (sinMontos && el.dataset.fmt === 'money') return;
             params.set(el.id, el.dataset.fmt ? String(leerNumero(el)) : el.value);
         });
-        const url = `${location.origin}${location.pathname}#${tab}?${params.toString()}`;
+        return `${location.origin}${location.pathname}#${tab}?${params.toString()}`;
+    }
+
+    function copiarLink(formId, boton) {
+        const url = construirLink(formId);
 
         const listo = () => {
             const original = boton.textContent;
@@ -774,7 +791,7 @@
         });
     }
 
-    window.pfUx = { recalcular, restaurarComparador, parsearNumero };
+    window.pfUx = { recalcular, restaurarComparador, parsearNumero, construirLink };
 
     iniciar();
     iniciarTema();
