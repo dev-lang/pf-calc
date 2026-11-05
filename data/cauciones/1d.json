@@ -1,5 +1,6 @@
 {
   "especie": "CAUCION 1D",
+  "plazo_dias": 1,
   "descripcion": "Caución bursátil en pesos a 1 día, TNA % (apertura, máximo, mínimo, cierre)",
   "fuente": "Rava Bursátil - https://www.rava.com/perfil/CAUCION%201D",
   "actualizado": "2026-11-04",
