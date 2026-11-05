@@ -17,11 +17,11 @@ jobs:
   actualizar:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Descargar CSV de Rava y fusionar en data/caucion-1d.json
         run: node scripts/update-caucion.mjs
