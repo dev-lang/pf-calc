@@ -69,6 +69,7 @@
                     <button class="tab-btn" onclick="switchTab('ipc')" aria-controls="ipc"><span class="tab-icon" aria-hidden="true">🛒</span> <span class="tab-label">Inflación (IPC)</span><span class="tab-short">IPC</span></button>
                     <button class="tab-btn" onclick="switchTab('calc-inflacion')" aria-controls="calc-inflacion"><span class="tab-icon" aria-hidden="true">🧮</span> <span class="tab-label">Calc. Inflación entre Fechas</span><span class="tab-short">Inflación</span></button>
                     <button class="tab-btn" onclick="switchTab('riesgopais')" aria-controls="riesgopais"><span class="tab-icon" aria-hidden="true">🌎</span> <span class="tab-label">Riesgo País</span><span class="tab-short">Riesgo país</span></button>
+                    <button class="tab-btn" onclick="switchTab('cauciones-historico')" aria-controls="cauciones-historico"><span class="tab-icon" aria-hidden="true">📉</span> <span class="tab-label">Cauciones (Histórico)</span><span class="tab-short">Cauciones</span></button>
                 </div>
                 <button type="button" class="theme-toggle" data-theme-toggle>Tema: Auto</button>
             </nav>
@@ -448,6 +449,7 @@
                         <label for="tasaCaucion">TNA - Tasa Nominal Anual (%)</label>
                         <input type="text" inputmode="decimal" autocomplete="off" id="tasaCaucion" name="tasaCaucion" data-min="0.01" required placeholder="Ej: 45,2" data-fmt="pct" data-suffix="%">
                         <div class="cotizacion-meta" id="tasaCaucionMeta">Consultando última tasa de caución...</div>
+                        <a class="cotizacion-meta ch-link-historico" href="#cauciones-historico">📉 Ver histórico de tasas por plazo</a>
                     </div>
                 </div>
 
@@ -820,6 +822,100 @@
                 <table class="tabla-comparacion" id="tablaDolarIPC">
                     <thead id="dvsiThead"></thead>
                     <tbody id="dvsiTbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CAUCIONES HISTORICO SECTION -->
+        <div id="cauciones-historico" class="tab-content">
+            <h1>Cauciones (Histórico)</h1>
+
+            <div class="info">
+                <strong>Info:</strong> Tasa de caución bursátil en pesos (TNA) por plazo, con el cierre diario publicado por Rava. El cierre es la última operación del día y puede dar saltos: la media móvil de 5 días ayuda a ver la tendencia. Historial desde el 18/05/2026. El plazo de 1 día no opera los viernes (ese día se usa el de 3 días) ni los feriados, y los de 2, 4 y 5 días operan poco.
+            </div>
+
+            <div class="cotizaciones-box caucion-hist-box" id="chResumenBox">
+                <h3 class="ch-titulo-resumen">
+                    <label for="chPlazoResumen">Último dato publicado ·</label>
+                    <select id="chPlazoResumen" onchange="chCambioPlazoResumen()"><option value="1" selected>1 día</option><option value="2">2 días</option><option value="3">3 días</option><option value="4">4 días</option><option value="5">5 días</option><option value="7">7 días</option><option value="14">14 días</option><option value="30">30 días</option></select>
+                </h3>
+                <div class="cotizacion-item"><span>Último cierre:</span><span class="precio-dolar" id="chUltimo">Cargando...</span></div>
+                <div class="cotizacion-item"><span>Variación vs. día anterior:</span><span class="precio-dolar" id="chVariacion">Cargando...</span></div>
+                <div class="cotizacion-item"><span>Promedio últimos 30 días:</span><span class="precio-dolar" id="chPromedio30">Cargando...</span></div>
+                <div class="cotizacion-item"><span>Mín. / Máx. del período:</span><span class="precio-dolar" id="chMinMax">Cargando...</span></div>
+                <div class="cotizacion-meta" id="chMeta">Cargando el histórico de cauciones...</div>
+                <button type="button" class="btn-refresh" onclick="initCaucionesHistorico(true)">Actualizar</button>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="chDesde">Desde</label>
+                    <input type="date" id="chDesde" onchange="chCambioRango()">
+                </div>
+                <div class="form-group">
+                    <label for="chHasta">Hasta</label>
+                    <input type="date" id="chHasta" onchange="chCambioRango()">
+                </div>
+            </div>
+
+            <div class="quick-filters" id="chFiltros">
+                <button type="button" class="btn-quick-filter" onclick="chFiltroRapido('1m', this)">Último mes</button>
+                <button type="button" class="btn-quick-filter" onclick="chFiltroRapido('3m', this)">3 meses</button>
+                <button type="button" class="btn-quick-filter" onclick="chFiltroRapido('6m', this)">6 meses</button>
+                <button type="button" class="btn-quick-filter active" onclick="chFiltroRapido('todo', this)">Todo</button>
+            </div>
+
+            <fieldset class="dvsi-casas" id="chPlazos">
+                <legend>Plazos</legend>
+                <label class="checkbox-inline"><input type="checkbox" value="1" checked onchange="chCambioPlazos()"> 1 día</label>
+                <label class="checkbox-inline"><input type="checkbox" value="2" onchange="chCambioPlazos()"> 2 días</label>
+                <label class="checkbox-inline"><input type="checkbox" value="3" onchange="chCambioPlazos()"> 3 días</label>
+                <label class="checkbox-inline"><input type="checkbox" value="4" onchange="chCambioPlazos()"> 4 días</label>
+                <label class="checkbox-inline"><input type="checkbox" value="5" onchange="chCambioPlazos()"> 5 días</label>
+                <label class="checkbox-inline"><input type="checkbox" value="7" checked onchange="chCambioPlazos()"> 7 días</label>
+                <label class="checkbox-inline"><input type="checkbox" value="14" onchange="chCambioPlazos()"> 14 días</label>
+                <label class="checkbox-inline"><input type="checkbox" value="30" onchange="chCambioPlazos()"> 30 días</label>
+            </fieldset>
+
+            <div class="chart-card" id="chGraficoCard">
+                <div class="chart-toolbar">
+                    <label for="chVista" style="margin: 0; font-size: 13px;">Ver:</label>
+                    <select id="chVista" onchange="chCambioVista()">
+                        <option value="diaria">Diaria</option>
+                        <option value="mensual">Promedio mensual</option>
+                        <option value="curva">Curva por plazo</option>
+                    </select>
+                    <span class="ch-opciones-diaria" id="chOpcionesDiaria">
+                        <label class="checkbox-inline"><input type="checkbox" id="chMediaMovil" checked onchange="chCambioOpciones()"> Media móvil 5 días</label>
+                        <label class="checkbox-inline" id="chFranjaLabel"><input type="checkbox" id="chFranja" onchange="chCambioOpciones()"> Franja mín.–máx. del día</label>
+                    </span>
+                    <button type="button" class="btn-refresh" onclick="exportarGraficoCauciones()">Exportar gráfico (PNG)</button>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="chartCauciones"></canvas>
+                </div>
+                <div class="cotizacion-meta" id="chAviso" style="margin-top: 4px;"></div>
+            </div>
+
+            <h2 class="ch-subtitulo">Caución vs inflación</h2>
+            <div class="cotizaciones-box ipc-box" id="chRealResumen"></div>
+            <div class="chart-card" id="chRealCard">
+                <div class="chart-toolbar">
+                    <label for="chPlazoReal" style="margin: 0; font-size: 13px;">Plazo:</label>
+                    <select id="chPlazoReal" onchange="chCambioPlazoReal()"><option value="1" selected>1 día</option><option value="2">2 días</option><option value="3">3 días</option><option value="4">4 días</option><option value="5">5 días</option><option value="7">7 días</option><option value="14">14 días</option><option value="30">30 días</option></select>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="chartCaucionesReal"></canvas>
+                </div>
+                <div class="cotizacion-meta" id="chRealMeta" style="margin-top: 4px;"></div>
+            </div>
+
+            <h2 class="ch-subtitulo">Promedio mensual</h2>
+            <div class="highlight dvsi-tabla-wrap" style="margin-top: 0;">
+                <table class="tabla-comparacion" id="tablaCaucionesMensual">
+                    <caption class="ch-caption">Promedio de los cierres del mes · debajo: mín. – máx. y días con dato · * mes parcial</caption>
+                    <thead id="chThead"></thead>
+                    <tbody id="chTbody"></tbody>
                 </table>
             </div>
         </div>
@@ -2979,6 +3075,10 @@
                 inicializarComparadorSiHaceFalta();
             }
 
+            if (tabName === 'cauciones-historico' && typeof initCaucionesHistorico === 'function') {
+                initCaucionesHistorico();
+            }
+
             if (tabName === 'dolar-vs-ipc' && typeof initDolarVsIPC === 'function') {
                 initDolarVsIPC();
             }
@@ -3126,6 +3226,7 @@
         }
     </script>
     <script src="dolar-ipc.js"></script>
+    <script src="cauciones-historico.js"></script>
     <script src="compartir.js"></script>
     <script src="ux.js"></script>
 </body>

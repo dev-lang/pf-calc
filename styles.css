@@ -1461,3 +1461,64 @@ a:focus-visible,
     opacity: 1;
     transform: translate(-50%, 0);
 }
+
+/* ===== Cauciones (Histórico) ===== */
+.caucion-hist-box {
+    border-left-color: var(--accent-market);
+}
+
+.ch-titulo-resumen {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.ch-titulo-resumen label {
+    margin: 0;
+    font: inherit;
+    color: inherit;
+}
+
+.ch-titulo-resumen select {
+    width: auto;
+    padding: 4px 8px;
+    font-size: 14px;
+}
+
+.ch-opciones-diaria {
+    display: contents;
+}
+
+.ch-opciones-diaria[hidden] {
+    display: none;
+}
+
+.ch-subtitulo {
+    margin: 28px 0 10px;
+    font-size: 20px;
+    color: var(--text-title);
+}
+
+.ch-caption {
+    caption-side: bottom;
+    text-align: left;
+    font-size: 12px;
+    color: var(--text-muted);
+    padding-top: 8px;
+}
+
+.ch-link-historico {
+    display: inline-block;
+    margin-top: 2px;
+    color: var(--brand-text);
+    text-decoration: none;
+}
+
+.ch-link-historico:hover {
+    text-decoration: underline;
+}
+
+#chFranjaLabel:has(input:disabled) {
+    opacity: 0.55;
+}

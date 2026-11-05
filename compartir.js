@@ -18,6 +18,7 @@
 
 (function () {
     'use strict';
+    /* global chSeleccionados, chSeries, chPromedio30, chFiltrar, chRango, chAcumuladoReal, chFilasReal, chMes */
     /* global getDiasCaucion, Chart, serieIPC, serieRiesgoPais, obtenerFilasFiltradasRiesgoPais, obtenerFilasFiltradasIPC,
        chartRiesgoPaisInstance, chartIPCInstance, chartDolarIPCInstance, formatearMesIPC, DVSI_CASAS,
        dvsiRango, dvsiCasasSeleccionadas, dvsiAcumulados, dvsiIPC */
@@ -425,7 +426,7 @@
                     plugins: {
                         legend: {
                             display: datasets.length > 1,
-                            labels: { color: texto, font: { size: 20 }, boxWidth: 22, padding: 18 }
+                            labels: { color: texto, font: { size: 20 }, boxWidth: 22, padding: 18, filter: cfg.options.plugins && cfg.options.plugins.legend && cfg.options.plugins.legend.labels && cfg.options.plugins.legend.labels.filter }
                         },
                         tooltip: { enabled: false },
                         datalabels: false
@@ -597,6 +598,72 @@
             };
         },
 
+        'cauciones-historico'() {
+            const vista = valorCampo('chVista');
+            const plazos = typeof chSeleccionados === 'function' ? chSeleccionados().filter(d => chSeries[d]) : [];
+            if (!global('chartCaucionesInstance')) throw new SinDatos();
+            const dias = Number(valorCampo('chPlazoResumen'));
+            const serie = chSeries[dias] || [];
+            if (!serie.length) throw new SinDatos();
+            const ultimo = serie[serie.length - 1];
+            const p30 = chPromedio30(serie);
+            const periodo = chFiltrar(dias).map(p => p.cierre);
+            const tema = temaActual();
+            const nombreVista = { diaria: 'diaria', mensual: 'promedio mensual', curva: 'curva por plazo' }[vista] || vista;
+            const r = chRango();
+            const sub = vista === 'curva'
+                ? 'Último cierre por plazo y promedio de 30 días'
+                : `Promedio 30 días: ${fmtPct(p30.prom)} · plazos: ${plazos.map(d => `${d}d`).join(', ')}`;
+            return {
+                archivo: 'cauciones-historico',
+                tarjeta: {
+                    seccion: 'Cauciones',
+                    acento: { claro: '#2b7fd4', oscuro: '#6cb8ff' },
+                    fuente: 'Fuente: Rava Bursátil (cierre diario)',
+                    principal: { etiqueta: `Caución a ${fmtDias(dias)} · cierre del ${fechaLarga(ultimo.fecha)}`, valor: `${fmtPct(ultimo.cierre)} TNA`, sub },
+                    datos: [
+                        { etiqueta: 'Vista', valor: nombreVista },
+                        { etiqueta: 'Mín.', valor: periodo.length ? fmtPct(Math.min(...periodo)) : '—' },
+                        { etiqueta: 'Máx.', valor: periodo.length ? fmtPct(Math.max(...periodo)) : '—' }
+                    ],
+                    grafico: graficoParaTarjeta('chartCaucionesInstance', tema)
+                },
+                texto: `Caución a ${fmtDias(dias)}: ${fmtPct(ultimo.cierre)} TNA al ${fechaLarga(ultimo.fecha)} (promedio 30 días ${fmtPct(p30.prom)}).`
+                    + (periodo.length && r ? ` Entre el ${fechaLarga(r.desde)} y el ${fechaLarga(r.hasta)}: mín. ${fmtPct(Math.min(...periodo))}, máx. ${fmtPct(Math.max(...periodo))}.` : ''),
+                link: linkDeCampos('cauciones-historico', [{ id: 'chDesde' }, { id: 'chHasta' }, { id: 'chVista' }, { id: 'chPlazoResumen' }, { id: 'chPlazoReal' }], {
+                    chPlazos: plazos.join(','),
+                    chMediaMovil: $('chMediaMovil').checked ? '1' : '0',
+                    chFranja: $('chFranja').checked ? '1' : '0'
+                })
+            };
+        },
+
+        'cauciones-real'() {
+            const dias = Number(valorCampo('chPlazoReal'));
+            if (!global('chartCaucionesRealInstance') || !chSeries[dias]) throw new SinDatos();
+            const acum = chAcumuladoReal(chFilasReal(dias));
+            if (!acum) throw new SinDatos();
+            const tema = temaActual();
+            const periodo = `${chMes(acum.desde)} – ${chMes(acum.hasta)}`;
+            return {
+                archivo: 'caucion-vs-inflacion',
+                tarjeta: {
+                    seccion: 'Caución vs Inflación',
+                    acento: acum.real < 0 ? { claro: '#dc3545', oscuro: '#ff6b5e' } : { claro: '#16a085', oscuro: '#2ecc9a' },
+                    fuente: 'Fuentes: Rava Bursátil e INDEC',
+                    principal: { etiqueta: `Caución a ${fmtDias(dias)} vs inflación · ${periodo}`, valor: `${fmtPctSigno(acum.real)} real`, sub: `Caución ${fmtPctSigno(acum.caucion)} vs IPC ${fmtPctSigno(acum.ipc)}` },
+                    datos: [
+                        { etiqueta: 'Caución', valor: fmtPctSigno(acum.caucion) },
+                        { etiqueta: 'IPC', valor: fmtPctSigno(acum.ipc) },
+                        { etiqueta: 'Meses', valor: String(acum.meses) }
+                    ],
+                    grafico: graficoParaTarjeta('chartCaucionesRealInstance', tema)
+                },
+                texto: `Caución a ${fmtDias(dias)} renovada al vencimiento, ${periodo}: ${fmtPctSigno(acum.caucion)} contra una inflación de ${fmtPctSigno(acum.ipc)} → ${fmtPctSigno(acum.real)} real.`,
+                link: linkDeCampos('cauciones-historico', [{ id: 'chPlazoReal' }])
+            };
+        },
+
         'calc-inflacion'(sinMontos) {
             const desde = valorCampo('calcInfDesde'), hasta = valorCampo('calcInfHasta');
             const acumulada = numero(texto('calcInfAcumulada'), 'pct');
@@ -632,6 +699,8 @@
 
     // Sin pesos que ocultar: el menú no muestra "Ocultar montos"
     const TIENE_MONTOS = {
+        'cauciones-historico': () => false,
+        'cauciones-real': () => false,
         riesgopais: () => false,
         ipc: () => false,
         'dolar-vs-ipc': () => false,
@@ -909,7 +978,9 @@
         riesgopais: '#riesgopais .chart-toolbar',
         ipc: '#ipc .chart-toolbar',
         'dolar-vs-ipc': '#dolar-vs-ipc .chart-toolbar',
-        'calc-inflacion': '#calcInfResumenBox'
+        'calc-inflacion': '#calcInfResumenBox',
+        'cauciones-historico': '#chGraficoCard .chart-toolbar',
+        'cauciones-real': '#chRealCard .chart-toolbar'
     };
 
     function crearBotonesPestanas() {

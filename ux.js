@@ -707,10 +707,11 @@
         const css = getComputedStyle(document.documentElement);
         Chart.defaults.color = css.getPropertyValue('--text-body').trim();
         Chart.defaults.borderColor = css.getPropertyValue('--border-light').trim();
-        /* global chartIPCInstance, chartRiesgoPaisInstance, chartDolarIPCInstance, renderGraficoIPC, renderGraficoRiesgoPais, renderGraficoDolarIPC */
+        /* global chartIPCInstance, chartRiesgoPaisInstance, chartDolarIPCInstance, chartCaucionesInstance, renderGraficoIPC, renderGraficoRiesgoPais, renderGraficoDolarIPC, renderGraficoCauciones */
         if (typeof chartIPCInstance !== 'undefined' && chartIPCInstance) renderGraficoIPC();
         if (typeof chartRiesgoPaisInstance !== 'undefined' && chartRiesgoPaisInstance) renderGraficoRiesgoPais();
         if (typeof chartDolarIPCInstance !== 'undefined' && chartDolarIPCInstance) renderGraficoDolarIPC();
+        if (typeof chartCaucionesInstance !== 'undefined' && chartCaucionesInstance) renderGraficoCauciones();
     }
 
     function aplicarTema(tema) {
