@@ -1,0 +1,45 @@
+name: Actualizar plazo fijo
+
+on:
+  schedule:
+    # Lunes a viernes 14:43 UTC = 11:43 Argentina (los bancos suelen cambiar las tasas a la mañana)
+    - cron: '43 14 * * 1-5'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: plazo-fijo
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Descargar tasas por banco (ArgentinaDatos) -> data/plazo-fijo/
+        run: node scripts/update-plazo-fijo.mjs
+
+      # Solo hay cambios si alguna tasa (o la lista de bancos) es distinta a la última guardada
+      - name: Commitear si hubo cambios
+        run: |
+          if [ -z "$(git status --porcelain -- data/plazo-fijo)" ]; then
+            echo "Sin cambios en las tasas."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data/plazo-fijo
+          git commit -m "data: plazo fijo al $(node -p "require('./data/plazo-fijo/historico.json').actualizado")"
+          # Reintenta por si otro workflow pusheó justo antes
+          for i in 1 2 3; do
+            git pull --rebase -q && git push && exit 0
+            sleep 10
+          done
+          exit 1

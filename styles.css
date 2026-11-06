@@ -1522,3 +1522,12 @@ a:focus-visible,
 #chFranjaLabel:has(input:disabled) {
     opacity: 0.55;
 }
+
+/* ===== Plazo fijo: último cambio de la tasa del banco ===== */
+.pf-cambio-banco {
+    margin-top: 6px;
+}
+
+.pf-cambio-banco[hidden] {
+    display: none;
+}
