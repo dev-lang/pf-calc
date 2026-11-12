@@ -1,12 +1,12 @@
 {
   "descripcion": "Tasas de plazo fijo a 30 días vigentes por banco, de mayor a menor",
   "fuente": "ArgentinaDatos (BCRA) - https://api.argentinadatos.com/v1/finanzas/tasas/plazoFijo",
-  "vigentesDesde": "2026-11-06",
+  "vigentesDesde": "2026-11-12",
   "inicioRegistro": "2026-11-06",
   "bancos": [
-    {"entidad":"BANCO DE COMERCIO S.A.","tna":24.25,"tnaClientes":24.25,"tnaNoClientes":24.25,"logo":"http://www.bcra.gob.ar/archivos/Imagenes/logosbancos/00432.png","enlace":"https://bancodecomercio.com.ar/plazo-fijo-web","desde":"2026-11-06","anterior":null},
     {"entidad":"BANCO BICA S.A.","tna":24,"tnaClientes":24,"tnaNoClientes":24,"logo":"http://www.bcra.gob.ar/archivos/Imagenes/logosbancos/00426.png","enlace":"https://plazofijo.bancobica.com.ar/","desde":"2026-11-06","anterior":null},
     {"entidad":"BANCO CMF S.A.","tna":24,"tnaClientes":24,"tnaNoClientes":24,"logo":"http://www.bcra.gob.ar/archivos/Imagenes/logosbancos/00319.png","enlace":"https://www.bancocmf.com.ar/plazo-fijo-web-2/","desde":"2026-11-06","anterior":null},
+    {"entidad":"BANCO DE COMERCIO S.A.","tna":24,"tnaClientes":24,"tnaNoClientes":24,"logo":"http://www.bcra.gob.ar/archivos/Imagenes/logosbancos/00432.png","enlace":"https://bancodecomercio.com.ar/plazo-fijo-web","desde":"2026-11-12","anterior":{"tna":24.25,"desde":"2026-11-06"}},
     {"entidad":"Cocos","tna":24,"tnaClientes":24,"tnaNoClientes":24,"logo":"https://api.argentinadatos.com/static/logos/cocos.png","enlace":"https://cocos.capital/","desde":"2026-11-06","anterior":null},
     {"entidad":"CRÉDITO REGIONAL COMPAÑÍA FINANCIERA S.A.U.","tna":24,"tnaClientes":24,"tnaNoClientes":23.75,"logo":"http://www.bcra.gob.ar/archivos/Imagenes/logosbancos/65203.png","enlace":"https://www.creditoregional.com.ar/solplazofijoweb.html","desde":"2026-11-06","anterior":null},
     {"entidad":"REBA COMPAÑIA FINANCIERA S.A.","tna":24,"tnaClientes":24,"tnaNoClientes":24,"logo":"http://www.bcra.gob.ar/archivos/Imagenes/logosbancos/45072.png","enlace":"https://www.reba.com.ar/plazo-fijo/?utm_source=web&utm_medium=bcra&utm_campaign=cantidad-visitas-bcra&utm_id=plazo-fijo-bcra","desde":"2026-11-06","anterior":null},
