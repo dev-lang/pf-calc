@@ -3,7 +3,7 @@
   "plazo_dias": 7,
   "descripcion": "Caución bursátil en pesos a 7 días, TNA % (apertura, máximo, mínimo, cierre)",
   "fuente": "Rava Bursátil - https://www.rava.com/perfil/CAUCION%207D",
-  "actualizado": "2026-11-11",
+  "actualizado": "2026-11-12",
   "serie": [
     {"fecha":"2026-05-19","apertura":20.3,"maximo":20.3,"minimo":20.3,"cierre":20.3},
     {"fecha":"2026-05-20","apertura":20,"maximo":20,"minimo":20,"cierre":20},
@@ -116,6 +116,7 @@
     {"fecha":"2026-10-29","apertura":21.8,"maximo":23,"minimo":18.7,"cierre":19.4},
     {"fecha":"2026-11-04","apertura":20,"maximo":28.5,"minimo":20,"cierre":23.5},
     {"fecha":"2026-11-05","apertura":20.5,"maximo":45,"minimo":20.5,"cierre":45},
-    {"fecha":"2026-11-11","apertura":24,"maximo":26.8,"minimo":11,"cierre":19}
+    {"fecha":"2026-11-11","apertura":24,"maximo":26.8,"minimo":11,"cierre":19},
+    {"fecha":"2026-11-12","apertura":17.1,"maximo":25,"minimo":17.1,"cierre":19}
   ]
 }
