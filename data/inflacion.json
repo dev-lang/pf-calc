@@ -1,7 +1,7 @@
 {
   "descripcion": "Inflación mensual (variación % del IPC publicada por INDEC)",
   "fuente": "ArgentinaDatos - https://api.argentinadatos.com/v1/finanzas/indices/inflacion",
-  "actualizado": "2026-09-30",
+  "actualizado": "2026-10-31",
   "serie": [
     {"fecha":"1943-03-31","valor":1.6},
     {"fecha":"1943-04-30","valor":0.7},
@@ -1005,6 +1005,7 @@
     {"fecha":"2026-06-30","valor":1.9},
     {"fecha":"2026-07-31","valor":2.1},
     {"fecha":"2026-08-31","valor":1.7},
-    {"fecha":"2026-09-30","valor":1.9}
+    {"fecha":"2026-09-30","valor":1.9},
+    {"fecha":"2026-10-31","valor":2.2}
   ]
 }

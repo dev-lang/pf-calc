@@ -1,7 +1,7 @@
 {
   "descripcion": "IPC Nivel General, Nacional, índice base dic-2016 = 100 (INDEC)",
   "fuente": "API de Series de Tiempo (datos.gob.ar) - serie 148.3_INIVELNAL_DICI_M_26",
-  "actualizado": "2026-08",
+  "actualizado": "2026-10",
   "serie": [
     {"mes":"2016-12","indice":100},
     {"mes":"2017-01","indice":101.5859},
@@ -31,7 +31,7 @@
     {"mes":"2019-01","indice":189.6101},
     {"mes":"2019-02","indice":196.7501},
     {"mes":"2019-03","indice":205.9571},
-    {"mes":"2019-04","indice":212.9596414},
+    {"mes":"2019-04","indice":213.0517},
     {"mes":"2019-05","indice":219.5691},
     {"mes":"2019-06","indice":225.537},
     {"mes":"2019-07","indice":230.494},
@@ -92,7 +92,7 @@
     {"mes":"2024-02","indice":4825.7881},
     {"mes":"2024-03","indice":5357.0929},
     {"mes":"2024-04","indice":5830.2271},
-    {"mes":"2024-05","indice":6073.7},
+    {"mes":"2024-05","indice":6073.7165},
     {"mes":"2024-06","indice":6351.7145},
     {"mes":"2024-07","indice":6607.7479},
     {"mes":"2024-08","indice":6883.4412},
@@ -119,6 +119,8 @@
     {"mes":"2026-05","indice":11607.3937},
     {"mes":"2026-06","indice":11826.4103},
     {"mes":"2026-07","indice":12076.3937},
-    {"mes":"2026-08","indice":12276.766}
+    {"mes":"2026-08","indice":12276.766},
+    {"mes":"2026-09","indice":12514.1508},
+    {"mes":"2026-10","indice":12785.9321}
   ]
 }
