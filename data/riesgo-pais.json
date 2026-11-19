@@ -1,7 +1,7 @@
 {
   "descripcion": "Riesgo país (EMBI Argentina), puntos básicos, dato diario",
   "fuente": "ArgentinaDatos - https://api.argentinadatos.com/v1/finanzas/indices/riesgo-pais",
-  "actualizado": "2026-11-16",
+  "actualizado": "2026-11-17",
   "serie": [
     {"fecha":"1999-01-22","valor":937},
     {"fecha":"1999-02-01","valor":790},
@@ -7748,6 +7748,7 @@
     {"fecha":"2026-11-11","valor":852},
     {"fecha":"2026-11-12","valor":829},
     {"fecha":"2026-11-13","valor":830},
-    {"fecha":"2026-11-16","valor":855}
+    {"fecha":"2026-11-16","valor":855},
+    {"fecha":"2026-11-17","valor":854}
   ]
 }
