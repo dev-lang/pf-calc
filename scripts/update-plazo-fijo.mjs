@@ -80,21 +80,34 @@ async function escribirSiCambio(ruta, texto) {
 const mapaTasas = bancos => Object.fromEntries(bancos.map(b => [b.entidad, b.tna]).sort(([a], [b]) => a.localeCompare(b)));
 const iguales = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
+// Días corridos que un banco puede faltar en la API sin perder su historia: si vuelve dentro de
+// ese plazo con la misma tasa, conserva la fecha de vigencia original (pasó con Banco Piano y
+// Brubank, que no vinieron el 20/11/2026 y volvieron el 23/11 con la misma tasa)
+const TOLERANCIA_AUSENCIA_DIAS = 7;
+
+const diasEntre = (a, b) => Math.round((new Date(`${b}T00:00:00Z`) - new Date(`${a}T00:00:00Z`)) / 86400000);
+
 // Para cada banco: desde cuándo rige su tasa actual y cuál era la anterior (recorriendo el histórico)
 function vigencias(serie) {
-    const estado = new Map(); // entidad -> { tna, desde, anterior }
+    const estado = new Map(); // entidad -> { tna, desde, anterior, ausenteDesde }
     serie.forEach(linea => {
         Object.entries(linea.tasas).forEach(([entidad, tna]) => {
             const e = estado.get(entidad);
-            if (!e) {
-                estado.set(entidad, { tna, desde: linea.fecha, anterior: null });
+            const volvioTarde = e && e.ausenteDesde && diasEntre(e.ausenteDesde, linea.fecha) > TOLERANCIA_AUSENCIA_DIAS;
+            if (!e || volvioTarde) {
+                estado.set(entidad, { tna, desde: linea.fecha, anterior: null, ausenteDesde: null });
             } else if (e.tna !== tna) {
-                estado.set(entidad, { tna, desde: linea.fecha, anterior: { tna: e.tna, desde: e.desde } });
+                estado.set(entidad, { tna, desde: linea.fecha, anterior: { tna: e.tna, desde: e.desde }, ausenteDesde: null });
+            } else {
+                e.ausenteDesde = null; // volvió con la misma tasa: sigue vigente desde la fecha original
             }
         });
-        // Bancos que dejaron de aparecer: si vuelven, arrancan de cero
-        [...estado.keys()].forEach(entidad => { if (!(entidad in linea.tasas)) estado.delete(entidad); });
+        // Bancos que no vinieron en esta línea: se marca desde cuándo faltan
+        estado.forEach((e, entidad) => {
+            if (!(entidad in linea.tasas) && !e.ausenteDesde) e.ausenteDesde = linea.fecha;
+        });
     });
+    estado.forEach(e => { delete e.ausenteDesde; });
     return estado;
 }
 
