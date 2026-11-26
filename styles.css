@@ -1531,3 +1531,18 @@ a:focus-visible,
 .pf-cambio-banco[hidden] {
     display: none;
 }
+
+/* ===== Aviso de dato viejo (cauciones) ===== */
+.aviso-dato-viejo {
+    margin-top: 6px;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--accent-warning);
+    background: rgba(255, 193, 7, 0.12);
+    color: var(--accent-warning-dark);
+    font-weight: 500;
+}
+
+.aviso-dato-viejo[hidden] {
+    display: none;
+}

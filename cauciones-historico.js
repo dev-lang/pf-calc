@@ -11,7 +11,7 @@
 //   3. Caución vs inflación: tasa del mes (TNA promedio capitalizada a diario) contra el IPC, y tasa real
 //   4. Tabla mensual por plazo (promedio, mín.–máx. y días con dato)
 
-/* global Chart, parametroCompartido, leerDatosLocales */
+/* global Chart, parametroCompartido, leerDatosLocales, mostrarAvisoCaucion */
 
 const CH_PLAZOS = [1, 2, 3, 4, 5, 7, 14, 30];
 const CH_COLORES = { 1: '#667eea', 2: '#9f7aea', 3: '#f7931e', 4: '#c9a227', 5: '#e67e22', 7: '#d946ef', 14: '#e74c3c', 30: '#2b8fd9' };
@@ -274,6 +274,7 @@ function chRenderResumen() {
     if (!todo.length) {
         ['chUltimo', 'chVariacion', 'chPromedio30', 'chMinMax'].forEach(id => set(id, '—'));
         set('chMeta', `Sin datos para ${chDias(dias)}.`);
+        if (typeof mostrarAvisoCaucion === 'function') mostrarAvisoCaucion('chAvisoDatoViejo', null);
         return;
     }
     const ultimo = todo[todo.length - 1];
@@ -291,6 +292,7 @@ function chRenderResumen() {
     set('chPromedio30', `${chPct(p30.prom)} (${p30.n} días con dato)`);
     set('chMinMax', periodo.length ? `${chPct(Math.min(...periodo))} / ${chPct(Math.max(...periodo))}` : '—');
     set('chMeta', `${todo.length} días con dato desde el ${chFecha(todo[0].fecha)} · Fuente: Rava Bursátil (cierre diario)`);
+    if (typeof mostrarAvisoCaucion === 'function') mostrarAvisoCaucion('chAvisoDatoViejo', ultimo.fecha);
 }
 
 function chOpciones(tituloY) {
