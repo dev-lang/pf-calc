@@ -1,23 +1,23 @@
 {
   "descripcion": "Último cierre (TNA %) de cada plazo de caución bursátil en pesos",
   "fuente": "Rava Bursátil - https://www.rava.com",
-  "actualizado": "2026-11-20",
+  "actualizado": "2026-11-25",
   "plazos": [
     {
       "plazo_dias": 1,
       "archivo": "1d.json",
-      "dias_con_dato": 97,
+      "dias_con_dato": 98,
       "desde": "2026-05-18",
-      "fecha": "2026-11-12",
-      "cierre": 14.1
+      "fecha": "2026-11-25",
+      "cierre": 13
     },
     {
       "plazo_dias": 2,
       "archivo": "2d.json",
-      "dias_con_dato": 71,
+      "dias_con_dato": 72,
       "desde": "2026-05-18",
-      "fecha": "2026-11-11",
-      "cierre": 10.2
+      "fecha": "2026-11-25",
+      "cierre": 10
     },
     {
       "plazo_dias": 3,
@@ -38,26 +38,26 @@
     {
       "plazo_dias": 5,
       "archivo": "5d.json",
-      "dias_con_dato": 70,
+      "dias_con_dato": 71,
       "desde": "2026-05-21",
-      "fecha": "2026-11-20",
-      "cierre": 11
+      "fecha": "2026-11-25",
+      "cierre": 15
     },
     {
       "plazo_dias": 7,
       "archivo": "7d.json",
-      "dias_con_dato": 115,
+      "dias_con_dato": 116,
       "desde": "2026-05-19",
-      "fecha": "2026-11-20",
-      "cierre": 16
+      "fecha": "2026-11-25",
+      "cierre": 20
     },
     {
       "plazo_dias": 14,
       "archivo": "14d.json",
-      "dias_con_dato": 116,
+      "dias_con_dato": 117,
       "desde": "2026-05-18",
-      "fecha": "2026-11-20",
-      "cierre": 16.5
+      "fecha": "2026-11-25",
+      "cierre": 21.6
     },
     {
       "plazo_dias": 30,
