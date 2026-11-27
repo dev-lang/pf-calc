@@ -1,7 +1,7 @@
 {
   "descripcion": "Tasas de plazo fijo a 30 días vigentes por banco, de mayor a menor",
   "fuente": "ArgentinaDatos (BCRA) - https://api.argentinadatos.com/v1/finanzas/tasas/plazoFijo",
-  "vigentesDesde": "2026-11-26",
+  "vigentesDesde": "2026-11-27",
   "inicioRegistro": "2026-11-06",
   "bancos": [
     {"entidad":"BANCO BICA S.A.","tna":24,"tnaClientes":24,"tnaNoClientes":24,"logo":"http://www.bcra.gob.ar/archivos/Imagenes/logosbancos/00426.png","enlace":"https://plazofijo.bancobica.com.ar/","desde":"2026-11-06","anterior":null},
@@ -9,10 +9,10 @@
     {"entidad":"BANCO DE COMERCIO S.A.","tna":24,"tnaClientes":24,"tnaNoClientes":24,"logo":"http://www.bcra.gob.ar/archivos/Imagenes/logosbancos/00432.png","enlace":"https://bancodecomercio.com.ar/plazo-fijo-web","desde":"2026-11-17","anterior":{"tna":21,"desde":"2026-11-16"}},
     {"entidad":"BANCO MERIDIAN S.A.","tna":24,"tnaClientes":24,"tnaNoClientes":24,"logo":"http://www.bcra.gob.ar/archivos/Imagenes/logosbancos/00281.png","enlace":"https://www.bancomeridian.com.ar/OnlineTermDeposit/Simulation","desde":"2026-11-16","anterior":{"tna":23.75,"desde":"2026-11-06"}},
     {"entidad":"Cocos","tna":24,"tnaClientes":24,"tnaNoClientes":24,"logo":"https://api.argentinadatos.com/static/logos/cocos.png","enlace":"https://cocos.capital/","desde":"2026-11-06","anterior":null},
-    {"entidad":"REBA COMPAÑIA FINANCIERA S.A.","tna":24,"tnaClientes":24,"tnaNoClientes":24,"logo":"http://www.bcra.gob.ar/archivos/Imagenes/logosbancos/45072.png","enlace":"https://www.reba.com.ar/plazo-fijo/?utm_source=web&utm_medium=bcra&utm_campaign=cantidad-visitas-bcra&utm_id=plazo-fijo-bcra","desde":"2026-11-06","anterior":null},
     {"entidad":"CRÉDITO REGIONAL COMPAÑÍA FINANCIERA S.A.U.","tna":23.75,"tnaClientes":23.75,"tnaNoClientes":24,"logo":"http://www.bcra.gob.ar/archivos/Imagenes/logosbancos/65203.png","enlace":"https://www.creditoregional.com.ar/solplazofijoweb.html","desde":"2026-11-13","anterior":{"tna":24,"desde":"2026-11-06"}},
     {"entidad":"BANCO DEL SOL S.A.","tna":23,"tnaClientes":23,"tnaNoClientes":23,"logo":"http://www.bcra.gob.ar/archivos/Imagenes/logosbancos/00310.png","enlace":"https://www.bancodelsol.com/","desde":"2026-11-06","anterior":null},
     {"entidad":"BANCO VOII S.A.","tna":23,"tnaClientes":23,"tnaNoClientes":23,"logo":"http://www.bcra.gob.ar/archivos/Imagenes/logosbancos/00312.png","enlace":"https://www.voii.com.ar/plazo-fijo-web/","desde":"2026-11-06","anterior":null},
+    {"entidad":"REBA COMPAÑIA FINANCIERA S.A.","tna":23,"tnaClientes":23,"tnaNoClientes":23,"logo":"http://www.bcra.gob.ar/archivos/Imagenes/logosbancos/45072.png","enlace":"https://www.reba.com.ar/plazo-fijo/?utm_source=web&utm_medium=bcra&utm_campaign=cantidad-visitas-bcra&utm_id=plazo-fijo-bcra","desde":"2026-11-27","anterior":{"tna":24,"desde":"2026-11-06"}},
     {"entidad":"BANCO MARIVA S.A.","tna":22.75,"tnaClientes":22.75,"tnaNoClientes":22.75,"logo":"http://www.bcra.gob.ar/archivos/Imagenes/logosbancos/00254.png","enlace":"https://pfweb.mariva.com.ar/","desde":"2026-11-25","anterior":{"tna":23,"desde":"2026-11-20"}},
     {"entidad":"BANCO MACRO S.A.","tna":22,"tnaClientes":22,"tnaNoClientes":0,"logo":"http://www.bcra.gob.ar/archivos/Imagenes/logosbancos/00285.png","enlace":"https://www.macro.com.ar/personas/inversiones/plazo-fijo","desde":"2026-11-26","anterior":{"tna":19.5,"desde":"2026-11-19"}},
     {"entidad":"UALA","tna":22,"tnaClientes":22,"tnaNoClientes":22,"logo":"https://icons.com.ar/icons/bancos-apps/uala.svg","enlace":"https://www.uala.com.ar/inversiones/plazo-fijo","desde":"2026-11-06","anterior":null},
